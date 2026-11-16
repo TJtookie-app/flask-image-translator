@@ -89,7 +89,7 @@ async function showAlternatives(mode, btn) {
         try { data = await r.json(); } catch (e) {}
         if (!r.ok || !data.alternatives) throw new Error(data.error || UI.err_failed);
         const label = document.createElement('p');
-        label.className = 'text-[11px] font-semibold text-slate-400';
+        label.className = 'text-xs font-semibold text-slate-400';
         label.textContent = UI.alts_label;
         box.replaceChildren(label);
         data.alternatives.forEach(alt => {

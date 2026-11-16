@@ -6,9 +6,11 @@
   DAILY_LIMIT_PER_IP  IPごとの1日あたり上限（既定 300）
   SITE_RATE_PER_MIN   サイト全体の1分あたり上限（既定 4。無料枠は1モデル1分5回。0で無効）
   SITE_DAILY_LIMIT    サイト全体の1日あたり上限（既定 3000。APIの無料枠・費用を守る）
+  LIMIT_DAY_TZ        「1日」の区切りに使うタイムゾーン（既定 America/Los_Angeles。Gemini の無料枠は太平洋時間の0時に戻るため、合わせている）
+  QUOTA_SHOW_BELOW    サイト全体の1日上限がこの値以下のときだけ、画面に「今日の残り回数」を出す（既定 500）
 """
 from collections import defaultdict, deque
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import os
 import threading
 import time
@@ -25,6 +27,18 @@ def _today():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+def _limit_day(now=None):
+    """利用制限の「1日」の区切り。Google の無料枠（太平洋時間の0時にリセット）に合わせる。
+    タイムゾーンが読み込めないときは、太平洋標準時（UTC-8）で代用する"""
+    now = now or datetime.now(timezone.utc)
+    try:
+        from zoneinfo import ZoneInfo
+        zone = ZoneInfo(os.environ.get("LIMIT_DAY_TZ") or "America/Los_Angeles")
+    except Exception:
+        zone = timezone(timedelta(hours=-8))
+    return now.astimezone(zone).strftime("%Y-%m-%d")
+
+
 class Limiter:
     def __init__(self):
         self.lock = threading.Lock()
@@ -33,10 +47,27 @@ class Limiter:
     def reset(self):
         with self.lock:
             self.hits = defaultdict(deque)   # ip -> 直近1分のタイムスタンプ
-            self.day = _today()
+            self.day = _limit_day()
             self.per_ip_day = defaultdict(int)
             self.site_day = 0
             self.site_hits = deque()         # サイト全体の直近1分のタイムスタンプ
+
+    def _roll(self):
+        """日が変わっていたら、1日分の数え直しをする（lock を持った状態で呼ぶ）"""
+        today = _limit_day()
+        if today != self.day:
+            self.day, self.per_ip_day, self.site_day = today, defaultdict(int), 0
+            self.hits = defaultdict(deque)
+            self.site_hits = deque()
+
+    def quota(self):
+        """画面に出す「今日の残り回数」。サイト全体の1日上限に対する残り"""
+        limit = _num("SITE_DAILY_LIMIT", 3000)
+        with self.lock:
+            self._roll()
+            used = self.site_day
+        return {"limit": limit, "used": used, "remaining": max(0, limit - used),
+                "show": limit <= _num("QUOTA_SHOW_BELOW", 500)}
 
     def check(self, ip):
         """OKなら None。制限に当たったらエラーラベル名（err_rate / err_daily）を返し、OKなら1回分を消費する"""
@@ -45,11 +76,7 @@ class Limiter:
         site_min = _num("SITE_RATE_PER_MIN", 4)
         now = time.time()
         with self.lock:
-            today = _today()
-            if today != self.day:
-                self.day, self.per_ip_day, self.site_day = today, defaultdict(int), 0
-                self.hits = defaultdict(deque)
-                self.site_hits = deque()
+            self._roll()
             if self.site_day >= site or self.per_ip_day[ip] >= per_ip:
                 return "err_daily"
             q = self.hits[ip]

@@ -83,7 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pr) pr.value = st.pron ? '1' : '0';
             form.querySelectorAll('button[type=submit]').forEach(b => { b.disabled = true; b.classList.add('opacity-60'); });
             const label = form.querySelector('button[type=submit] .btn-label');
-            if (label) label.textContent = UI.translating;
+            if (label) {
+                if (!label.dataset.label) label.dataset.label = label.textContent;
+                label.textContent = UI.translating;
+            }
+            startWaitNotice(form);
         });
     });
 

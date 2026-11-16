@@ -380,6 +380,13 @@ def register_routes(app):
                            remote_addr=request.remote_addr)
         return jsonify(data)
 
+    @app.route("/api/quota")
+    def quota():
+        """サイト全体の「今日の残り回数」（画面の小さな表示用）。利用回数には数えない"""
+        resp = jsonify(limiter.quota())
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
     @app.route("/healthz")
     def healthz():
         return "ok"

@@ -164,7 +164,7 @@ with sync_playwright() as p:
     pg.select_option("#phrase-lang", "English")
     pg.wait_for_selector("#phrase-list >> text=I'd like a window seat, please")
     check("phrasebook shows 81 phrases", pg.locator("#phrase-list .flex.gap-2.items-start").count() == 81)
-    heads = pg.locator("#phrase-list > div.text-\\[11px\\]").all_inner_texts()
+    heads = pg.locator("#phrase-list > div.font-semibold").all_inner_texts()
     check(f"airport categories come right after the basics {heads[:3]}", heads[0] == "あいさつ・基本" and heads[1].startswith("空港") and len(heads) == 11)
     pg.fill("#phrase-search", "窓側")
     check("search finds the window-seat phrase (Japanese meaning)", pg.locator("#phrase-list .flex.gap-2.items-start").count() == 1)

@@ -88,7 +88,7 @@ async function renderPhrasebook() {
             .filter(x => x.text && (!q || x.text.toLowerCase().includes(q) || x.meaning.toLowerCase().includes(q)));
         if (!cards.length) return;
         const h = document.createElement('div');
-        h.className = 'text-[11px] font-semibold text-slate-400 pt-1';
+        h.className = 'text-xs font-semibold text-slate-400 pt-1';
         h.textContent = cat[mk];
         const group = document.createElement('div');
         group.className = 'space-y-2';

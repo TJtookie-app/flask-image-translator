@@ -36,7 +36,7 @@ function buildBubble(msg) {
         (isA ? 'bg-indigo-950/50 border-indigo-800/60' : 'bg-emerald-950/40 border-emerald-800/60');
 
     const head = document.createElement('div');
-    head.className = 'text-[10px] text-slate-500';
+    head.className = 'text-[11px] text-slate-400';
     head.textContent = (isA ? UI.conv_person_a : UI.conv_person_b) + ' · ' + ((langByName(msg.srcLang) || {}).native || msg.srcLang);
 
     const orig = document.createElement('div');
@@ -122,6 +122,8 @@ async function converse(side, text) {
     } catch (e) {
         bubble.fail(e instanceof TypeError ? UI.err_network : (e.message || UI.err_failed));
         if (!$('conv-input').value) $('conv-input').value = text;
+    } finally {
+        if (typeof refreshQuota === 'function') refreshQuota();   // 今日の残り回数を更新
     }
 }
 

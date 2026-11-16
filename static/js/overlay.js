@@ -76,7 +76,7 @@ function renderOverlay(blocks, imgUrl) {
         $('overlay-toggle').classList.add('hidden');
         list.classList.remove('hidden');
         const note = document.createElement('p');
-        note.className = 'text-[11px] text-slate-500';
+        note.className = 'text-xs text-slate-400';
         note.textContent = UI.ov_fallback;
         list.appendChild(note);
         blocks.forEach(b => {
@@ -212,7 +212,7 @@ async function runPdf(file) {
         status.textContent = fmt(UI.pdf_done, { n: texts.length });
         stop.remove();
         const all = iconBtn('fa-solid fa-copy', UI.pdf_copy_all, async () => { try { await navigator.clipboard.writeText(texts.join('\n\n')); } catch (e) {} });
-        all.className = 'px-3 h-8 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition';
+        all.className = 'px-3 h-10 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition';
         all.append(' ' + UI.pdf_copy_all);
         bar.appendChild(all);
         if (total > limit) {

@@ -6,7 +6,7 @@
         <input type="hidden" name="mode" value="text">
         <input type="hidden" name="formality" value="auto"><input type="hidden" name="pron" value="0">
         <input type="hidden" name="glossary" value="[]">
-        <textarea name="direct_text" dir="auto" rows="5" required maxlength="5000" class="w-full p-4 rounded-2xl bg-slate-950/70 text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 placeholder-slate-600 resize-none shadow-inner" placeholder="{{ ui.text_placeholder }}">{{ input_text if active_mode == 'text' else '' }}</textarea>
+        <textarea name="direct_text" dir="auto" rows="5" required maxlength="5000" class="w-full p-4 rounded-2xl bg-slate-950/70 text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 placeholder-slate-400 resize-none shadow-inner" placeholder="{{ ui.text_placeholder }}">{{ input_text if active_mode == 'text' else '' }}</textarea>
         <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transition active:scale-[0.99] flex items-center justify-center gap-2">
             <i class="fa-solid fa-paper-plane"></i> <span class="btn-label">{{ ui.btn_text_translate }}</span>
         </button>
@@ -25,12 +25,12 @@
                 <div class="flex flex-col items-center justify-center p-4 text-center">
                     <i class="fa-solid fa-image text-3xl text-indigo-400 mb-2"></i>
                     <p class="text-sm text-slate-300 font-medium">{{ ui.file_input_label }}</p>
-                    <p class="text-xs text-slate-500 mt-1">PNG, JPG, WEBP, HEIC, PDF</p>
+                    <p class="text-xs text-slate-400 mt-1">PNG, JPG, WEBP, HEIC, PDF</p>
                 </div>
                 <input type="file" name="image" accept="image/*,application/pdf,.pdf" required class="hidden" onchange="document.getElementById('img-file-name').textContent = this.files[0] ? this.files[0].name : ''">
             </label>
             <p id="img-file-name" class="text-xs text-indigo-400 mt-2 h-4 font-medium break-all"></p>
-            <p class="text-[11px] text-slate-500 mt-1 text-center">{{ ui.pdf_hint|replace('{m}', pdf_max_pages|string) }}</p>
+            <p class="text-xs text-slate-400 mt-1 text-center">{{ ui.pdf_hint|replace('{m}', pdf_max_pages|string) }}</p>
 
             <!-- 重ね翻訳: 選んだ画像の上に訳文を重ねて表示する（結果が返ったあとに表示） -->
             <div id="overlay-box" class="hidden w-full mt-3 space-y-2">
@@ -40,7 +40,7 @@
                 </div>
                 <div id="overlay-list" class="hidden space-y-1.5 text-left"></div>
                 <div class="flex items-center justify-between gap-2">
-                    <p class="text-[11px] text-slate-500 text-left">{{ ui.ov_hint }}</p>
+                    <p class="text-xs text-slate-400 text-left">{{ ui.ov_hint }}</p>
                     <button type="button" id="overlay-toggle" onclick="toggleOverlay()" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"></button>
                 </div>
             </div>
@@ -79,8 +79,8 @@
     <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 aspect-video flex items-center justify-center">
         <video id="camera-video" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
         <canvas id="camera-canvas" class="hidden"></canvas>
-        <div id="camera-placeholder" class="p-6 text-slate-500 text-xs">
-            <i class="fa-solid fa-camera text-3xl text-slate-600 block mb-2"></i>
+        <div id="camera-placeholder" class="p-6 text-slate-400 text-xs">
+            <i class="fa-solid fa-camera text-3xl text-slate-500 block mb-2"></i>
             {{ ui.camera_instruction }}
         </div>
     </div>
@@ -111,7 +111,7 @@
         {% for side, label in [('A', ui.conv_person_a), ('B', ui.conv_person_b)] %}
         <div id="chat-card-{{ side }}" onclick="setSpeaker('{{ side }}')" role="button" tabindex="0"
              class="chat-card rounded-2xl p-2.5 border-2 border-slate-800 bg-slate-950/50 cursor-pointer transition min-w-0 space-y-1.5">
-            <span class="text-[11px] font-semibold {{ 'text-indigo-400' if side == 'A' else 'text-emerald-400' }}">{{ label }}</span>
+            <span class="text-xs font-semibold {{ 'text-indigo-400' if side == 'A' else 'text-emerald-400' }}">{{ label }}</span>
             <select id="conv-lang-{{ side }}" aria-label="{{ label }}" onclick="event.stopPropagation()"
                     class="w-full bg-slate-800 text-slate-100 text-sm rounded-xl px-2 py-2 border border-slate-700 focus:outline-none focus:border-indigo-500"></select>
         </div>
@@ -119,7 +119,7 @@
     </div>
 
     <div id="conv-log" class="space-y-2 max-h-72 overflow-y-auto"></div>
-    <p id="conv-empty" class="text-center text-xs text-slate-600 py-3">{{ ui.conv_empty }}</p>
+    <p id="conv-empty" class="text-center text-xs text-slate-400 py-3">{{ ui.conv_empty }}</p>
     <p id="conv-warn" role="status" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-2 text-center">{{ ui.warn_same_chat }}</p>
     <p id="conv-status" class="text-xs text-slate-400 text-center min-h-[1rem]"></p>
 
@@ -129,7 +129,7 @@
             <i class="fa-solid fa-microphone"></i>
         </button>
         <input id="conv-input" type="text" dir="auto" maxlength="1000" autocomplete="off" placeholder="{{ ui.chat_input_placeholder }}"
-               class="min-w-0 flex-1 px-3 py-2.5 rounded-2xl bg-slate-950/70 text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 placeholder-slate-600">
+               class="min-w-0 flex-1 px-3 py-2.5 rounded-2xl bg-slate-950/70 text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 placeholder-slate-400">
         <button type="submit" id="conv-send" aria-label="send"
                 class="w-11 h-11 flex-shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center transition">
             <i class="fa-solid fa-paper-plane"></i>

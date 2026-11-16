@@ -7,11 +7,9 @@ body { padding-bottom: max(1rem, env(safe-area-inset-bottom)); padding-top: max(
 /* iOS Safari は 16px 未満の入力欄でズームするため防ぐ */
 select, textarea, input:not([type=checkbox]):not([type=radio]) { font-size: 16px !important; }
 
-/* ---- 文字サイズ（Tailwind の text-[10px] などpx指定の小さい文字も大きくする） ---- */
-html[data-fs] .text-\[10px\] { font-size: .65rem !important; }
-html[data-fs] .text-\[11px\] { font-size: .72rem !important; }
-html[data-fs=xl] .text-\[10px\] { font-size: .75rem !important; }
-html[data-fs=xl] .text-\[11px\] { font-size: .82rem !important; }
+/* ---- 文字サイズ（Tailwind の text-[11px] などpx指定の小さい文字も、文字サイズ設定に合わせて大きくする） ---- */
+html[data-fs] .text-\[11px\] { font-size: .7rem !important; }
+html[data-fs=xl] .text-\[11px\] { font-size: .8rem !important; }
 
 /* ---- 大きく表示（相手に見せる） ---- */
 .big-overlay {
@@ -113,3 +111,18 @@ html[data-theme=light] .rc-item i { color: #64748b; }
 html[data-theme=light] .undo-toast { background: #ffffff; color: #0f172a; border-color: #cbd5e1; box-shadow: 0 10px 30px rgba(15, 23, 42, .18); }
 html[data-theme=light] .undo-toast button { color: #4338ca; }
 html[data-theme=light] .undo-toast button:hover { background: #eef2ff; }
+
+/* ---- 翻訳が遅いときの案内・今日の残り回数 ---- */
+.wait-note { margin-top: .6rem; padding: .6rem .8rem; border-radius: .9rem; font-size: .88rem; line-height: 1.5; text-align: center;
+    color: #fde68a; background: rgba(120, 53, 15, .35); border: 1px solid rgba(146, 64, 14, .7); }
+.quota-note { margin: 0 auto .75rem; text-align: center; font-size: .82rem; line-height: 1.4; color: #cbd5e1; }
+.quota-note.low { color: #fcd34d; }
+.quota-note.none { color: #fca5a5; }
+html[data-theme=light] .wait-note { color: #92400e; background: #fef3c7; border-color: #f59e0b; }
+html[data-theme=light] .quota-note { color: #334155; }
+html[data-theme=light] .quota-note.low { color: #92400e; }
+html[data-theme=light] .quota-note.none { color: #b91c1c; }
+/* 入力欄の薄い案内文字（暗い画面で読みやすい色にしたので、明るい画面では濃い色に戻す） */
+html[data-theme=light] [class*="placeholder-slate-400"]::placeholder { color: #64748b !important; }
+/* ボタンを素早く2回タップしたときの拡大を防ぐ */
+button, a, select, label { touch-action: manipulation; }

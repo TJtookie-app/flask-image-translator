@@ -10,7 +10,7 @@ function iconBtn(icon, title, onClick) {
     b.type = 'button';
     b.title = title;
     b.setAttribute('aria-label', title);
-    b.className = 'w-8 h-8 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition';
+    b.className = 'w-10 h-10 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition';
     const i = document.createElement('i');
     i.className = icon;
     b.appendChild(i);
@@ -23,7 +23,7 @@ function historyItem(e) {
     card.className = 'p-3 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1.5';
 
     const meta = document.createElement('div');
-    meta.className = 'text-[10px] text-slate-500 flex justify-between gap-2';
+    meta.className = 'text-[11px] text-slate-400 flex justify-between gap-2';
     const when = new Date(e.ts).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const l = document.createElement('span');
     const sn = (langByName(e.srcLang) || {}).native || e.srcLang || '?';
@@ -142,7 +142,7 @@ function renderGlossary() {
         const body = document.createElement('div');
         body.className = 'min-w-0 flex-1 space-y-0.5';
         const tag = document.createElement('span');
-        tag.className = 'text-[10px] text-slate-500';
+        tag.className = 'text-[11px] text-slate-400';
         tag.textContent = (e.kind === 'example' ? UI.glossary_kind_example : UI.glossary_kind_term) +
             ' · → ' + ((langByName(e.to) || {}).native || e.to);
         const t = document.createElement('div');
@@ -240,7 +240,7 @@ function renderTrash() {
         const body = document.createElement('div');
         body.className = 'min-w-0 flex-1 space-y-0.5';
         const tag = document.createElement('div');
-        tag.className = 'text-[10px] text-slate-500';
+        tag.className = 'text-[11px] text-slate-400';
         tag.textContent = (UI['trash_kind_' + t.kind] || t.kind) +
             (t.items.length > 1 ? ' · ' + fmt(UI.trash_count_n, { n: t.items.length }) : '') +
             ' · ' + fmt(UI.trash_days_left_n, { n: trashDaysLeft(t) });

@@ -14,20 +14,20 @@
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-globe text-indigo-400"></i> {{ ui.select_language }}
             </h2>
-            <a href="{{ url_for('index') }}" aria-label="close" class="p-2 w-10 h-10 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition">
+            <a href="{{ url_for('index') }}" aria-label="close" class="p-2 w-11 h-11 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition">
                 <i class="fa-solid fa-xmark"></i>
             </a>
         </div>
 
         <input id="lang-search" type="search" autocomplete="off" placeholder="{{ ui.search_lang }}"
-               class="w-full px-4 py-2.5 rounded-xl bg-slate-950/70 text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 placeholder-slate-600">
+               class="w-full px-4 py-2.5 rounded-xl bg-slate-950/70 text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 placeholder-slate-400">
 
         {% macro option(value, label, sub='', search='') %}
         <label class="lang-opt flex items-center gap-3 p-3 rounded-xl bg-slate-950/60 hover:bg-indigo-950/40 border border-slate-800/80 cursor-pointer transition" data-search="{{ (search ~ ' ' ~ label ~ ' ' ~ sub)|lower }}">
             <input type="radio" name="target_lang" value="{{ value }}" class="accent-indigo-500" {% if value == current %}checked{% endif %} required>
             <span class="min-w-0">
                 <span class="block text-sm font-medium text-slate-200 truncate">{{ label }}</span>
-                {% if sub %}<span class="block text-[11px] text-slate-500 truncate">{{ sub }}</span>{% endif %}
+                {% if sub %}<span class="block text-xs text-slate-400 truncate">{{ sub }}</span>{% endif %}
             </span>
         </label>
         {% endmacro %}
@@ -43,7 +43,7 @@
 
                 {% if recent %}
                 <div id="recent-group" class="space-y-1">
-                    <p class="text-[11px] font-semibold text-slate-400">{{ ui.recent_langs }}</p>
+                    <p class="text-xs font-semibold text-slate-400">{{ ui.recent_langs }}</p>
                     <div class="grid grid-cols-2 gap-2">
                         {% for lang in languages if lang.name in recent %}
                         {{ option(lang.name, lang.native, lang.name, lang.name) }}
@@ -57,7 +57,7 @@
                     {{ option(lang.name, lang.native, lang.name, lang.name) }}
                     {% endfor %}
                 </div>
-                <p id="no-results" class="hidden text-center text-sm text-slate-500 py-4">{{ ui.no_results }}</p>
+                <p id="no-results" class="hidden text-center text-sm text-slate-400 py-4">{{ ui.no_results }}</p>
             </div>
 
             <button type="submit" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-2xl shadow-lg transition">
