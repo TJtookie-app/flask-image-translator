@@ -1,6 +1,8 @@
 import base64
 import binascii
+import ipaddress
 import json
+import os
 import re
 
 from flask import jsonify, render_template, request, session
@@ -20,15 +22,32 @@ VALID_MODES = {"text", "image", "voice", "camera"}
 # エラーラベル → HTTPステータス
 ERROR_STATUS = {
     "err_empty": 400, "err_too_long": 400, "err_image": 400, "err_no_text": 422,
-    "err_blocked": 422, "err_pdf": 400, "err_pdf_big": 413, "err_rate": 429, "err_daily": 429,
+    "err_blocked": 422, "err_pdf": 400, "err_pdf_big": 413, "err_rate": 429, "err_busy": 429, "err_daily": 429,
     "err_quota": 503, "err_overloaded": 503, "err_no_key": 503, "err_api_key": 503,
     "err_timeout": 504, "err_connection": 502, "err_failed": 502,
 }
 
 
+def _valid_ip(value):
+    try:
+        return str(ipaddress.ip_address((value or "").strip()))
+    except ValueError:
+        return None
+
+
 def client_ip():
-    fwd = request.headers.get("X-Forwarded-For", "")
-    return (fwd.split(",")[0].strip() if fwd else request.remote_addr) or "unknown"
+    """利用制限に使うIP。X-Forwarded-For は偽装できるので、IPとして正しい値だけを使う。
+    TRUSTED_PROXY_HOPS=N（既定 0）のとき、右から N 番目＝自分たちの手前のプロキシが付けた値を使う。
+    0 のときは従来どおり先頭の値（確認の方法は README を参照）"""
+    fwd = [x.strip() for x in request.headers.get("X-Forwarded-For", "").split(",") if x.strip()]
+    try:
+        hops = int(os.environ.get("TRUSTED_PROXY_HOPS", "0"))
+    except ValueError:
+        hops = 0
+    cand = None
+    if fwd:
+        cand = fwd[-hops] if 0 < hops <= len(fwd) else fwd[0]
+    return _valid_ip(cand) or _valid_ip(request.remote_addr) or "unknown"
 
 
 def guard():

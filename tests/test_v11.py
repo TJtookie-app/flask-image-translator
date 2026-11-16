@@ -191,12 +191,12 @@ def test_switches_to_fallback_on_timeout_and_on_model_gone(env):
     assert used == ["m1", "m2"]
 
 
-def test_no_switch_for_quota_connection_or_without_fallback(env):
+def test_no_switch_for_connection_or_without_fallback(env):
     _, translator, _, mp = env
-    used = _run_call(translator, mp, [_Err(429, "RESOURCE_EXHAUSTED")])
+    used = _run_call(translator, mp, [_Err(429, "RESOURCE_EXHAUSTED")], fallback="")
     with pytest.raises(translator.TranslationError) as e:
         translator._call(["x"])
-    assert e.value.key == "err_quota" and used == ["m1"]          # 上限は再試行しない
+    assert e.value.key == "err_quota" and used == ["m1"]          # 予備がなければ再試行しない（予備があれば V11.1 で切り替える）
     used = _run_call(translator, mp, [ConnectionError("reset")])
     translator._call(["x"])
     assert used == ["m1", "m1"]                                    # 通信エラーは同じモデルで再試行
@@ -229,7 +229,7 @@ def test_missing_api_key_message_is_friendly_and_logged(env, capsys):
     from languages import UI_LABELS
     assert "GEMINI_API_KEY" not in UI_LABELS["Japanese"]["err_no_key"] and "GEMINI_API_KEY" not in UI_LABELS["English"]["err_no_key"]
     mp.delenv("GEMINI_API_KEY", raising=False)
-    mp.setattr(translator, "_client", None)
+    mp.setattr(translator, "_clients", {})
     with pytest.raises(translator.TranslationError) as e:
         translator._get_client()
     assert e.value.key == "err_no_key"

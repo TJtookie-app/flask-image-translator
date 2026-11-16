@@ -100,7 +100,7 @@ def register_routes(app):
             if e.key not in ("err_empty", "err_too_long", "err_image"):
                 track(mode, e.key)
             ctx["error"] = get_ui().get(e.key, e.key)
-            return render_main(status=ERROR_STATUS.get(e.key, 502) if e.key in ("err_rate", "err_daily") else 200, **ctx)
+            return render_main(status=ERROR_STATUS.get(e.key, 502) if e.key in ("err_rate", "err_busy", "err_daily") else 200, **ctx)
 
         return render_main(**ctx)
 
@@ -374,7 +374,11 @@ def register_routes(app):
         given = request.headers.get("X-Admin-Token") or request.args.get("token")
         if not token or given != token:
             abort(404)
-        return jsonify(stats.snapshot())
+        data = stats.snapshot()
+        if request.args.get("ip"):   # 利用制限が見ているIPの確認用（TRUSTED_PROXY_HOPS を決めるときに使う）
+            return jsonify(seen_ip=client_ip(), x_forwarded_for=request.headers.get("X-Forwarded-For", ""),
+                           remote_addr=request.remote_addr)
+        return jsonify(data)
 
     @app.route("/healthz")
     def healthz():

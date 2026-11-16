@@ -5,6 +5,7 @@ import types
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 os.environ.setdefault("SECRET_KEY", "test")
+os.environ.setdefault("SITE_RATE_PER_MIN", "0")   # ブラウザ確認でも、サイト全体の1分上限で止まらないように
 os.environ["UI_LABELS_DIR"] = os.path.join(ROOT, "tests", "_labels")
 
 # google-genai が無い環境でもテストできるよう、最小のダミーを用意（本物があればそれを使う）
@@ -29,6 +30,7 @@ def env(monkeypatch):
     app.config["TESTING"] = True
     limiter.reset(); stats.reset(); ui_i18n._mem.clear(); ui_i18n._failed_at.clear()
     monkeypatch.setattr(translator, "RETRY_WAIT", 0)
+    monkeypatch.setenv("SITE_RATE_PER_MIN", "0")   # サイト全体の1分上限は、個別のテストで必要なときだけ有効にする
     calls = []
 
     def fake(parts, system=None):

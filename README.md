@@ -8,10 +8,12 @@ Flask製の翻訳アプリ（テキスト／画像／音声／カメラ／チャ
 | `GEMINI_API_KEY` | 必須。Gemini の API キー |
 | `SECRET_KEY` | 必須（render.yaml なら自動生成）。未設定だと再起動のたびに表示言語の設定が消えます |
 | `GEMINI_MODEL` | 任意。既定は `gemini-4-hydrogen`。**消えたモデル名を入れると 404 で全部失敗します。AI Studio の「Get code」にあるモデル名をコピーして貼ってください** |
-| `GEMINI_FALLBACK_MODEL` | 任意。既定は `gemini-3.8-flash`。混雑(503)・時間切れ・モデルが無い(404)のとき、2回目の試行でこのモデルに切り替えます（空にすると切り替えません） |
+| `GEMINI_FALLBACK_MODEL` | 任意。既定は `gemini-3.8-flash`。混雑(503)・時間切れ・上限超過(429)・モデルが無い(404)のとき、2回目の試行でこのモデルに切り替えます。上限超過は別枠なので待たずに切り替えます（空にすると切り替えません） |
 | `GEMINI_THINKING_LEVEL` | 任意。既定は `low`。翻訳に長い「思考」は不要なので下げて速くします（`off` で指定なし、`GEMINI_THINKING=1` でモデルの既定に戻す） |
-| `GEMINI_TIMEOUT` / `GEMINI_ATTEMPTS` | 任意。1回の待ち秒数（既定40）／一時的な失敗時の試行回数（既定2） |
-| `RATE_PER_MIN` / `DAILY_LIMIT_PER_IP` / `SITE_DAILY_LIMIT` | 任意。1分・IP別1日・サイト全体1日の上限（既定 20 / 300 / 3000）。**無料枠の1日の上限は AI Studio の「レート制限」画面で確認し、`SITE_DAILY_LIMIT` をそれより少し低く設定してください**（上限に達したら Google 側が 429 を返し、画面には「利用が集中しています」と出ます） |
+| `GEMINI_TEXT_TIMEOUT` / `GEMINI_TIMEOUT` / `GEMINI_ATTEMPTS` | 任意。1回の待ち秒数（文字だけ 既定25／画像・PDF 既定40）／一時的な失敗時の試行回数（既定2）。文字の翻訳は2回試しても約50秒で終わります |
+| `RATE_PER_MIN` / `DAILY_LIMIT_PER_IP` / `SITE_DAILY_LIMIT` | 任意。1分・IP別1日・サイト全体1日の上限（既定 20 / 300 / 3000）。**無料枠の1日の上限は AI Studio の「レート制限」画面で確認し、`SITE_DAILY_LIMIT` をそれより少し低く設定してください**（2026-11 時点の無料枠は、モデルごとに1分5回・1日20回。`SITE_DAILY_LIMIT=16` を設定）。上限に達した日は「今日の翻訳の枠は終わりました」と表示されます |
+| `SITE_RATE_PER_MIN` | 任意。サイト全体の1分あたり上限（既定 4、0で無効）。無料枠は1モデル1分5回なので、それより少し低くしています。超えると「ただいま利用が集中しています」と表示されます。**課金を有効にしたら、この値と `SITE_DAILY_LIMIT` を上げてください** |
+| `TRUSTED_PROXY_HOPS` | 任意。既定 0。IPごとの上限で使うIPの決め方です。0 は `X-Forwarded-For` の先頭（偽装されうる）、1 以上は「右から数えて N 番目」＝手前のプロキシが付けた値を使います。`ADMIN_TOKEN` を設定して `/api/stats?token=...&ip=1` を開くと、アプリが見ているIPと `X-Forwarded-For` を確認できます（自分のIPが右から何番目か確認してから設定してください） |
 | `ADMIN_TOKEN` | 任意。設定すると `/api/stats?token=...` で日別の利用件数・エラー種別を確認できます |
 | `KEEP_ALIVE_URL` | 任意。`https://自分のURL/healthz` を入れると10分ごとに自分を呼んでスリープを防ぎます（外部の監視サービスで /healthz を5分おきに呼ぶ方が確実） |
 
@@ -80,3 +82,14 @@ python tests/e2e_backup.py      # バックアップ機能のブラウザ動作
 python tests/e2e_pwa.py         # PWA・オフライン・フレーズ集のブラウザ動作
 python tests/e2e_v11.py         # 結果カードの「…」メニュー・ゴミ箱・元に戻す（スマホ幅）
 ```
+
+## 無料枠から課金版へ切り替えるとき
+コードは変えずに、環境変数だけで切り替えられます。
+1. AI Studio で、このプロジェクトの請求を有効にする（予算アラートも設定する）
+2. Render の Environment で、`SITE_DAILY_LIMIT` と `SITE_RATE_PER_MIN`（必要なら `RATE_PER_MIN`）を上げる
+3. 保存すると自動で再デプロイされる
+
+## セキュリティ
+- 全ページに `X-Content-Type-Options` / `X-Frame-Options` / `Referrer-Policy` / `Permissions-Policy` / `Strict-Transport-Security` を付けています。
+- CSP（読み込みを許可する場所の制限）は、外部の CDN（Tailwind / FontAwesome）を外す V13 で入れます。
+- `requirements.txt` は、次の大きな版の手前に上限を付けています。

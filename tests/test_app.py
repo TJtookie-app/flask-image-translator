@@ -118,8 +118,10 @@ def test_retry_transient_then_success(env):
     assert n["i"] == 2
 
 
-def test_no_retry_on_quota_and_error_message(env):
+def test_no_retry_on_quota_without_fallback_and_error_message(env):
+    """予備のモデルがないときは、上限超過を再試行せずにエラーを返す（予備があるときは V11.1 で切り替える）"""
     app, translator, calls, mp = env
+    mp.setattr(translator, "FALLBACK_MODEL", "")
     n = {"i": 0}
 
     def quota(parts, system=None):

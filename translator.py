@@ -21,17 +21,27 @@ def _env_num(name, default, cast=float):
         return default
 
 
-TIMEOUT_SEC = _env_num("GEMINI_TIMEOUT", 40.0)      # 1回の呼び出しを待つ上限（秒）
+TIMEOUT_SEC = _env_num("GEMINI_TIMEOUT", 40.0)      # 画像・PDF など重い呼び出しを待つ上限（秒）
+TEXT_TIMEOUT_SEC = _env_num("GEMINI_TEXT_TIMEOUT", 25.0)   # 文字だけの呼び出しを待つ上限（秒）。2回試しても約50秒で終わる
 ATTEMPTS = max(1, _env_num("GEMINI_ATTEMPTS", 2, int))  # 一時的な失敗のときの試行回数
 RETRY_WAIT = 1.0                                     # リトライ前の待ち（秒）
 RETRY_KEYS = {"err_timeout", "err_overloaded", "err_connection"}
-SWITCH_KEYS = {"err_timeout", "err_overloaded"}   # 予備のモデルに切り替える失敗
+SWITCH_KEYS = {"err_timeout", "err_overloaded"}   # 予備のモデルに切り替える失敗（上限超過 err_quota は _call で別扱い）
 
 _tls = threading.local()   # このリクエストで使うモデル（None なら MODEL）
 
 
 def _model():
     return getattr(_tls, "model", None) or MODEL
+
+
+def _timeout_for(parts):
+    """画像・PDF を含むときは長めに、文字だけなら短めに待つ"""
+    return TIMEOUT_SEC if any(not isinstance(p, str) for p in parts) else TEXT_TIMEOUT_SEC
+
+
+def _fallback_usable():
+    return bool(FALLBACK_MODEL) and FALLBACK_MODEL != MODEL
 
 SYSTEM_INSTRUCTION = (
     "You are a translation engine. Translate faithfully, keep line breaks and tone. "
@@ -73,23 +83,24 @@ class TranslationError(Exception):
         self.key = key
 
 
-_client = None
+_clients = {}   # 待ち時間（秒）ごとのクライアント
 
 
-def _get_client():
-    global _client
-    if _client is None:
+def _get_client(timeout=None):
+    timeout = timeout or TIMEOUT_SEC
+    client = _clients.get(timeout)
+    if client is None:
         api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
             print("[translator] GEMINI_API_KEY is not set (環境変数にAPIキーを設定してください)", flush=True)
             raise TranslationError("err_no_key")
         from google import genai  # 遅延import（キー未設定でもアプリは起動できる）
         from google.genai import types
-        _client = genai.Client(
+        client = _clients[timeout] = genai.Client(
             api_key=api_key,
-            http_options=types.HttpOptions(timeout=int(TIMEOUT_SEC * 1000)),  # ミリ秒
+            http_options=types.HttpOptions(timeout=int(timeout * 1000)),  # ミリ秒
         )
-    return _client
+    return client
 
 
 def _block_reason(resp):
@@ -127,16 +138,19 @@ def classify_exception(e):
 
 def _call(parts, system=None):
     """_generate を呼び、例外を TranslationError に変換する。一時的な失敗は1回リトライ。
-    混雑・時間切れ・モデルが無い(404)ときは、2回目は予備のモデル（GEMINI_FALLBACK_MODEL）に切り替える"""
+    混雑・時間切れ・上限超過(429)・モデルが無い(404)ときは、2回目は予備のモデル（GEMINI_FALLBACK_MODEL）に切り替える。
+    上限超過は予備のモデルが別枠なので、待たずにすぐ切り替える"""
     last = None
     switch_next = False
+    skip_wait = False
     try:
         for attempt in range(ATTEMPTS):
             _tls.model = None
-            if attempt > 0 and switch_next and FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
+            if attempt > 0 and switch_next and _fallback_usable():
                 _tls.model = FALLBACK_MODEL
                 print(f"[translator] retrying with fallback model: {FALLBACK_MODEL}", flush=True)
             switch_next = False
+            skip_wait = False
             try:
                 return _generate(parts, system=system)
             except TranslationError as e:
@@ -149,10 +163,12 @@ def _call(parts, system=None):
                 print(f"[translator] Gemini error ({key}, model={_model()}): {type(e).__name__}: {e}", flush=True)
                 last = TranslationError(key)
                 gone = key == "err_failed" and getattr(e, "code", None) == 404   # モデルが無くなった
-                switch_next = key in SWITCH_KEYS or gone
-                if key not in RETRY_KEYS and not gone:
+                quota_switch = key == "err_quota" and _fallback_usable() and _model() != FALLBACK_MODEL
+                switch_next = key in SWITCH_KEYS or gone or quota_switch
+                skip_wait = quota_switch
+                if key not in RETRY_KEYS and not gone and not quota_switch:
                     raise last
-            if attempt + 1 < ATTEMPTS and RETRY_WAIT:
+            if attempt + 1 < ATTEMPTS and RETRY_WAIT and not skip_wait:
                 time.sleep(RETRY_WAIT)
         raise last
     finally:
@@ -184,12 +200,13 @@ def _generate(parts, system=None):
         temperature=0.2,
     )
     thinking = _thinking_config(types)
+    timeout = _timeout_for(parts)
 
     def run(with_thinking):
         c = dict(cfg)
         if with_thinking and thinking is not None:
             c["thinking_config"] = thinking
-        return _get_client().models.generate_content(
+        return _get_client(timeout).models.generate_content(
             model=_model(), contents=parts, config=types.GenerateContentConfig(**c),
         )
 

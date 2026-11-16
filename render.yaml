@@ -14,7 +14,8 @@ services:
       - key: GEMINI_FALLBACK_MODEL
         value: gemini-3.8-flash
       # 以下は任意（既定値のままでOK）
-      # - GEMINI_TIMEOUT=40 / GEMINI_ATTEMPTS=2 / GEMINI_THINKING_LEVEL=low
-      # - RATE_PER_MIN=20 / DAILY_LIMIT_PER_IP=300 / SITE_DAILY_LIMIT=3000
+      # - GEMINI_TEXT_TIMEOUT=25 / GEMINI_TIMEOUT=40 / GEMINI_ATTEMPTS=2 / GEMINI_THINKING_LEVEL=low
+      # - RATE_PER_MIN=20 / DAILY_LIMIT_PER_IP=300 / SITE_DAILY_LIMIT=16（無料枠の場合）
+      # - SITE_RATE_PER_MIN=4（無料枠は1モデル1分5回） / TRUSTED_PROXY_HOPS=0
       # - ADMIN_TOKEN=（設定すると /api/stats?token=... で集計を見られる）
       # - KEEP_ALIVE_URL=https://<自分のURL>/healthz

@@ -48,6 +48,19 @@ def _inject_asset_version():
 
 app.config["ASSET_V"] = ASSET_V
 
+
+@app.after_request
+def _security_headers(resp):
+    """基本のセキュリティヘッダ。CSP は CDN（Tailwind/FontAwesome）を外す V13 で入れる"""
+    h = resp.headers
+    h.setdefault("X-Content-Type-Options", "nosniff")
+    h.setdefault("X-Frame-Options", "SAMEORIGIN")
+    h.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    h.setdefault("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(), payment=()")
+    if not os.environ.get("FLASK_DEBUG"):
+        h.setdefault("Strict-Transport-Security", "max-age=31536000")
+    return resp
+
 # ルートの登録
 register_routes(app)
 start_keepalive()

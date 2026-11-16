@@ -1,7 +1,8 @@
-Flask
-gunicorn
-requests
-google-genai
-pillow
-pydantic
-pypdf
+# 次の大きな版（互換性が変わりうる）の手前に上限を付けている。google-genai は、Render に入っている版を確認してから上限を付ける
+Flask>=3.1,<4
+gunicorn>=23,<28
+requests>=2.32,<3
+google-genai>=1.0
+pillow>=11,<14
+pydantic>=2.9,<3
+pypdf>=5,<8

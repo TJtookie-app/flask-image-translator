@@ -1,8 +1,10 @@
-"""利用制限（1分・1日・サイト全体の1日）と簡易統計。すべてメモリ上（ワーカー1つ前提）。
+"""利用制限（1分・1日・サイト全体の1分と1日）と簡易統計。すべてメモリ上（ワーカー1つ前提）。
+再起動やデプロイで数え直しになるため、Google 側の上限（無料枠）より少し低めに設定しておく。
 
 環境変数:
   RATE_PER_MIN        IPごとの1分あたり上限（既定 20）
   DAILY_LIMIT_PER_IP  IPごとの1日あたり上限（既定 300）
+  SITE_RATE_PER_MIN   サイト全体の1分あたり上限（既定 4。無料枠は1モデル1分5回。0で無効）
   SITE_DAILY_LIMIT    サイト全体の1日あたり上限（既定 3000。APIの無料枠・費用を守る）
 """
 from collections import defaultdict, deque
@@ -34,17 +36,20 @@ class Limiter:
             self.day = _today()
             self.per_ip_day = defaultdict(int)
             self.site_day = 0
+            self.site_hits = deque()         # サイト全体の直近1分のタイムスタンプ
 
     def check(self, ip):
         """OKなら None。制限に当たったらエラーラベル名（err_rate / err_daily）を返し、OKなら1回分を消費する"""
         per_min, per_ip, site = (_num("RATE_PER_MIN", 20), _num("DAILY_LIMIT_PER_IP", 300),
                                  _num("SITE_DAILY_LIMIT", 3000))
+        site_min = _num("SITE_RATE_PER_MIN", 4)
         now = time.time()
         with self.lock:
             today = _today()
             if today != self.day:
                 self.day, self.per_ip_day, self.site_day = today, defaultdict(int), 0
                 self.hits = defaultdict(deque)
+                self.site_hits = deque()
             if self.site_day >= site or self.per_ip_day[ip] >= per_ip:
                 return "err_daily"
             q = self.hits[ip]
@@ -52,6 +57,12 @@ class Limiter:
                 q.popleft()
             if len(q) >= per_min:
                 return "err_rate"
+            sq = self.site_hits
+            while sq and now - sq[0] > 60:
+                sq.popleft()
+            if site_min > 0 and len(sq) >= site_min:
+                return "err_busy"
+            sq.append(now)
             q.append(now)
             self.per_ip_day[ip] += 1
             self.site_day += 1
