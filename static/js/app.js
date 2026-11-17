@@ -9,7 +9,12 @@ function switchTab(tabName) {
         btn.classList.add('text-slate-400');
     });
     const active = $('nav-' + tabName);
-    if (active) {
+    const hdrMoney = $('nav-money');   // 通貨はヘッダーのボタン（下のバーの外）。開いている間だけ色を付ける
+    if (hdrMoney && !hdrMoney.classList.contains('nav-btn')) {
+        hdrMoney.classList.toggle('on', tabName === 'money');
+        hdrMoney.setAttribute('aria-pressed', tabName === 'money' ? 'true' : 'false');
+    }
+    if (active && active.classList.contains('nav-btn')) {
         active.classList.remove('text-slate-400');
         active.classList.add('text-indigo-400', 'bg-indigo-950/40');
     }
@@ -155,3 +160,13 @@ document.addEventListener('keydown', e => {
     closeResultMenus();
     if (open) open.focus();
 });
+
+// ---- 下のバー: 文字を入力するあいだ（スマホでキーボードが出るあいだ）は隠す ----
+(function () {
+    const typing = (el) => !!el && (el.tagName === 'TEXTAREA' ||
+        (el.tagName === 'INPUT' && /^(text|search|number|tel|email|url|password|)$/.test(el.type || '')));
+    const coarse = () => !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    const sync = () => document.body.classList.toggle('kb-open', coarse() && typing(document.activeElement));
+    document.addEventListener('focusin', sync);
+    document.addEventListener('focusout', () => setTimeout(sync, 80));
+})();

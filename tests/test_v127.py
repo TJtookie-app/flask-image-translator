@@ -168,7 +168,7 @@ def test_money_tab_markup_and_nav(env):
                    "money-result", "money-list", "money-search", "money-status", "money-credit", "nav-money", "js/money.js",
                    "通貨・為替", "現在地で判定", "銀行間の目安"):
         assert needle in html, needle
-    assert html.count("onclick=\"switchTab('") >= 7 and "grid-cols-7" in html
+    assert html.count("onclick=\"switchTab('") >= 7          # 下のバー6つ + ヘッダーの通貨ボタン
     assert html.index("js/money.js") < html.index("js/app.js")
     off = c.get("/offline").get_data(as_text=True)
     assert "tab-money" in off and "js/money.js" in off

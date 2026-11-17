@@ -1,7 +1,7 @@
 <!-- ヘッダー（ロゴ ＋ 言語選択バー） -->
 <div class="flex items-center justify-between mb-4 mt-2">
     <!-- 左側：インコアイコン + TOOKIEロゴ -->
-    <a href="{{ url_for('index') }}" class="flex items-center gap-2.5" translate="no">
+    <a href="{{ url_for('index') }}" class="hdr-brand flex items-center gap-2.5" translate="no">
         <img src="{{ url_for('static', filename='icon-192.png', v=asset_v) }}" 
              alt="TOOKIE Logo" 
              class="w-9 h-9 rounded-xl object-cover border border-slate-700/50 shadow">
@@ -11,10 +11,13 @@
         </div>
     </a>
 
-    <!-- 右側：設定ボタン + UI言語切り替えボタン -->
+    <!-- 右側：通貨ボタン + UI言語切り替えボタン + 設定ボタン -->
     <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button type="button" id="nav-money" onclick="switchTab('money')" title="{{ ui.nav_money }}" aria-label="{{ ui.nav_money }}" class="hdr-money flex items-center justify-center w-11 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
+            <i class="fa-solid fa-coins text-indigo-400"></i>
+        </button>
         <a href="{{ url_for('start') }}" title="{{ ui.change_language }}" aria-label="{{ ui.change_language }}" class="flex items-center gap-1.5 px-3 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
-            <i class="fa-solid fa-globe text-indigo-400"></i><span dir="auto" class="max-w-[5rem] truncate">{{ ui_native }}</span>
+            <i class="fa-solid fa-globe text-indigo-400"></i><span dir="auto" class="hdr-lang-text max-w-[5rem] truncate">{{ ui_native }}</span>
         </a>
         <button type="button" id="open-settings" onclick="openSettings()" title="{{ ui.filter_settings }}" aria-label="{{ ui.filter_settings }}" class="flex items-center justify-center w-11 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
             <i class="fa-solid fa-gear text-indigo-400"></i>

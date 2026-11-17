@@ -9,7 +9,7 @@
     {% include 'components/pwa_head.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_v) }}">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between px-4 selection:bg-indigo-500 selection:text-white">
+<body class="has-bottom-nav bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between px-4 selection:bg-indigo-500 selection:text-white">
 
     <div class="max-w-xl w-full bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 p-5 md:p-7 flex-grow flex flex-col justify-between my-auto">
         {% include 'components/header.html' %}
@@ -38,8 +38,10 @@
             {% include 'components/tabs.html' %}
         </div>
 
-        {% include 'components/nav.html' %}
+        <p class="text-center mt-6"><a href="{{ url_for('privacy') }}" class="text-xs text-slate-400 hover:text-slate-300">{{ ui.privacy_link }}</a></p>
     </div>
+
+    {% include 'components/nav.html' %}
 
     {% include 'components/scripts.html' %}
 </body>
