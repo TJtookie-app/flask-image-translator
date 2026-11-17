@@ -227,3 +227,12 @@ def test_geolocation_allowed_for_own_pages(env):
     app, *_ = env
     h = app.test_client().get("/").headers["Permissions-Policy"]
     assert "geolocation=(self)" in h and "camera=(self)" in h
+
+
+def test_country_select_is_readable_and_tidy():
+    css = read("static", "style.css")
+    assert ".money-select option" in css and "color-scheme: dark" in css      # 開いたリストが白背景＋薄い文字にならない
+    assert "html[data-theme=light] .money-select option" in css and ".money-popup option" in css
+    assert 'class="money-popup' in read("templates", "components", "money_tab.html")   # 国を選ぶ見えない select にも配色が効く
+    js = read("static", "js", "money.js")
+    assert "MONEY_HIDE_COUNTRIES" in js and all(c in js for c in ("'DG'", "'EA'", "'IC'", "'TA'"))

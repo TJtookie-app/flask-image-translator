@@ -41,6 +41,7 @@ Flask製の翻訳アプリ（テキスト／画像／音声／カメラ／チャ
 - **国の判定（3段階）:** ①端末のタイムゾーン（許可不要・オフラインでも動く。`static/money/zones.json`）→ ②「現在地で判定」ボタン（GPS。端末のブラウザから直接 BigDataCloud の無料API `api.bigdatacloud.net/data/reverse-geocode-client` へ。座標は小数2桁（約1km）に丸め、TOOKIE のサーバーには送らず保存もしません）→ ③国を手動で選ぶ。通貨・国名の表示言語は `Intl.DisplayNames` で端末の言語に合わせます。
 - **為替レート:** サーバー `rates.py` が open.er-api.com（キー不要・1日1回更新・表示義務あり）から取得して6時間保存し、取れなければ Frankfurter（ECB）に切り替えます。両方だめなときは前回の値を「古いかも」付きで返します。画面側も最後に取得した値を端末に保存するので、**オフラインでは最後にオンラインだったときのレートと、その時刻** を表示します。銀行間の目安であり、実際の両替レートとは異なります。
 - **データの作り直し:** 国→通貨（`static/money/countries.json`）とタイムゾーン→国（`zones.json`）は `pip install babel` のうえ `python tools/build_money_data.py` で再生成できます（CLDR・IANA 由来。ブルガリアのユーロ化など、古い箇所は `OVERRIDES` で補正）。
+- **V12.7.1:** 国を選ぶリストが（Windows の Edge/Chrome で）白背景に薄い文字になって読めなかったのを直しました。ディエゴガルシア島などの特殊な地域は国の一覧から外しています（`MONEY_HIDE_COUNTRIES`）。
 - V13 で CSP を入れるときは、`api.bigdatacloud.net` を接続先に許可してください。
 
 ## 画面の多言語化

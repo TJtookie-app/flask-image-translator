@@ -18,7 +18,7 @@
             <button type="button" id="money-gps" onclick="moneyDetectGps()" class="money-btn"><i class="fa-solid fa-location-crosshairs"></i><span>{{ ui.money_gps_btn }}</span></button>
             <label class="money-btn cursor-pointer relative">
                 <i class="fa-solid fa-earth-asia"></i><span>{{ ui.money_country }}</span>
-                <select id="money-country-select" onchange="moneyPickCountry(this.value)" aria-label="{{ ui.money_country }}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"></select>
+                <select id="money-country-select" onchange="moneyPickCountry(this.value)" aria-label="{{ ui.money_country }}" class="money-popup absolute inset-0 w-full h-full opacity-0 cursor-pointer"></select>
             </label>
         </div>
         <p id="money-gps-msg" class="hidden text-xs text-amber-200" role="status"></p>

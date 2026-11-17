@@ -171,6 +171,10 @@ html[data-theme=light] .pbar { background: #cbd5e1; }
 .money-select {
     min-height: 2.75rem; padding: .4rem .6rem; border-radius: .75rem; font-size: .8rem; background: #0f172a; color: #f1f5f9; border: 1px solid #334155; max-width: 100%;
 }
+/* 開いたリスト（Windows の Edge/Chrome）も暗い配色にする。国の選択（.money-popup）は、見えない select をボタンに重ねたもの */
+.money-select, .money-popup { color-scheme: dark; }
+.money-select option, .money-select optgroup, .money-popup option { background: #0f172a; color: #f1f5f9; }
+.money-select option:disabled { color: #64748b; }
 .money-row { display: flex; align-items: stretch; gap: .35rem; }
 .money-row-main {
     flex: 1 1 auto; min-width: 0; min-height: 2.9rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
@@ -182,3 +186,6 @@ html[data-theme=light] .pbar { background: #cbd5e1; }
 html[data-theme=light] .money-card { background: #f8fafc; border-color: #cbd5e1; }
 html[data-theme=light] .money-btn, html[data-theme=light] .money-pin { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
 html[data-theme=light] .money-select, html[data-theme=light] .money-row-main { background: #fff; color: #0f172a; border-color: #cbd5e1; }
+html[data-theme=light] .money-select, html[data-theme=light] .money-popup { color-scheme: light; }
+html[data-theme=light] .money-select option, html[data-theme=light] .money-select optgroup, html[data-theme=light] .money-popup option { background: #fff; color: #0f172a; }
+html[data-theme=light] .money-select option:disabled { color: #94a3b8; }

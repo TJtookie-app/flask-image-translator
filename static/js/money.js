@@ -4,6 +4,7 @@
 const MKEY = 'tl_money_v1';   // 設定: { home, from, to, toAuto, amount, pins, where: { cc, src, at } }
 const RKEY = 'tl_rates_v1';   // 最後に取得したレート: { base, rates, updated, fetched, source, attribution, stale, savedAt }
 const MONEY_DEFAULT_PINS = ['USD', 'EUR', 'GBP', 'CNY', 'KRW', 'TWD', 'HKD', 'THB', 'SGD', 'AUD', 'CAD', 'CHF'];
+const MONEY_HIDE_COUNTRIES = ['EU', 'DG', 'EA', 'IC', 'TA'];   // 国の一覧には出さない（EU・ディエゴガルシア島・セウタとメリリャ・カナリア諸島・トリスタンダクーニャ）
 const MONEY_REFRESH_MS = 30 * 60 * 1000;     // この時間内に取得したレートは、開き直しても取り直さない
 const GEO_URL = 'https://api.bigdatacloud.net/data/reverse-geocode-client';   // 現在地→国。端末から直接呼ぶ（キー不要・クライアント専用）
 
@@ -241,8 +242,13 @@ function renderMoneyWhere() {
     const sel = $('money-country-select');
     let coll = null;
     try { coll = new Intl.Collator(mLocale()); } catch (e) {}
-    const ccs = Object.keys(moneyGeo.countries).filter(cc => /^[A-Z]{2}$/.test(cc) && cc !== 'EU')
-        .map(cc => [cc, mRegionName(cc)]).sort((a, b) => (coll ? coll.compare(a[1], b[1]) : a[1].localeCompare(b[1])));
+    // 国の選択肢: 名前の付かない特殊な地域（ディエゴガルシア島など）は出さず、名前が取れない国は末尾へ
+    const ccs = Object.keys(moneyGeo.countries).filter(cc => /^[A-Z]{2}$/.test(cc) && !MONEY_HIDE_COUNTRIES.includes(cc))
+        .map(cc => [cc, mRegionName(cc)]).sort((a, b) => {
+            const ua = a[1] === a[0], ub = b[1] === b[0];
+            if (ua !== ub) return ua ? 1 : -1;
+            return coll ? coll.compare(a[1], b[1]) : a[1].localeCompare(b[1]);
+        });
     sel.replaceChildren(mOption('', UI.money_country_auto), ...ccs.map(([cc, n]) => mOption(cc, mFlag(cc) + ' ' + n)));
     sel.value = w && w.src === 'manual' ? w.cc : '';
 }

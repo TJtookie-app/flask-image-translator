@@ -94,6 +94,14 @@ with sync_playwright() as p:
     pg.fill("#money-search", ""); pg.dispatch_event("#money-search", "input")
     pg.locator("#money-list .money-row-main", has_text="THB").click()
     check("tap list row -> converts home->THB", pg.input_value("#money-from") == "JPY" and pg.input_value("#money-to") == "THB")
+    # 国の選択肢: 開いたリストの配色（白背景に薄い文字にならない）と、特殊な地域を出さない
+    col = pg.evaluate("""() => { const o = document.querySelector('#money-country-select option[value=JP]'); const c = getComputedStyle(o); return [c.backgroundColor, c.color]; }""")
+    lum = lambda rgb: sum(int(x) for x in rgb[rgb.index("(") + 1:rgb.index(")")].split(",")[:3]) / 3
+    check(f"country list: option colors readable on dark ({col})", lum(col[0]) < 60 and lum(col[1]) > 180)
+    vals = pg.evaluate("[...document.querySelectorAll('#money-country-select option')].map(o => o.value)")
+    check("country list hides DG/EA/IC/TA/EU", not {"DG", "EA", "IC", "TA", "EU"} & set(vals) and "JP" in vals and "XK" in vals)
+    labels = pg.evaluate("[...document.querySelectorAll('#money-country-select option')].slice(1, 6).map(o => o.textContent)")
+    check(f"country list starts with real names ({labels})", all(len(l.split(' ', 1)[-1]) > 2 for l in labels))
     # 手動で国を選ぶ
     pg.select_option("#money-country-select", "CH")
     check(f"manual country CH -> {txt(pg, '#money-cur')}", txt(pg, "#money-cur").startswith("CHF") and "手動" in txt(pg, "#money-src"))
