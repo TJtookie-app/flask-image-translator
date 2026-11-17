@@ -9,12 +9,7 @@ function switchTab(tabName) {
         btn.classList.add('text-slate-400');
     });
     const active = $('nav-' + tabName);
-    const hdrMoney = $('nav-money');   // 通貨はヘッダーのボタン（下のバーの外）。開いている間だけ色を付ける
-    if (hdrMoney && !hdrMoney.classList.contains('nav-btn')) {
-        hdrMoney.classList.toggle('on', tabName === 'money');
-        hdrMoney.setAttribute('aria-pressed', tabName === 'money' ? 'true' : 'false');
-    }
-    if (active && active.classList.contains('nav-btn')) {
+    if (active) {
         active.classList.remove('text-slate-400');
         active.classList.add('text-indigo-400', 'bg-indigo-950/40');
     }

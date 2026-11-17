@@ -1,4 +1,4 @@
-"""V12.8のブラウザ確認: 下のタブバーが固定される・通貨ボタンがヘッダーにある（アイコンだけ）・入力中はバーを隠す。使い方: python tests/e2e_v128.py
+"""V12.8のブラウザ確認: 下のタブバーが固定される（通貨は履歴の左隣）・入力中はバーを隠す。使い方: python tests/e2e_v128.py
 ※ Tailwind の CDN は遮断して試すので、ヘッダーの細かい幅は確認できません（バーは style.css だけで作っているので確認できます）。"""
 import json, os, sys, threading
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +35,8 @@ with sync_playwright() as p:
     # ---------- スマホ幅（タッチ） ----------
     ctx, pg = ctxmake(viewport={"width": 390, "height": 700}, has_touch=True, is_mobile=True, device_scale_factor=2)
     H = pg.evaluate("window.innerHeight")
-    check("bottom bar exists with 6 tab buttons, none is money", pg.locator("#bottom-nav .nav-btn").count() == 6 and pg.locator("#bottom-nav #nav-money").count() == 0)
+    order = pg.evaluate("[...document.querySelectorAll('#bottom-nav .nav-btn')].map(b => b.id.replace('nav-', ''))")
+    check(f"bottom bar: 7 tabs, history rightmost, money second from right ({order})", order == ["text", "image", "voice", "camera", "conversation", "money", "history"])
     check("bar is position: fixed", pg.evaluate("getComputedStyle(document.getElementById('bottom-nav')).position") == "fixed")
     r = rect(pg, "#bottom-nav"); check(f"bar sits at the bottom edge ({r})", abs(r["bottom"] - H) < 1 and r["left"] == 0 and r["width"] >= 389)
     # 中身を長くして、スクロールしてもバーが動かない
@@ -50,20 +51,18 @@ with sync_playwright() as p:
     pg.evaluate("document.getElementById('filler').remove(); window.scrollTo(0, 0)")
     check("bar is under overlays (z-index below the viewers)", int(pg.evaluate("getComputedStyle(document.getElementById('bottom-nav')).zIndex")) < 60)
 
-    # 通貨ボタン（ヘッダー）
-    check("money button is in the header, left of the language button",
-          pg.evaluate("""() => { const m = document.getElementById('nav-money'), l = document.querySelector("a[href='/start']"); return m.closest('.mb-4') === l.closest('.mb-4') && (m.compareDocumentPosition(l) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0; }"""))
-    check("money button has no text (icon only)", pg.inner_text("#nav-money").strip() == "" and pg.locator("#nav-money i.fa-coins").count() == 1)
-    check("but keeps a name for screen readers / long-press", pg.get_attribute("#nav-money", "aria-label") == "通貨" and pg.get_attribute("#nav-money", "title") == "通貨")
+    # 通貨はバーの中（履歴の左隣）。ヘッダーにはない
+    check("header has no money button", pg.locator("#nav-money").count() == 1 and pg.locator("#bottom-nav #nav-money").count() == 1)
+    mr, hr = rect(pg, "#nav-money"), rect(pg, "#nav-history")
+    check(f"money sits immediately left of history ({mr}, {hr})", mr["right"] <= hr["left"] + 4 and abs(mr["top"] - hr["top"]) < 2 and hr["right"] > 360)
     pg.click("#nav-money")
     pg.wait_for_function("document.getElementById('money-status').textContent.includes('レート更新')", timeout=8000)
     check("tap -> money tab opens", "hidden" not in pg.get_attribute("#tab-money", "class") and "hidden" in pg.get_attribute("#tab-text", "class"))
-    check("money button lights up while open", pg.evaluate("document.getElementById('nav-money').classList.contains('on')") and pg.get_attribute("#nav-money", "aria-pressed") == "true")
-    check("no bottom tab is highlighted on the money tab", pg.evaluate("document.querySelectorAll('#bottom-nav .nav-btn.text-indigo-400').length") == 0)
+    check("money tab is highlighted in the bar", pg.evaluate("document.getElementById('nav-money').classList.contains('text-indigo-400')"))
     check("language bar is hidden on the money tab", "hidden" in pg.get_attribute("#language-bar-wrapper", "class"))
     r = rect(pg, "#bottom-nav"); check("bar still fixed on the money tab", abs(r["bottom"] - H) < 1)
     pg.click("#nav-history")
-    check("bottom tab -> leaves money, button turns off", "hidden" in pg.get_attribute("#tab-money", "class") and not pg.evaluate("document.getElementById('nav-money').classList.contains('on')")
+    check("history tab: money turns off", "hidden" in pg.get_attribute("#tab-money", "class") and not pg.evaluate("document.getElementById('nav-money').classList.contains('text-indigo-400')")
           and pg.evaluate("document.getElementById('nav-history').classList.contains('text-indigo-400')"))
     pg.click("#nav-text")
     check("back to text tab", "hidden" not in pg.get_attribute("#tab-text", "class"))
@@ -89,7 +88,10 @@ with sync_playwright() as p:
     # ---------- 幅の狭いスマホ（320px）: 言語ボタンはアイコンだけ ----------
     ctx, pg = ctxmake(viewport={"width": 320, "height": 640})
     check("320px: language button text is hidden (icon stays)", pg.evaluate("getComputedStyle(document.querySelector('.hdr-lang-text')).display") == "none")
-    check("320px: 6 buttons share the bar width", pg.evaluate("[...document.querySelectorAll('#bottom-nav .nav-btn')].every(b => b.getBoundingClientRect().width > 40)"))
+    check("320px: 7 buttons share the bar width", pg.evaluate("[...document.querySelectorAll('#bottom-nav .nav-btn')].every(b => b.getBoundingClientRect().width > 36)"))
+    ctx.close()
+    ctx, pg = ctxmake(viewport={"width": 360, "height": 700})
+    check("360px: language button text is hidden too", pg.evaluate("getComputedStyle(document.querySelector('.hdr-lang-text')).display") == "none")
     ctx.close()
     ctx, pg = ctxmake(viewport={"width": 390, "height": 700})
     check("390px: language button text is shown", pg.evaluate("getComputedStyle(document.querySelector('.hdr-lang-text')).display") != "none")

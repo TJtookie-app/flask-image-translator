@@ -222,10 +222,10 @@ function mFillCurrencySelect(sel, current, firstCodes) {
     const all = mAllCodes();
     const first = [...new Set(firstCodes)].filter(c => all.includes(c));
     sel.replaceChildren();
-    first.forEach(c => sel.appendChild(mOption(c, c + ' — ' + mCurName(c))));
+    first.forEach(c => sel.appendChild(mOption(c, c + ' ' + mCurName(c))));
     if (first.length) sel.appendChild(Object.assign(mOption('', '──────────'), { disabled: true }));
-    all.filter(c => !first.includes(c)).forEach(c => sel.appendChild(mOption(c, c + ' — ' + mCurName(c))));
-    if (current && !all.includes(current)) sel.insertBefore(mOption(current, current + ' — ' + mCurName(current)), sel.firstChild);
+    all.filter(c => !first.includes(c)).forEach(c => sel.appendChild(mOption(c, c + ' ' + mCurName(c))));
+    if (current && !all.includes(current)) sel.insertBefore(mOption(current, current + ' ' + mCurName(current)), sel.firstChild);
     sel.value = current;
 }
 

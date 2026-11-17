@@ -52,7 +52,7 @@ with sync_playwright() as p:
     ctx = br.new_context(viewport={"width": 390, "height": 900}, locale="ja-JP", timezone_id="Asia/Tokyo")
     only_local(ctx)
     pg = open_money(ctx)
-    check("tab visible, nav has 7 buttons", pg.is_visible("#tab-money") and pg.locator("[id^=nav-]").count() == 7 and pg.locator("#bottom-nav .nav-btn").count() == 6)
+    check("tab visible, nav has 7 buttons", pg.is_visible("#tab-money") and pg.locator("[id^=nav-]").count() == 7 and pg.locator("#bottom-nav .nav-btn").count() == 7)
     check(f"country by timezone: {txt(pg, '#money-country')}", txt(pg, "#money-country") == "日本")
     check("flag", txt(pg, "#money-flag") == "🇯🇵")
     check(f"local currency {txt(pg, '#money-cur')}", txt(pg, "#money-cur").startswith("JPY"))
