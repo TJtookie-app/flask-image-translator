@@ -25,6 +25,7 @@
         </div>
 
         {% include 'components/history_tab.html' %}
+        {% include 'components/money_tab.html' %}
     </div>
 
     <script>
@@ -45,6 +46,7 @@
     <script src="{{ url_for('static', filename='js/phrasebook.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/study.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/backup.js', v=asset_v) }}"></script>
+    <script src="{{ url_for('static', filename='js/money.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/offline.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/pwa.js', v=asset_v) }}"></script>
 </body>

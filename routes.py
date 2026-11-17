@@ -14,6 +14,7 @@ from languages import (
     normalize_language_name,
     language_badge,
 )
+import rates
 import translator
 from translator import TranslationError
 from phrasebook import available_languages
@@ -388,6 +389,19 @@ def register_routes(app):
     def quota():
         """サイト全体の「今日の残り回数」（画面の小さな表示用）。利用回数には数えない"""
         resp = jsonify(limiter.quota())
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
+    @app.route("/api/rates")
+    def api_rates():
+        """通貨タブ用の為替レート（USD基準）。サーバー内に数時間保存した値を返す。Gemini の利用回数には数えない"""
+        try:
+            data = rates.store.get()
+        except rates.RatesUnavailable:
+            resp = jsonify({"error": get_ui()["err_rates"]})
+            resp.status_code = 503
+        else:
+            resp = jsonify(data)
         resp.headers["Cache-Control"] = "no-store"
         return resp
 

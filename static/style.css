@@ -159,3 +159,26 @@ html[data-theme=light] .ov-tool:hover, html[data-theme=light] .ov-tool:active { 
 @keyframes pbar-slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
 @media (prefers-reduced-motion: reduce) { .pbar.ind .pbar-fill { animation: none; width: 100%; opacity: .5; } .pbar-fill { transition: none; } }
 html[data-theme=light] .pbar { background: #cbd5e1; }
+
+/* ---- V12.7: 通貨タブ ---- */
+.money-card { padding: .85rem; border-radius: 1rem; background: rgba(15, 23, 42, .6); border: 1px solid #1e293b; }
+.money-btn {
+    min-height: 2.75rem; padding: .5rem .9rem; display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    border-radius: .75rem; font-size: .75rem; font-weight: 600; background: #1e293b; color: #e2e8f0; border: 1px solid #334155;
+}
+.money-btn:hover, .money-btn:active { background: #334155; }
+.money-btn:disabled { opacity: .6; }
+.money-select {
+    min-height: 2.75rem; padding: .4rem .6rem; border-radius: .75rem; font-size: .8rem; background: #0f172a; color: #f1f5f9; border: 1px solid #334155; max-width: 100%;
+}
+.money-row { display: flex; align-items: stretch; gap: .35rem; }
+.money-row-main {
+    flex: 1 1 auto; min-width: 0; min-height: 2.9rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    padding: .45rem .7rem; border-radius: .75rem; background: #0f172a; border: 1px solid #1e293b;
+}
+.money-row-main:hover, .money-row-main:active { background: #1e293b; }
+.money-pin { flex: 0 0 auto; width: 2.75rem; border-radius: .75rem; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; font-size: .9rem; }
+.money-pin:hover, .money-pin:active { background: #334155; }
+html[data-theme=light] .money-card { background: #f8fafc; border-color: #cbd5e1; }
+html[data-theme=light] .money-btn, html[data-theme=light] .money-pin { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+html[data-theme=light] .money-select, html[data-theme=light] .money-row-main { background: #fff; color: #0f172a; border-color: #cbd5e1; }

@@ -1,0 +1,59 @@
+<!-- 通貨・為替（現在地の通貨・換算・主な通貨の一覧）。レートは /api/rates、国の判定データは static/money/*.json（端末に保存されるのでオフラインでも動く） -->
+<div id="tab-money" class="tab-content hidden space-y-3">
+    <h2 class="text-sm font-bold text-slate-100"><i class="fa-solid fa-coins text-amber-300"></i> {{ ui.money_title }}</h2>
+
+    <!-- 現在地の通貨 -->
+    <section class="money-card space-y-2" aria-labelledby="money-here-h">
+        <p id="money-here-h" class="text-xs font-semibold text-slate-300">{{ ui.money_here }}</p>
+        <div class="flex items-center gap-3">
+            <span id="money-flag" class="text-3xl leading-none" aria-hidden="true">🌍</span>
+            <div class="min-w-0 flex-1">
+                <p id="money-country" class="text-sm font-semibold text-slate-100 truncate"></p>
+                <p id="money-cur" dir="auto" class="text-lg font-extrabold text-amber-200"></p>
+                <p id="money-also" class="hidden text-xs text-slate-400"></p>
+            </div>
+        </div>
+        <p id="money-src" class="text-xs text-slate-400" role="status"></p>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" id="money-gps" onclick="moneyDetectGps()" class="money-btn"><i class="fa-solid fa-location-crosshairs"></i><span>{{ ui.money_gps_btn }}</span></button>
+            <label class="money-btn cursor-pointer relative">
+                <i class="fa-solid fa-earth-asia"></i><span>{{ ui.money_country }}</span>
+                <select id="money-country-select" onchange="moneyPickCountry(this.value)" aria-label="{{ ui.money_country }}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"></select>
+            </label>
+        </div>
+        <p id="money-gps-msg" class="hidden text-xs text-amber-200" role="status"></p>
+    </section>
+
+    <!-- 換算 -->
+    <section class="money-card space-y-2" aria-label="{{ ui.money_amount }}">
+        <div class="flex items-center gap-2">
+            <label class="text-xs text-slate-300 w-24 flex-shrink-0" for="money-home">{{ ui.money_home }}</label>
+            <select id="money-home" onchange="moneySetHome(this.value)" class="money-select flex-1"></select>
+        </div>
+        <input id="money-amount" type="text" inputmode="decimal" autocomplete="off" aria-label="{{ ui.money_amount }}" value="1000"
+               oninput="moneyConvert()" class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2.5 text-lg font-semibold text-slate-100 text-right">
+        <div class="flex items-center gap-2">
+            <select id="money-from" onchange="moneyConvert(true)" aria-label="{{ ui.money_from }}" class="money-select flex-1 min-w-0"></select>
+            <button type="button" onclick="moneySwap()" aria-label="{{ ui.money_swap }}" class="w-11 h-11 flex-shrink-0 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+            <select id="money-to" onchange="moneyConvert(true)" aria-label="{{ ui.money_to }}" class="money-select flex-1 min-w-0"></select>
+        </div>
+        <p id="money-result" dir="auto" class="text-2xl font-extrabold text-emerald-300 text-right break-words" role="status" aria-live="polite">—</p>
+        <p id="money-rate-line" dir="auto" class="text-xs text-slate-400 text-right"></p>
+    </section>
+
+    <!-- 主な通貨の一覧 -->
+    <section class="money-card space-y-2" aria-labelledby="money-list-h">
+        <p id="money-list-h" class="text-xs font-semibold text-slate-300">{{ ui.money_list }}</p>
+        <div id="money-list" class="space-y-1.5"></div>
+        <input id="money-search" type="search" autocomplete="off" placeholder="{{ ui.money_search }}" aria-label="{{ ui.money_search }}" oninput="moneySearch()"
+               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-400">
+        <div id="money-search-results" class="space-y-1.5"></div>
+    </section>
+
+    <!-- レートの状態（更新時刻・オフライン・出典） -->
+    <div class="space-y-1">
+        <p id="money-status" class="text-xs text-slate-300" role="status">{{ ui.money_loading }}</p>
+        <p class="text-xs text-slate-400">{{ ui.money_note }}</p>
+        <p class="text-xs text-slate-400">{{ ui.money_credit }}: <a id="money-credit" href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" class="underline">Exchange Rate API</a></p>
+    </div>
+</div>

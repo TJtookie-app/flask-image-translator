@@ -14,7 +14,7 @@ function switchTab(tabName) {
         active.classList.add('text-indigo-400', 'bg-indigo-950/40');
     }
 
-    const ownLang = (tabName === 'conversation' || tabName === 'history');
+    const ownLang = (tabName === 'conversation' || tabName === 'history' || tabName === 'money');
     $('language-bar-wrapper').classList.toggle('hidden', ownLang);
 
     const needsSource = (tabName === 'text' || tabName === 'voice');
@@ -25,6 +25,7 @@ function switchTab(tabName) {
     $('target-lang-label').textContent = needsSource ? UI.target_label : UI.target_label_short;
 
     if (tabName === 'history') renderHistory();
+    if (tabName === 'money' && typeof initMoney === 'function') initMoney();
 }
 
 function setFavIcons(isFav) {

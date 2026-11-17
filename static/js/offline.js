@@ -3,4 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $('tab-history').classList.remove('hidden');
     populateLangSelect($('gl-to'), TARGET_LANG);
     setHistFilter(PHRASE_LANGS.length ? 'phrases' : 'all');
+    $('tab-money').classList.remove('hidden');   // 通貨も、最後に取得したレートでオフラインのまま使える
+    initMoney();
 });

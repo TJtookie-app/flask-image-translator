@@ -241,7 +241,7 @@ def test_privacy_mentions_google_free_tier_pdf_and_trash(env):
     c = app.test_client(); start(c, "Japanese")
     html = c.get("/privacy").get_data(as_text=True)
     assert "無料枠" in html and "PDF" in html and "ゴミ箱" in html and "機密情報" in html
-    assert html.count('<p class="text-sm text-slate-300 leading-relaxed">') == 6
+    assert html.count('<p class="text-sm text-slate-300 leading-relaxed">') == 7   # V12.7 で通貨タブの説明を1段落追加
     start(c, "English")
     en = c.get("/privacy").get_data(as_text=True)
     assert "free tier" in en and "PDFs" in en and "trash" in en

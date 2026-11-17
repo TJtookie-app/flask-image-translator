@@ -28,6 +28,11 @@ def env(monkeypatch):
     import ui_i18n
     from app import app
     app.config["TESTING"] = True
+    import rates
+
+    def no_network(url):   # テストが外のAPIへ取りに行かないように（必要なテストだけ差し替える）
+        raise RuntimeError("no network in tests")
+    rates.store.reset(); monkeypatch.setattr(rates, "_http_get", no_network)
     limiter.reset(); stats.reset(); ui_i18n._mem.clear(); ui_i18n._failed_at.clear()
     monkeypatch.setattr(translator, "RETRY_WAIT", 0)
     monkeypatch.setenv("SITE_RATE_PER_MIN", "0")   # サイト全体の1分上限は、個別のテストで必要なときだけ有効にする

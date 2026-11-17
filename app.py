@@ -56,7 +56,7 @@ def _security_headers(resp):
     h.setdefault("X-Content-Type-Options", "nosniff")
     h.setdefault("X-Frame-Options", "SAMEORIGIN")
     h.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-    h.setdefault("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(), payment=()")
+    h.setdefault("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(self), payment=()")
     if not os.environ.get("FLASK_DEBUG"):
         h.setdefault("Strict-Transport-Security", "max-age=31536000")
     return resp

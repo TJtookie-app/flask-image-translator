@@ -15,6 +15,7 @@ services:
         value: gemini-3.8-flash
       # 以下は任意（既定値のままでOK）
       # - GEMINI_TEXT_TIMEOUT=25 / GEMINI_TIMEOUT=40 / GEMINI_ATTEMPTS=2 / GEMINI_THINKING_LEVEL=low
+      # - RATES_TTL_SEC=21600（通貨タブの為替レートの保存時間。既定のままでOK）
       # - RATE_PER_MIN=20 / DAILY_LIMIT_PER_IP=300 / SITE_DAILY_LIMIT=16（無料枠の場合）
       # - SITE_RATE_PER_MIN=4（無料枠は1モデル1分5回） / TRUSTED_PROXY_HOPS=0
       # - LIMIT_DAY_TZ=America/Los_Angeles（既定。1日の区切り＝Googleの無料枠が戻る時刻） / QUOTA_SHOW_BELOW=500（上限がこれ以下のとき残り回数を表示）
