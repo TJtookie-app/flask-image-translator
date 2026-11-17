@@ -36,10 +36,15 @@ def test_header_has_no_money_button(env):
 
 def test_css_fixed_bar_rules():
     css = read("static", "style.css")
-    assert re.search(r"\.bottom-nav \{[^}]*position: fixed[^}]*bottom: 0", css, re.S)
-    assert "env(safe-area-inset-bottom" in css.split(".bottom-nav {", 1)[1].split("}", 1)[0]
+    outer = css.split(".bottom-nav {", 1)[1].split("}", 1)[0]
+    assert "position: fixed" in outer and "env(safe-area-inset-bottom" in outer and "pointer-events: none" in outer   # 外側は固定・何も受けない
+    assert "translateZ(0)" in outer                                                  # 専用の層（スクロール中にずれない）
+    inner = css.split(".bottom-nav-in {", 1)[1].split("}", 1)[0]
+    assert "border-radius: 1.75rem" in inner and "pointer-events: auto" in inner and "backdrop-filter" in inner   # カプセル型
+    assert "grid-auto-flow: column" in inner and "grid-auto-columns: minmax(0, 1fr)" in inner   # ボタンの数が変わっても均等
+    assert "repeat(7" not in css                                                     # 列の数をCSSに固定しない（HTMLとずれると空きが出る）
     assert "body.has-bottom-nav" in css and "body.kb-open .bottom-nav { display: none; }" in css
-    assert "--nav-h" in css and "repeat(7, minmax(0, 1fr))" in css and "max-width: 379px" in css
+    assert "--nav-h" in css and "--nav-gap" in css and "max-width: 379px" in css
     assert ".hdr-money" not in css
     # 通貨の見えない select は、Tailwind がなくても位置が決まる
     assert re.search(r"\.money-popup \{[^}]*position: absolute", css)
@@ -55,3 +60,15 @@ def test_other_pages_have_no_bar(env):
     c = app.test_client(); start(c, "Japanese")
     for path in ("/privacy", "/offline"):
         assert 'id="bottom-nav"' not in c.get(path).get_data(as_text=True)
+
+
+def test_version_label_and_html_not_cached(env):
+    app, *_ = env
+    c = app.test_client(); start(c, "Japanese")
+    r = c.get("/")
+    assert r.headers["Cache-Control"] == "no-cache"          # 古いページと新しい CSS/JS が混ざらないように
+    import app as appmod
+    assert r.headers["X-App-Version"] == appmod.APP_VERSION
+    html = r.get_data(as_text=True)
+    assert 'id="app-version"' in html and f"TOOKIE V{appmod.APP_VERSION}" in html
+    assert c.get("/api/quota").headers.get("Cache-Control") != "public"

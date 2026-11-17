@@ -1,5 +1,5 @@
 <!-- ヘッダー（ロゴ ＋ 言語選択バー） -->
-<div class="flex items-center justify-between mb-4 mt-2">
+<div class="flex items-center justify-between gap-2 mb-4 mt-2">
     <!-- 左側：インコアイコン + TOOKIEロゴ -->
     <a href="{{ url_for('index') }}" class="hdr-brand flex items-center gap-2.5" translate="no">
         <img src="{{ url_for('static', filename='icon-192.png', v=asset_v) }}" 
@@ -11,11 +11,8 @@
         </div>
     </a>
 
-    <!-- 右側：通貨ボタン + UI言語切り替えボタン + 設定ボタン -->
+    <!-- 右側：UI言語切り替えボタン + 設定ボタン -->
     <div class="flex items-center gap-1.5 flex-shrink-0">
-        <button type="button" id="nav-money" onclick="switchTab('money')" title="{{ ui.nav_money }}" aria-label="{{ ui.nav_money }}" class="hdr-money flex items-center justify-center w-11 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
-            <i class="fa-solid fa-coins text-indigo-400"></i>
-        </button>
         <a href="{{ url_for('start') }}" title="{{ ui.change_language }}" aria-label="{{ ui.change_language }}" class="flex items-center gap-1.5 px-3 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
             <i class="fa-solid fa-globe text-indigo-400"></i><span dir="auto" class="hdr-lang-text max-w-[5rem] truncate">{{ ui_native }}</span>
         </a>

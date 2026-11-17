@@ -4,7 +4,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Helveti
 .hidden { display: none !important; }
 /* iPhone のホームバー・ノッチ対策 */
 body { padding-bottom: max(1rem, env(safe-area-inset-bottom)); padding-top: max(1rem, env(safe-area-inset-top)); }
-body.has-bottom-nav { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 1rem); }
 /* iOS Safari は 16px 未満の入力欄でズームするため防ぐ */
 select, textarea, input:not([type=checkbox]):not([type=radio]) { font-size: 16px !important; }
 
@@ -109,7 +108,7 @@ html[data-theme=light] .rc-item i { color: #64748b; }
     color: #a5b4fc; font-weight: 700; cursor: pointer;
 }
 .undo-toast button:hover { background: #1e293b; }
-body.has-bottom-nav .undo-toast { bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + .6rem); }
+body.has-bottom-nav .undo-toast { bottom: calc(var(--nav-h) + var(--nav-gap) + env(safe-area-inset-bottom, 0px) + .75rem); }
 html[data-theme=light] .undo-toast { background: #ffffff; color: #0f172a; border-color: #cbd5e1; box-shadow: 0 10px 30px rgba(15, 23, 42, .18); }
 html[data-theme=light] .undo-toast button { color: #4338ca; }
 html[data-theme=light] .undo-toast button:hover { background: #eef2ff; }
@@ -200,21 +199,28 @@ html[data-theme=light] .money-select, html[data-theme=light] .money-popup { colo
 html[data-theme=light] .money-select option, html[data-theme=light] .money-select optgroup, html[data-theme=light] .money-popup option { background: #fff; color: #0f172a; }
 html[data-theme=light] .money-select option:disabled { color: #94a3b8; }
 
-/* ---- 下に固定するタブバー（V12.8）。通貨はヘッダーのボタン ---- */
-:root { --nav-h: 4.5rem; }   /* バーの高さ（ボタン約71px）。本文の下の余白と「元に戻す」の位置はこの値で決まる */
+/* ---- 下に固定するタブバー（V12.9.1: Instagram のような、浮いたカプセル型） ---- */
+:root { --nav-h: 4.4rem; --nav-gap: .4rem; }   /* カプセルの高さと、画面の下からの距離。本文の下の余白・「元に戻す」の位置はこの2つで決まる */
 .bottom-nav {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    background: rgba(15, 23, 42, .97); border-top: 1px solid #1e293b;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    position: fixed; left: 0; right: 0; z-index: 40;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--nav-gap));
+    padding: 0 .75rem; pointer-events: none;   /* 外側は何も受けない（カプセルの外は、後ろの内容をそのまま触れる） */
+    transform: translateZ(0); will-change: transform; -webkit-transform: translateZ(0);   /* 専用の層にして、スクロール中もずれないようにする */
 }
 .bottom-nav-in {
-    box-sizing: border-box; max-width: 36rem; margin: 0 auto; padding: .35rem .75rem; min-height: var(--nav-h);
-    display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; align-items: stretch;
+    pointer-events: auto; box-sizing: border-box; max-width: 34rem; margin: 0 auto; min-height: var(--nav-h);
+    padding: .3rem .4rem; border-radius: 1.75rem;
+    background: rgba(15, 23, 42, .84); border: 1px solid rgba(148, 163, 184, .2);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+    /* ボタンの数が変わっても、幅は均等に分ける（空きの列ができない） */
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; align-items: stretch;
 }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .bottom-nav-in { background: rgba(15, 23, 42, .97); } }
+body.has-bottom-nav { padding-bottom: calc(var(--nav-h) + var(--nav-gap) + env(safe-area-inset-bottom, 0px) + 1.25rem); }
 body.kb-open .bottom-nav { display: none; }
 body.kb-open.has-bottom-nav { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
-html[data-theme=light] .bottom-nav { background: rgba(255, 255, 255, .97); border-top-color: #e2e8f0; }
+html[data-theme=light] .bottom-nav-in { background: rgba(255, 255, 255, .88); border-color: rgba(100, 116, 139, .3); box-shadow: 0 8px 24px rgba(15, 23, 42, .18); }
 /* 幅の狭いスマホ: ロゴの文字を縮め、言語ボタンはアイコンだけにして収める */
 .hdr-brand { min-width: 0; flex-shrink: 1; }
 .hdr-brand > div { min-width: 0; }

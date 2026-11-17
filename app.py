@@ -39,11 +39,12 @@ def _asset_version():
 
 
 ASSET_V = _asset_version()
+APP_VERSION = "12.10"   # 画面（設定の下）と X-App-Version ヘッダーに出る。どの版が動いているかの目印
 
 
 @app.context_processor
 def _inject_asset_version():
-    return {"asset_v": ASSET_V}
+    return {"asset_v": ASSET_V, "app_version": APP_VERSION}
 
 
 app.config["ASSET_V"] = ASSET_V
@@ -56,6 +57,9 @@ def _security_headers(resp):
     h.setdefault("X-Content-Type-Options", "nosniff")
     h.setdefault("X-Frame-Options", "SAMEORIGIN")
     h.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    h.setdefault("X-App-Version", APP_VERSION)
+    if resp.mimetype == "text/html":   # ページ（HTML）は毎回サーバーに確認する。古いページと新しい CSS/JS が混ざらないように
+        h.setdefault("Cache-Control", "no-cache")
     h.setdefault("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(self), payment=()")
     if not os.environ.get("FLASK_DEBUG"):
         h.setdefault("Strict-Transport-Security", "max-age=31536000")
