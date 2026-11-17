@@ -12,6 +12,7 @@ from limits import limiter, stats
 from languages import (
     AUTO, LANGUAGES, get_lang_code, is_rtl, is_supported,
     normalize_language_name,
+    language_badge,
 )
 import translator
 from translator import TranslationError
@@ -79,10 +80,13 @@ def register_routes(app):
             if detected:
                 session["last_detected"] = detected
             show_detected = mode in ("image", "camera") or source_lang == AUTO
+            badge = language_badge(result["detected_language"]) if show_detected else {"label": "", "tag": "", "native": ""}
             ctx.update(
                 translated_text=result["translation"] or result["source_text"],
                 original_text=result["source_text"] if mode in ("image", "camera") else None,
-                detected_lang=(detected or result["detected_language"] or None) if show_detected else None,
+                detected_lang=badge["label"] or None,
+                detected_tag=badge["tag"] or None,
+                detected_native=badge["native"] or None,
                 pronunciation=result.get("pronunciation") or None,
                 same_detected=bool(detected and detected == target_lang),
             )

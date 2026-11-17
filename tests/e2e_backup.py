@@ -51,7 +51,7 @@ with sync_playwright() as p:
     pg.click("text=この端末のデータをすべて削除")
     pg.wait_for_url("**/start")
     check("delete -> start screen", True)
-    pg.goto(B + "/start")
+    pg.goto(B + "/start", wait_until="networkidle")   # 画面が裏で送る通信が終わってから次へ（設定Cookieの上書き競合を避ける）
     left = pg.evaluate("Object.keys(localStorage).filter(k=>k.startsWith('tl_')).length")
     check("localStorage emptied", left == 0)
     ctx.request.post(B + "/set-display-language", form={"ui_lang": "Japanese"})

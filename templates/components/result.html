@@ -5,7 +5,7 @@
         <div class="flex items-center gap-2 min-w-0 flex-wrap">
             <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">{{ ui.result_label }} ({{ target_display }})</span>
             {% if detected_lang %}
-            <span class="bg-emerald-950/80 text-emerald-400 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-emerald-800">🌐 {{ detected_lang }}</span>
+            <span class="lang-badge bg-emerald-950/80 text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-800" data-lang-tag="{{ detected_tag or '' }}" data-lang-native="{{ detected_native or '' }}">🌐 <span class="lang-badge-text">{{ detected_lang }}</span></span>
             {% endif %}
         </div>
     </div>

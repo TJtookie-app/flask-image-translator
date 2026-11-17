@@ -121,3 +121,29 @@ function useAlternative(mode, alt) {
     if (currentEntryId) updateHistory(currentEntryId, x => { x.out = alt; x.pron = ''; });
     $('alts-' + mode).classList.add('hidden');
 }
+
+// ---- 結果の「🌐 言語」バッジ: 「Español（スペイン語）」のように、その言語自身の名前＋いまの画面の言語での名前にする ----
+function intlTag(code) {
+    code = String(code || '');
+    if (code === 'zh-CN' || code === 'zh-SG') return 'zh-Hans';
+    if (code === 'zh-TW' || code === 'zh-HK') return 'zh-Hant';
+    const p = code.split('-')[0];
+    return p === 'nb' ? 'no' : p;
+}
+
+function localizeLangBadges() {
+    let names = null;
+    try { names = new Intl.DisplayNames([intlTag(codeOf(UI_LANG)) || 'en'], { type: 'language' }); } catch (e) { return; }   // 古いブラウザは、サーバーが出した表示のまま
+    const wide = /^(ja|zh)/i.test(codeOf(UI_LANG) || '');
+    document.querySelectorAll('.lang-badge[data-lang-tag]').forEach(el => {
+        const tag = el.dataset.langTag, native = el.dataset.langNative || '';
+        if (!tag) return;
+        let local = '';
+        try { local = names.of(tag) || ''; } catch (e) {}
+        if (!local || local === tag) return;   // 名前が分からない（対応外のコード）ときは、そのまま
+        const text = native && native.toLowerCase() !== local.toLowerCase() ? (wide ? native + '（' + local + '）' : native + ' (' + local + ')') : (native || local);
+        const t = el.querySelector('.lang-badge-text');
+        if (t) t.textContent = text;
+    });
+}
+document.addEventListener('DOMContentLoaded', localizeLangBadges);
