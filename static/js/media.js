@@ -93,6 +93,7 @@ function captureCamera() {
     canvas.height = Math.round(video.videoHeight * scale);
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
     $('camera_data').value = canvas.toDataURL('image/jpeg', 0.85);
+    if (typeof storeLastImage === 'function') storeLastImage($('camera_data').value, 'camera');   // 結果に写真を重ねて見せるため、端末に一時保持
     videoStream.getTracks().forEach(t => t.stop());
     $('camera-form').requestSubmit();
 }

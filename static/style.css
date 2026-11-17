@@ -126,3 +126,36 @@ html[data-theme=light] .quota-note.none { color: #b91c1c; }
 html[data-theme=light] [class*="placeholder-slate-400"]::placeholder { color: #64748b !important; }
 /* ボタンを素早く2回タップしたときの拡大を防ぐ */
 button, a, select, label { touch-action: manipulation; }
+
+/* ---- V12.5: 画像の結果（操作ボタン・拡大表示）とPDFの進捗バー ---- */
+.ov-tools { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ov-tool {
+    flex: 1 1 7rem; min-height: 2.75rem; padding: .5rem .75rem; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    border-radius: .75rem; font-size: .75rem; font-weight: 600; background: #1e293b; color: #e2e8f0; border: 1px solid #334155; transition: background .15s;
+}
+.ov-tool:hover, .ov-tool:active { background: #334155; }
+.ov-tool.hidden { display: none; }
+.ov-zoom { position: fixed; inset: 0; z-index: 70; background: #000; display: flex; flex-direction: column; }
+.ov-zoom-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; }
+.ov-zoom-stage { margin: 0 auto; max-width: none; }
+.ov-zoom-bar {
+    flex: 0 0 auto; display: flex; gap: .5rem; justify-content: center; padding: .6rem .75rem calc(.6rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(15, 23, 42, .96); border-top: 1px solid #334155;
+}
+.ov-zoom-btn {
+    min-width: 3rem; height: 2.9rem; padding: 0 .9rem; border-radius: .75rem; font-size: 1.1rem; font-weight: 700;
+    background: #1e293b; color: #f1f5f9; border: 1px solid #475569;
+}
+.ov-zoom-btn:hover, .ov-zoom-btn:active { background: #334155; }
+html[data-theme=light] .ov-tool { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+html[data-theme=light] .ov-tool:hover, html[data-theme=light] .ov-tool:active { background: #cbd5e1; }
+
+.pbar { height: .5rem; border-radius: 999px; background: #1e293b; overflow: hidden; }
+.pbar-fill { height: 100%; width: 0; border-radius: 999px; background: #6366f1; transition: width .4s ease; }
+.pbar.ind .pbar-fill { width: 35%; animation: pbar-slide 1.2s ease-in-out infinite; }
+.pbar-done .pbar-fill { background: #10b981; }
+.pbar-error .pbar-fill { background: #ef4444; }
+.pbar-stopped .pbar-fill { background: #64748b; }
+@keyframes pbar-slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .pbar.ind .pbar-fill { animation: none; width: 100%; opacity: .5; } .pbar-fill { transition: none; } }
+html[data-theme=light] .pbar { background: #cbd5e1; }

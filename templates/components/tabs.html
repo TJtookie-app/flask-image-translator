@@ -1,4 +1,5 @@
 {% from 'components/result.html' import result_box with context %}
+{% from 'components/overlay_box.html' import overlay_box with context %}
 
 <!-- 1. テキスト -->
 <div id="tab-text" class="tab-content space-y-4">
@@ -33,17 +34,7 @@
             <p class="text-xs text-slate-400 mt-1 text-center">{{ ui.pdf_hint|replace('{m}', pdf_max_pages|string) }}</p>
 
             <!-- 重ね翻訳: 選んだ画像の上に訳文を重ねて表示する（結果が返ったあとに表示） -->
-            <div id="overlay-box" class="hidden w-full mt-3 space-y-2">
-                <div id="overlay-stage" class="ov-stage relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-black">
-                    <img id="overlay-img" class="block w-full h-auto" alt="">
-                    <div id="overlay-layer" class="ov-layer absolute inset-0"></div>
-                </div>
-                <div id="overlay-list" class="hidden space-y-1.5 text-left"></div>
-                <div class="flex items-center justify-between gap-2">
-                    <p class="text-xs text-slate-400 text-left">{{ ui.ov_hint }}</p>
-                    <button type="button" id="overlay-toggle" onclick="toggleOverlay()" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"></button>
-                </div>
-            </div>
+            {{ overlay_box('overlay') }}
         </div>
         <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transition active:scale-[0.99] flex items-center justify-center gap-2">
             <i class="fa-solid fa-file-invoice"></i> <span class="btn-label">{{ ui.btn_file_translate }}</span>
@@ -87,6 +78,7 @@
 
     <form id="camera-form" action="/" method="POST" class="tx-form space-y-3">
         <input type="hidden" name="mode" value="camera">
+        <input type="hidden" name="overlay" value="1">
         <input type="hidden" name="formality" value="auto"><input type="hidden" name="pron" value="0">
         <input type="hidden" id="camera_data" name="camera_data" value="">
         <div class="flex gap-2">
@@ -98,6 +90,8 @@
             </button>
         </div>
     </form>
+    <!-- 撮った写真の上に訳文を重ねて表示（画像タブと同じ部品） -->
+    {{ overlay_box('ovc') }}
     {{ result_box('camera', show_original=true, left=true) }}
 </div>
 

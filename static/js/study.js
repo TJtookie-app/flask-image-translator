@@ -2,6 +2,19 @@
 let studyQueue = [];
 let studyCurrent = null;
 let studyTotal = 0;
+// 復習の向き: 'fwd' = 原文を見て訳を思い出す（従来）/ 'rev' = 訳を見て原文を思い出す（逆引き）。向きごとに覚えた度合いを別に持つ
+const SDIR_KEY = 'tl_study_dir_v1';
+let studyDir = 'fwd';
+try { if (localStorage.getItem(SDIR_KEY) === 'rev') studyDir = 'rev'; } catch (e) {}
+const dueOf = (v) => (studyDir === 'rev' ? v.rdue : v.due) || 0;
+
+function setStudyDir(d) {
+    studyDir = d === 'rev' ? 'rev' : 'fwd';
+    try { localStorage.setItem(SDIR_KEY, studyDir); } catch (e) {}
+    if (studyCurrent) { studyCurrent = null; studyQueue = []; $('study-card').classList.add('hidden'); }
+    $('study-msg').classList.add('hidden');
+    renderStudy();
+}
 
 // 訳文の「しおり」ボタンから保存
 function saveVocabEntry(entry, btn) {
@@ -26,10 +39,17 @@ function saveVocabCurrent(mode, btn) {
     }, btn);
 }
 
-const dueCards = () => loadVocab().filter(v => (v.due || 0) <= Date.now()).sort((a, b) => (a.due || 0) - (b.due || 0));
+const dueCards = () => loadVocab().filter(v => dueOf(v) <= Date.now()).sort((a, b) => dueOf(a) - dueOf(b));
 
 function renderStudy() {
     const all = loadVocab(), due = dueCards();
+    [['fwd', 'study-dir-fwd'], ['rev', 'study-dir-rev']].forEach(([d, id]) => {
+        const b = $(id);
+        if (!b) return;
+        b.setAttribute('aria-pressed', String(studyDir === d));
+        b.className = 'flex-1 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition ' +
+            (studyDir === d ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300');
+    });
     $('study-stats').textContent = fmt(UI.study_total, { n: all.length }) + ' / ' + fmt(UI.study_due, { n: due.length });
     $('study-start').classList.toggle('hidden', !due.length || !!studyCurrent);
     const msg = $('study-msg');
@@ -77,15 +97,27 @@ function startStudy() {
     nextStudy();
 }
 
+// いまの向きでの「問題」と「答え」。逆引きは、訳を見て原文を思い出す
+function studyFace(v) {
+    return studyDir === 'rev'
+        ? { q: v.out, a: v.src, qPron: v.pron || '', aPron: '', aLang: codeOf(v.srcLang), qLang: v.tcode || codeOf(v.tgt) }
+        : { q: v.src, a: v.out, qPron: '', aPron: v.pron || '', aLang: v.tcode || codeOf(v.tgt), qLang: codeOf(v.srcLang) };
+}
+
 function nextStudy() {
     studyCurrent = studyQueue.shift() || null;
     if (!studyCurrent) { endStudy(true); return; }
+    const f = studyFace(studyCurrent);
     $('study-card').classList.remove('hidden');
     $('study-start').classList.add('hidden');
-    $('study-front').textContent = studyCurrent.src;
-    $('study-answer').textContent = studyCurrent.out;
-    $('study-pron').textContent = studyCurrent.pron || '';
-    $('study-speak').onclick = () => speak(studyCurrent.out, studyCurrent.tcode || codeOf(studyCurrent.tgt));
+    $('study-front').textContent = f.q;
+    $('study-front-pron').textContent = f.qPron;
+    $('study-front-pron').classList.toggle('hidden', !f.qPron);
+    $('study-answer').textContent = f.a;
+    $('study-pron').textContent = f.aPron;
+    $('study-speak').onclick = () => speak(f.a, f.aLang);
+    $('study-front-speak').onclick = () => speak(f.q, f.qLang);
+    $('study-front-speak').classList.toggle('hidden', studyDir !== 'rev');   // 逆引きは、問題（訳）を先に聞ける
     $('study-left').textContent = fmt(UI.study_left, { n: studyQueue.length + 1 });
     $('study-back').classList.add('hidden');
     $('study-grade').classList.add('hidden');
@@ -94,10 +126,11 @@ function nextStudy() {
 
 function revealStudy() {
     if (!studyCurrent) return;
+    const f = studyFace(studyCurrent);
     $('study-back').classList.remove('hidden');
     $('study-grade').classList.remove('hidden');
     $('study-reveal').classList.add('hidden');
-    speak(studyCurrent.out, studyCurrent.tcode || codeOf(studyCurrent.tgt));
+    speak(f.a, f.aLang);
 }
 
 function endStudy(finished) {
@@ -118,12 +151,13 @@ function gradeStudy(good) {
     const list = loadVocab();
     const v = list.find(x => x.id === studyCurrent.id);
     if (v) {
+        const bk = studyDir === 'rev' ? 'rbox' : 'box', dk = studyDir === 'rev' ? 'rdue' : 'due';
         if (good) {
-            v.box = Math.min(SRS_DAYS.length - 1, (v.box || 0) + 1);
-            v.due = Date.now() + SRS_DAYS[v.box] * 86400000;
+            v[bk] = Math.min(SRS_DAYS.length - 1, (v[bk] || 0) + 1);
+            v[dk] = Date.now() + SRS_DAYS[v[bk]] * 86400000;
         } else {
-            v.box = 0;
-            v.due = 0;
+            v[bk] = 0;
+            v[dk] = 0;
             studyQueue.push(v);
         }
         saveVocab(list);

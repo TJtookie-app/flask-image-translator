@@ -65,6 +65,7 @@ function cleanVocabItem(e) {
         id: str(e.id, 40) || uid(), ts: num(e.ts, Date.now()), src, out,
         srcLang: str(e.srcLang, 60), tgt: str(e.tgt, 60), tcode: str(e.tcode, 20), pron: str(e.pron, 500),
         box: Math.max(0, Math.min(SRS_DAYS.length - 1, Math.round(num(e.box, 0)))), due: num(e.due, 0),
+        rbox: Math.max(0, Math.min(SRS_DAYS.length - 1, Math.round(num(e.rbox, 0)))), rdue: num(e.rdue, 0),   // 逆引き復習の進み具合
     };
 }
 const cleanList = (raw, fn, cap) => (Array.isArray(raw) ? raw.slice(0, cap).map(fn).filter(Boolean) : []);

@@ -26,7 +26,7 @@ function historyItem(e) {
     meta.className = 'text-[11px] text-slate-400 flex justify-between gap-2';
     const when = new Date(e.ts).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const l = document.createElement('span');
-    const sn = (langByName(e.srcLang) || {}).native || e.srcLang || '?';
+    const sn = e.mode === 'pdf' ? 'PDF' : ((langByName(e.srcLang) || {}).native || e.srcLang || '?');
     const tn = (langByName(e.tgt) || {}).native || e.tgt;
     l.textContent = sn + ' → ' + tn;
     const r = document.createElement('span');
@@ -58,7 +58,7 @@ function historyItem(e) {
         iconBtn('fa-solid fa-copy', UI.copy_btn, async () => {
             try { await navigator.clipboard.writeText(e.out); } catch (err) {}
         }),
-        ...(OFFLINE_PAGE ? [] : [iconBtn('fa-solid fa-rotate-left', UI.reuse, () => {
+        ...(OFFLINE_PAGE || e.mode === 'pdf' ? [] : [iconBtn('fa-solid fa-rotate-left', UI.reuse, () => {
             const ta = document.querySelector('textarea[name=direct_text]');
             if (ta) ta.value = e.src || '';
             switchTab('text');

@@ -137,8 +137,8 @@ def test_busy_error_through_api(env):
 def test_daily_message_explains_free_plan():
     from languages import UI_LABELS
     ja, en = UI_LABELS["Japanese"], UI_LABELS["English"]
-    assert "今日の翻訳の枠は終わりました" in ja["err_daily"] and "明日" in ja["err_daily"]
-    assert "Today" in en["err_daily"] and "tomorrow" in en["err_daily"]
+    assert "今日の翻訳の枠は終わりました" in ja["err_daily"] and "戻ります" in ja["err_daily"]
+    assert "Today" in en["err_daily"] and "resets" in en["err_daily"]
     assert "err_busy" in ja and "err_busy" in en
 
 
