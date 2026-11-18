@@ -39,7 +39,7 @@ def _asset_version():
 
 
 ASSET_V = _asset_version()
-APP_VERSION = "12.11"   # 画面（設定の下）と X-App-Version ヘッダーに出る。どの版が動いているかの目印
+APP_VERSION = "1.0"   # 画面（設定の下）と X-App-Version ヘッダーに出る。どの版が動いているかの目印
 
 
 @app.context_processor
@@ -68,6 +68,21 @@ def _security_headers(resp):
 # ルートの登録
 register_routes(app)
 start_keepalive()
+
+
+def _startup_note():
+    """起動ログに版と主な部品の版を1行出す（Render のログで、実際に入っている google-genai の版を確認できる）"""
+    from importlib import metadata
+    parts = [f"TOOKIE V{APP_VERSION}"]
+    for pkg in ("google-genai", "Flask", "gunicorn"):
+        try:
+            parts.append(f"{pkg} {metadata.version(pkg)}")
+        except metadata.PackageNotFoundError:
+            parts.append(f"{pkg} (なし)")
+    print("[startup] " + " / ".join(parts), flush=True)
+
+
+_startup_note()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

@@ -53,7 +53,7 @@ def test_labels_generated_for_new_language_and_only_missing(env, tmp_path):
     seen = []
 
     def fake_labels(labels, lang):
-        seen.append(set(labels)); return {k: "T" + k for k in labels}
+        seen.append(set(labels)); return {k: "T" + v for k, v in labels.items()}   # 差し込み記号 {h} などは原文のまま残す
     mp.setattr(translator, "translate_labels", fake_labels)
     c = app.test_client()
     start(c, "French")
@@ -333,7 +333,7 @@ def test_ensure_async_fills_missing_labels(env, tmp_path):
     import time, ui_i18n
     app, translator, calls, mp = env
     mp.setattr(ui_i18n, "LABEL_DIR", str(tmp_path))
-    mp.setattr(translator, "translate_labels", lambda labels, lang: {k: "T" for k in labels})
+    mp.setattr(translator, "translate_labels", lambda labels, lang: {k: "T" + v for k, v in labels.items()})
     ui_i18n.ensure_async("Swahili")
     for _ in range(50):
         if ui_i18n.has_labels("Swahili"):

@@ -94,4 +94,4 @@ def test_version_label(env):
     app, *_ = env
     assert app.config.get("TESTING") is not None
     import app as appmod
-    assert appmod.APP_VERSION == "12.11"
+    assert re.fullmatch(r"\d+(\.\d+)*", appmod.APP_VERSION)   # 版の名前は test_v100.py など、その版のテストで確かめる

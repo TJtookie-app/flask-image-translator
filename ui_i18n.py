@@ -6,6 +6,7 @@
 """
 import json
 import os
+import re
 import threading
 import time
 
@@ -23,6 +24,22 @@ def _path(lang):
     return os.path.join(LABEL_DIR, get_lang_code(lang).lower() + ".json")
 
 
+_PLACEHOLDER = re.compile(r"\{\w+\}")
+
+
+def _clean(translated, source):
+    """翻訳結果から、使えない文言を除く（キーが違う・空・{h} のような差し込み記号が原文と違うもの）。
+    除いた分は English で表示される。差し込み記号が崩れると画面に {h} がそのまま出てしまうため"""
+    out = {}
+    for k, v in (translated or {}).items():
+        if k not in source or not isinstance(v, str) or not v.strip():
+            continue
+        if sorted(_PLACEHOLDER.findall(source[k])) != sorted(_PLACEHOLDER.findall(v)):
+            continue
+        out[k] = v.strip()
+    return out
+
+
 def _load_cached(lang):
     with _lock:
         if lang in _mem:
@@ -30,7 +47,7 @@ def _load_cached(lang):
     try:
         with open(_path(lang), encoding="utf-8") as f:
             data = json.load(f)
-        data = {k: v for k, v in data.items() if k in UI_LABELS["English"] and isinstance(v, str) and v.strip()}
+        data = _clean(data, UI_LABELS["English"])
     except (OSError, ValueError):
         return None
     with _lock:
@@ -64,23 +81,8 @@ def has_labels(lang):
     return _load_cached(lang) is not None and not _missing(lang)
 
 
-def ensure_ui_labels(lang):
-    """足りない文言だけ Gemini で翻訳して保存する。揃っていれば True（失敗しても例外は出さない）"""
-    if has_labels(lang):
-        return True
-    if time.time() - _failed_at.get(lang, 0) < RETRY_AFTER:
-        return False
-    _failed_at[lang] = time.time()
-    source = _missing(lang)
-    try:
-        translated = translator.translate_labels(source, lang)
-    except Exception as e:
-        print(f"[ui_i18n] could not generate labels for {lang}: {e}", flush=True)
-        return False
-    if len(translated) < len(source) * 0.8:  # 欠落が多い結果は採用しない
-        print(f"[ui_i18n] incomplete labels for {lang}: {len(translated)}/{len(source)}", flush=True)
-        return False
-    _failed_at.pop(lang, None)
+def _save(lang, translated):
+    """既にある文言に translated を足して、メモリと ui_labels/<言語コード>.json に保存する"""
     merged = dict(_load_cached(lang) or {})
     merged.update(translated)
     with _lock:
@@ -93,6 +95,26 @@ def ensure_ui_labels(lang):
         os.replace(tmp, _path(lang))
     except OSError as e:
         print(f"[ui_i18n] could not save labels for {lang}: {e}", flush=True)
+
+
+def ensure_ui_labels(lang):
+    """足りない文言だけ Gemini で翻訳して保存する。揃っていれば True（失敗しても例外は出さない）"""
+    if has_labels(lang):
+        return True
+    if time.time() - _failed_at.get(lang, 0) < RETRY_AFTER:
+        return False
+    _failed_at[lang] = time.time()
+    source = _missing(lang)
+    try:
+        translated = _clean(translator.translate_labels(source, lang), source)
+    except Exception as e:
+        print(f"[ui_i18n] could not generate labels for {lang}: {e}", flush=True)
+        return False
+    if len(translated) < len(source) * 0.8:  # 欠落が多い結果は採用しない
+        print(f"[ui_i18n] incomplete labels for {lang}: {len(translated)}/{len(source)}", flush=True)
+        return False
+    _failed_at.pop(lang, None)
+    _save(lang, translated)
     return True
 
 
@@ -114,6 +136,37 @@ def ensure_async(lang):
             _inflight.discard(lang)
 
     threading.Thread(target=run, daemon=True).start()
+
+
+def build_labels(lang, chunk=60):
+    """tools/generate_ui_labels.py 用。足りない文言を翻訳して保存する。戻り値は (今回できた数, まだ足りない数)。
+    まず全部を1回で頼み（API の呼び出し回数を節約）、欠けた分だけを chunk 個ずつに分けて頼み直す（最大2周）。
+    上限(429)などの例外は、呼び出し側が止められるようにそのまま投げる"""
+    source = _missing(lang)
+    if not source:
+        return 0, 0
+    got = _clean(translator.translate_labels(source, lang), source)
+    for _ in range(2):
+        rest = {k: v for k, v in source.items() if k not in got}
+        if not rest or len(got) >= len(source) * 0.98:
+            break
+        items = list(rest.items())
+        for i in range(0, len(items), chunk):
+            got.update(_clean(translator.translate_labels(dict(items[i:i + chunk]), lang), rest))
+    if got:
+        _save(lang, got)
+    return len(got), len(source) - len(got)
+
+
+def audit():
+    """全言語の文言の状況。[(言語名, あるキー数, 足りないキー数)]。API は使わない（手書きの日本語・英語は除く）"""
+    rows = []
+    for name in all_languages():
+        if name in UI_LABELS:
+            continue
+        have = _load_cached(name) or {}
+        rows.append((name, len(have), len(_missing(name))))
+    return rows
 
 
 def all_languages():

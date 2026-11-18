@@ -78,16 +78,19 @@ JSは、`templates/components/scripts.html`（と `offline.html`）に書いた�
 
 ## 画面の多言語化
 - 日本語・英語は `labels_ja.py` / `labels_en.py` に手書き（`languages.UI_LABELS` で取り出せます）。それ以外は `ui_labels/<言語コード>.json` を読みます。
-- ファイルが無い言語は、スタート画面で選んだ時に Gemini が一度だけ自動翻訳して保存します（失敗したら英語で表示）。
-  Render の無料枠はディスクが消えるため、**事前生成してコミット**しておくのがおすすめです。
+- 足りない文言がある言語は、スタート画面で選んだ時に Gemini が足りない分だけ自動翻訳して保存します（失敗したら、その分は英語で表示）。
+  Render の無料枠はディスクが消えるため、**事前に作ってコミット**しておきます（そうすると、選んだときに API を使いません）。
+- 差し込み記号（`{h}` `{g}` など）が原文と違う翻訳は、画面に記号が出てしまうので使わず、英語で表示します。
 
-```bash
-export GEMINI_API_KEY=...
-pip install -r requirements.txt
-python tools/generate_ui_labels.py          # 未生成の言語だけ作る（--force で全作り直し）
-git add ui_labels && git commit -m "Add UI labels"
+```powershell
+$env:GEMINI_API_KEY = "（自分のキー）"          # この端末の PowerShell だけに入れる。コードやチャットには書かない
+python tools/generate_ui_labels.py --check     # API を使わず、どの言語がどれだけ足りないか確認
+python tools/generate_ui_labels.py             # 足りない文言だけ作る（途中で止まっても、次は続きから）
+git add -A ; git commit -m "Add UI labels" ; git push origin main
 ```
-生成された JSON は母語話者に確認してもらい、直接編集して構いません。`From` / `To` は全言語で固定です。
+- 無料枠は「1分5回・1日20回」程度です。ツールは1回ごとに約13秒待ち、1日の上限に達したら保存済みの分を残して止まります。**日本時間の夕方（17時ごろ）に上限が戻る**ので、もう一度同じコマンドを実行してください。全39言語（日本語・英語以外）が揃うまで、2〜3日かかることがあります。
+- **同じ API キーを使うので、公開中のサイトの1日の枠（`SITE_DAILY_LIMIT`）と同じ枠を使います。** サイトが混む時間を避けて実行してください。課金版に切り替えれば、数分で終わります。
+- 作り直したい言語は `--force --only Thai`（英語名）。生成された JSON は母語話者に確認してもらい、直接編集して構いません。`From` / `To` は全言語で固定です。
 
 ## AI学習（スラング・省略語への対応）
 モデルの再学習ではなく、翻訳のたびに次を Gemini に渡して精度を上げています（すべて端末内に保存）。
@@ -132,6 +135,14 @@ GEMINI_API_KEY=... FLASK_DEBUG=1 python app.py
 - 他の言語は `python tools/generate_phrasebook.py`（Gemini）で作れます（機械翻訳なので、できればネイティブの確認を）。
 - 手書き分も、ネイティブの方に確認してもらうと安心です。
 
+## v1.0 の公開前チェック（アプリ化の前に）
+1. **画面文言が全言語そろっているか:** `python tools/generate_ui_labels.py --check` が「全言語が揃っています」と出る（上の「画面の多言語化」）。
+2. **`google-genai` の版を固定する:** Render のログに起動時 `[startup] TOOKIE V1.0 / google-genai X.Y.Z / ...` と1行出ます。その版を見て、`requirements.txt` を `google-genai>=X.Y,<(次のメジャー)` にします（今は `>=1.0` で上限なし）。
+3. **`TRUSTED_PROXY_HOPS` を決める:** 既定の 0 は、`X-Forwarded-For` の先頭（利用者が偽装できる値）をIPとして使います。`ADMIN_TOKEN` を設定し、`/api/stats?token=...&ip=1` を開いて、`seen_ip` が自分のIPか、`x_forwarded_for` の右から何番目が自分のIPかを確認してから設定します（右端なら 1、Cloudflare などが挟まって右から2番目なら 2）。間違えるとIP別の上限が全員共通になるので、確認してから。
+4. **`Dockerfile`:** `render.yaml` が `env: docker` なので必要です。消さないでください（Python（Native）で動かしている場合も、害はありません）。
+5. **最終テスト:** `python -m pytest tests -q` と、上の e2e をすべて流す。
+6. **タグとバックアップ:** `git tag v1.0-pre-app` → `git push origin v1.0-pre-app`。フォルダ全体を zip にして別の場所（クラウドなど）に置きます（`.git` を含めると履歴ごと戻せます）。
+
 ## テスト
 ```bash
 pip install pytest playwright   # e2e を動かすときだけ playwright
@@ -146,7 +157,7 @@ python tests/e2e_v126.py        # 言語バッジ（Español（スペイン語�
 python tests/e2e_v127.py        # 通貨タブ（国の判定・換算・一覧・オフライン）
 python tests/e2e_v128.py        # 下のタブバーの固定（通貨は履歴の左隣）・入力中の非表示
 python tests/e2e_v129.py        # スマホ幅（390/360/320px）での重なり・はみ出しの確認
-# V12.11 は pytest（tests/test_v1211.py）で確認。ブラウザの確認は上の e2e 全部を流します
+# V12.11・v1.0 は pytest（tests/test_v1211.py / tests/test_v100.py）で確認。ブラウザの確認は上の e2e 全部を流します
 ```
 
 ## 無料枠から課金版へ切り替えるとき

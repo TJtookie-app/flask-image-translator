@@ -1,43 +1,124 @@
+"""画面の文言（日本語・英語以外の全言語）を作る・確認するツール。
+
+  python tools/generate_ui_labels.py            足りない文言だけを Gemini で翻訳して ui_labels/ に保存（途中で止まっても、次は続きから）
+  python tools/generate_ui_labels.py --check    API を使わず、全言語が揃っているか確認（揃っていなければ終了コード 1）
+  python tools/generate_ui_labels.py --only Thai,Dutch    言語を指定（英語名。カンマ区切り）
+  python tools/generate_ui_labels.py --force --only Thai  指定した言語を作り直す（--only なしの --force は全言語）
+
+APIキーは、実行する端末の環境変数 GEMINI_API_KEY に入れてから実行します（コードやチャットには書かない）。
+  PowerShell:  $env:GEMINI_API_KEY = "（自分のキー）"
+無料枠は「1分5回・1日20回」程度なので、1回ごとに約13秒待ち、1日の上限に達したら保存済みの分を残して止まります。
+その場合は、日本時間の夕方（17時ごろ）に上限が戻るので、もう一度同じコマンドを実行してください（続きから作ります）。
+"""
 import os
 import sys
-import time  # ★ 追加
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import ui_i18n
-from languages import LANGUAGES, UI_LABELS
+import ui_i18n  # noqa: E402
+from languages import LANGUAGES, UI_LABELS  # noqa: E402
+
+PACE_SEC = float(os.environ.get("LABEL_PACE_SEC", "13"))   # API の呼び出しの間隔（無料枠は1分5回）
 
 
-def main():
-    force = "--force" in sys.argv
-    ok = failed = skipped = 0
-    for lang in LANGUAGES:
-        name = lang["name"]
-        if name in UI_LABELS:
-            continue
+def _say(text=""):
+    print(text, flush=True)
+
+
+def _targets(only):
+    names = [l["name"] for l in LANGUAGES if l["name"] not in UI_LABELS]
+    if not only:
+        return names, []
+    lower = {n.lower(): n for n in names}
+    picked, unknown = [], []
+    for w in only:
+        n = lower.get(w.strip().lower())
+        (picked if n else unknown).append(n or w)
+    return picked, unknown
+
+
+def check(names):
+    """揃っているか表示する。全部揃っていれば 0、足りなければ 1"""
+    rows = [(n, ) + tuple(r[1:]) for n in names for r in ui_i18n.audit() if r[0] == n]
+    short = [r for r in rows if r[2]]
+    for n, have, miss in rows:
+        _say(f"{'OK  ' if not miss else 'あと'+str(miss).rjust(3)+'個'}  {n}  ({have}個あり)")
+    _say(f"\n{len(rows) - len(short)} / {len(rows)} 言語が揃っています。" + ("" if not short else f"（足りない言語: {len(short)}）"))
+    return 0 if not short else 1
+
+
+def run(argv, now=time.time, sleep=time.sleep):
+    force = "--force" in argv
+    only = []
+    if "--only" in argv:
+        i = argv.index("--only")
+        only = [w for w in (argv[i + 1] if i + 1 < len(argv) else "").split(",") if w.strip()]
+    names, unknown = _targets(only)
+    if unknown:
+        _say("見つからない言語: " + ", ".join(unknown) + "（英語名で。例: Thai, Dutch）")
+        return 2
+    if "--check" in argv:
+        return check(names)
+    if not os.environ.get("GEMINI_API_KEY", "").strip():
+        _say("環境変数 GEMINI_API_KEY が空です。PowerShell なら次のように設定してから、もう一度実行してください（キーはここに貼らないでください）。")
+        _say('  $env:GEMINI_API_KEY = "（自分のキー）"')
+        return 2
+
+    import translator
+    real = translator.translate_labels
+    last = [0.0]
+
+    def paced(labels, lang):
+        wait = PACE_SEC - (now() - last[0])
+        if wait > 0:
+            sleep(wait)
+        last[0] = now()
+        return real(labels, lang)
+
+    translator.translate_labels = paced   # ui_i18n.build_labels はここを呼ぶ
+    made = 0
+    stopped = ""
+    for name in names:
         if force:
             ui_i18n._mem.pop(name, None)
             try:
                 os.remove(ui_i18n._path(name))
             except OSError:
                 pass
-        elif ui_i18n.has_labels(name):
-            skipped += 1
-            print(f"skip   {name}")
+        if not ui_i18n._missing(name):
+            _say(f"skip   {name}（揃っています）")
             continue
-        print(f"make   {name} ...", end=" ", flush=True)
-        if ui_i18n.ensure_ui_labels(name):
-            ok += 1
-            print("ok")
-        else:
-            failed += 1
-            print("FAILED")
+        _say(f"make   {name} ...")
+        try:
+            got, left = ui_i18n.build_labels(name)
+        except Exception as e:
+            key = getattr(e, "key", "")
+            if key == "err_quota":
+                stopped = "今日の無料枠の上限に達しました。"
+            elif key == "err_api_key":
+                stopped = "APIキーが使えません（未設定・間違い・無効）。"
+            else:
+                _say(f"  失敗（{key or type(e).__name__}）。次の言語へ進みます")
+                continue
+            break
+        made += got
+        _say(f"  +{got}個を保存" + (f"（まだ {left}個足りません。もう一度実行すると続きから作ります）" if left else "（揃いました）"))
 
-        time.sleep(1.5)  # ★ ここに待機時間を追加（1.5秒）
-
-    print(f"done: {ok} generated, {skipped} skipped, {failed} failed")
-    sys.exit(1 if failed else 0)
+    _say("")
+    code = check(names)
+    if stopped:
+        _say(f"\n{stopped}保存済みの分は残っています。日本時間の夕方（17時ごろ）以降にもう一度、同じコマンドを実行してください。")
+    elif code:
+        _say("\n足りない言語があります。もう一度同じコマンドを実行してください（続きから作ります）。")
+    else:
+        _say("\nすべての言語が揃いました。ui_labels/ の変更を git add -A → commit → push してください。")
+    return code
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+    sys.exit(run(sys.argv[1:]))
