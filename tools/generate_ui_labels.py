@@ -16,10 +16,18 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# 文言は文字数が多く、アプリ本体の待ち時間（25秒）では足りない。このツールの中だけ長くする（本体の設定は変えない）
+os.environ.setdefault("GEMINI_TEXT_TIMEOUT", "150")
+os.environ.setdefault("GEMINI_ATTEMPTS", "2")
+
 import ui_i18n  # noqa: E402
 from languages import LANGUAGES, UI_LABELS  # noqa: E402
 
 PACE_SEC = float(os.environ.get("LABEL_PACE_SEC", "13"))   # API の呼び出しの間隔（無料枠は1分5回）
+RETRY_WAIT_SEC = float(os.environ.get("LABEL_RETRY_WAIT_SEC", "30"))   # 混雑・時間切れのとき、同じ言語をやり直すまでの待ち（回数をかけて長くなる）
+TRIES = 3             # 1言語あたりの挑戦回数
+STOP_AFTER_BUSY = 3   # 続けてこれだけの言語が混雑・時間切れで失敗したら、Google側が混んでいるとみて止まる
+BUSY_KEYS = {"err_timeout", "err_overloaded", "err_connection"}
 
 
 def _say(text=""):
@@ -78,6 +86,7 @@ def run(argv, now=time.time, sleep=time.sleep):
 
     translator.translate_labels = paced   # ui_i18n.build_labels はここを呼ぶ
     made = 0
+    busy_in_a_row = 0
     stopped = ""
     for name in names:
         if force:
@@ -90,25 +99,40 @@ def run(argv, now=time.time, sleep=time.sleep):
             _say(f"skip   {name}（揃っています）")
             continue
         _say(f"make   {name} ...")
-        try:
-            got, left = ui_i18n.build_labels(name)
-        except Exception as e:
-            key = getattr(e, "key", "")
-            if key == "err_quota":
-                stopped = "今日の無料枠の上限に達しました。"
-            elif key == "err_api_key":
-                stopped = "APIキーが使えません（未設定・間違い・無効）。"
-            else:
-                _say(f"  失敗（{key or type(e).__name__}）。次の言語へ進みます")
-                continue
+        done = False
+        small = False   # 時間切れになったら、次は小分けにして頼む
+        for attempt in range(TRIES):
+            try:
+                got, left = ui_i18n.build_labels(name, chunk=40, whole=not small)
+                done = True
+                break
+            except Exception as e:
+                key = getattr(e, "key", "") or type(e).__name__
+                if key in ("err_quota", "err_api_key"):
+                    stopped = ("今日の無料枠の上限に達しました。" if key == "err_quota"
+                               else "APIキーが使えません（未設定・間違い・無効・削除済み）。")
+                    break
+                _say(f"  うまくいきませんでした（{key}）" + ("。小分けにしてやり直します" if key == "err_timeout" else ""))
+                small = small or key == "err_timeout"
+                if attempt + 1 < TRIES:
+                    sleep(RETRY_WAIT_SEC * (attempt + 1))
+        if stopped:
             break
+        if not done:
+            busy_in_a_row += 1
+            _say("  この言語は今回あきらめて、次へ進みます")
+            if busy_in_a_row >= STOP_AFTER_BUSY:
+                stopped = "Google 側が混んでいて、続けて失敗しています。"
+                break
+            continue
+        busy_in_a_row = 0
         made += got
         _say(f"  +{got}個を保存" + (f"（まだ {left}個足りません。もう一度実行すると続きから作ります）" if left else "（揃いました）"))
 
     _say("")
     code = check(names)
     if stopped:
-        _say(f"\n{stopped}保存済みの分は残っています。日本時間の夕方（17時ごろ）以降にもう一度、同じコマンドを実行してください。")
+        _say(f"\n{stopped}保存済みの分は残っています。" + ("日本時間の夕方（17時ごろ）以降" if "上限" in stopped else "しばらく（30分〜数時間）置いてから") + "、もう一度同じコマンドを実行してください（続きから作ります）。")
     elif code:
         _say("\n足りない言語があります。もう一度同じコマンドを実行してください（続きから作ります）。")
     else:

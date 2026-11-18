@@ -113,6 +113,85 @@ def test_committed_label_files_are_valid():
             assert sorted(PH.findall(v)) == sorted(PH.findall(UI_LABELS["English"][k])), (code, k, v)
 
 
-def test_version_is_1_0():
+def test_version_is_1_0_x():
     import app as appmod
-    assert appmod.APP_VERSION == "1.0"
+    assert appmod.APP_VERSION.startswith("1.0")
+
+
+def test_timeout_falls_back_to_small_chunks_and_keeps_partial(lab, monkeypatch):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    from gemini_errors import TranslationError
+    from languages import FIXED_LABELS, UI_LABELS
+    need = [k for k in UI_LABELS["English"] if k not in FIXED_LABELS]
+    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
+    sizes = []
+
+    def fake(labels, lang):
+        sizes.append(len(labels))
+        if len(labels) > 40:                               # 大きな依頼は時間切れ
+            raise TranslationError("err_timeout")
+        return _tr(labels)
+    translator.translate_labels = fake
+    code = g.run(["--only", "Thai"], sleep=lambda s: None)
+    assert code == 0 and ui_i18n.has_labels("Thai")
+    assert sizes[0] == len(need) and max(sizes[1:]) <= 40  # 1回目は全部、時間切れのあとは40個ずつ
+
+
+def test_partial_progress_is_saved_when_a_call_fails(lab):
+    ui_i18n, translator, tmp = lab
+    from gemini_errors import TranslationError
+    n = {"i": 0}
+
+    def fake(labels, lang):
+        n["i"] += 1
+        if n["i"] == 3:
+            raise TranslationError("err_overloaded")
+        return _tr(labels)
+    translator.translate_labels = fake
+    with pytest.raises(TranslationError):
+        ui_i18n.build_labels("Thai", chunk=40, whole=False)
+    saved = json.loads((tmp / "th-th.json").read_text(encoding="utf-8"))
+    assert len(saved) == 80                                # 2回成功した分（40個×2）は残っている
+
+
+def test_run_stops_when_google_is_busy_for_several_languages(lab, monkeypatch):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    from gemini_errors import TranslationError
+    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
+    calls = []
+
+    def fake(labels, lang):
+        calls.append(lang)
+        raise TranslationError("err_overloaded")
+    translator.translate_labels = fake
+    waits = []
+    code = g.run(["--only", "Thai,Dutch,Polish,Czech,Danish"], sleep=lambda s: waits.append(s))
+    assert code == 1
+    assert set(calls) == {"Thai", "Dutch", "Polish"}       # 3言語続けて失敗したら、4言語目は試さない
+    assert max(waits) >= g.RETRY_WAIT_SEC                  # 同じ言語のやり直しの前に、間を空けている
+
+
+def test_run_retries_a_busy_language_then_succeeds(lab, monkeypatch):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    from gemini_errors import TranslationError
+    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
+    n = {"i": 0}
+
+    def fake(labels, lang):
+        n["i"] += 1
+        if n["i"] == 1:
+            raise TranslationError("err_overloaded")
+        return _tr(labels)
+    translator.translate_labels = fake
+    assert g.run(["--only", "Thai"], sleep=lambda s: None) == 0
+    assert ui_i18n.has_labels("Thai")
+
+
+def test_tool_uses_longer_timeout_without_touching_app_defaults():
+    import generate_ui_labels  # noqa: F401  # 読み込むだけで、ツール用の待ち時間が環境変数に入る
+    assert float(os.environ["GEMINI_TEXT_TIMEOUT"]) >= 60
+    src = open(os.path.join(ROOT, "translator.py"), encoding="utf-8").read()
+    assert '_env_num("GEMINI_TEXT_TIMEOUT", 25.0)' in src   # アプリ本体の既定（25秒）は変えていない

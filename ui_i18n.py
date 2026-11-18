@@ -138,23 +138,28 @@ def ensure_async(lang):
     threading.Thread(target=run, daemon=True).start()
 
 
-def build_labels(lang, chunk=60):
+def build_labels(lang, chunk=60, whole=True):
     """tools/generate_ui_labels.py 用。足りない文言を翻訳して保存する。戻り値は (今回できた数, まだ足りない数)。
-    まず全部を1回で頼み（API の呼び出し回数を節約）、欠けた分だけを chunk 個ずつに分けて頼み直す（最大2周）。
-    上限(429)などの例外は、呼び出し側が止められるようにそのまま投げる"""
+    whole=True: まず全部を1回で頼み（API の呼び出し回数を節約）、欠けた分だけを chunk 個ずつに分けて頼み直す（最大2周）。
+    whole=False: 最初から chunk 個ずつに分けて頼む（1回で時間切れになるとき用）。
+    途中で例外（上限・混雑など）になっても、それまでに得られた分は保存する。例外は呼び出し側が止められるよう、そのまま投げる"""
     source = _missing(lang)
     if not source:
         return 0, 0
-    got = _clean(translator.translate_labels(source, lang), source)
-    for _ in range(2):
-        rest = {k: v for k, v in source.items() if k not in got}
-        if not rest or len(got) >= len(source) * 0.98:
-            break
-        items = list(rest.items())
-        for i in range(0, len(items), chunk):
-            got.update(_clean(translator.translate_labels(dict(items[i:i + chunk]), lang), rest))
-    if got:
-        _save(lang, got)
+    got = {}
+    try:
+        if whole:
+            got.update(_clean(translator.translate_labels(source, lang), source))
+        for _ in range(2):
+            rest = {k: v for k, v in source.items() if k not in got}
+            if not rest or len(got) >= len(source) * 0.98:
+                break
+            items = list(rest.items())
+            for i in range(0, len(items), chunk):
+                got.update(_clean(translator.translate_labels(dict(items[i:i + chunk]), lang), rest))
+    finally:
+        if got:
+            _save(lang, got)
     return len(got), len(source) - len(got)
 
 
