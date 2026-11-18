@@ -4,10 +4,14 @@
   python tools/generate_ui_labels.py --check    API を使わず、全言語が揃っているか確認（揃っていなければ終了コード 1）
   python tools/generate_ui_labels.py --only Thai,Dutch    言語を指定（英語名。カンマ区切り）
   python tools/generate_ui_labels.py --force --only Thai  指定した言語を作り直す（--only なしの --force は全言語）
+  python tools/generate_ui_labels.py --max-calls 10       1回の実行で使う API の呼び出しの上限（既定 15。失敗した呼び出しも数える）
 
 APIキーは、実行する端末の環境変数 GEMINI_API_KEY に入れてから実行します（コードやチャットには書かない）。
-  PowerShell:  $env:GEMINI_API_KEY = "（自分のキー）"
-無料枠は「1分5回・1日20回」程度なので、1回ごとに約13秒待ち、1日の上限に達したら保存済みの分を残して止まります。
+画面に出さずに入れる方法（入力は ****** と表示され、画面を人に見せても写らない）:
+  $k = Read-Host "APIキー" -AsSecureString
+  $env:GEMINI_API_KEY = [System.Net.NetworkCredential]::new("", $k).Password
+無料枠は「プロジェクトごと・モデルごとに 1分5回・1日20回」程度です。1回ごとに約13秒待ち、1日の上限か、この実行の上限（--max-calls）に達したら、保存済みの分を残して止まります。
+**同じプロジェクトのキーは、公開中のサイトと同じ枠を使います。** 文言づくりには、別のプロジェクトで作ったキーを使うと、サイトの枠を減らしません。
 その場合は、日本時間の夕方（17時ごろ）に上限が戻るので、もう一度同じコマンドを実行してください（続きから作ります）。
 """
 import os
@@ -21,13 +25,22 @@ os.environ.setdefault("GEMINI_TEXT_TIMEOUT", "150")
 os.environ.setdefault("GEMINI_ATTEMPTS", "2")
 
 import ui_i18n  # noqa: E402
+from gemini_errors import TranslationError  # noqa: E402
 from languages import LANGUAGES, UI_LABELS  # noqa: E402
 
 PACE_SEC = float(os.environ.get("LABEL_PACE_SEC", "13"))   # API の呼び出しの間隔（無料枠は1分5回）
+MAX_CALLS = int(os.environ.get("LABEL_MAX_CALLS", "15"))   # 1回の実行で使う API 呼び出しの上限（失敗も数える。無料枠は1日20回）
 RETRY_WAIT_SEC = float(os.environ.get("LABEL_RETRY_WAIT_SEC", "30"))   # 混雑・時間切れのとき、同じ言語をやり直すまでの待ち（回数をかけて長くなる）
 TRIES = 3             # 1言語あたりの挑戦回数
 STOP_AFTER_BUSY = 3   # 続けてこれだけの言語が混雑・時間切れで失敗したら、Google側が混んでいるとみて止まる
 BUSY_KEYS = {"err_timeout", "err_overloaded", "err_connection"}
+
+
+class _OutOfBudget(TranslationError):
+    """この実行の呼び出し上限に達した（Gemini のエラーではない）"""
+
+    def __init__(self):
+        super().__init__("err_budget")
 
 
 def _say(text=""):
@@ -62,6 +75,14 @@ def run(argv, now=time.time, sleep=time.sleep):
     if "--only" in argv:
         i = argv.index("--only")
         only = [w for w in (argv[i + 1] if i + 1 < len(argv) else "").split(",") if w.strip()]
+    max_calls = MAX_CALLS
+    if "--max-calls" in argv:
+        i = argv.index("--max-calls")
+        try:
+            max_calls = max(1, int(argv[i + 1]))
+        except (IndexError, ValueError):
+            _say("--max-calls には回数を数字で指定してください（例: --max-calls 10）")
+            return 2
     names, unknown = _targets(only)
     if unknown:
         _say("見つからない言語: " + ", ".join(unknown) + "（英語名で。例: Thai, Dutch）")
@@ -74,62 +95,71 @@ def run(argv, now=time.time, sleep=time.sleep):
         return 2
 
     import translator
-    real = translator.translate_labels
+    real = translator._generate   # 本当の API 呼び出し1回。アプリ本体の再挑戦・予備モデルへの切り替えも、ここを通る
     last = [0.0]
+    calls = [0]
 
-    def paced(labels, lang):
+    def counted(parts, system=None):
+        if calls[0] >= max_calls:
+            raise _OutOfBudget()
         wait = PACE_SEC - (now() - last[0])
         if wait > 0:
             sleep(wait)
         last[0] = now()
-        return real(labels, lang)
+        calls[0] += 1
+        return real(parts, system=system)
 
-    translator.translate_labels = paced   # ui_i18n.build_labels はここを呼ぶ
-    made = 0
-    busy_in_a_row = 0
-    stopped = ""
-    for name in names:
-        if force:
-            ui_i18n._mem.pop(name, None)
-            try:
-                os.remove(ui_i18n._path(name))
-            except OSError:
-                pass
-        if not ui_i18n._missing(name):
-            _say(f"skip   {name}（揃っています）")
-            continue
-        _say(f"make   {name} ...")
-        done = False
-        small = False   # 時間切れになったら、次は小分けにして頼む
-        for attempt in range(TRIES):
-            try:
-                got, left = ui_i18n.build_labels(name, chunk=40, whole=not small)
-                done = True
-                break
-            except Exception as e:
-                key = getattr(e, "key", "") or type(e).__name__
-                if key in ("err_quota", "err_api_key"):
-                    stopped = ("今日の無料枠の上限に達しました。" if key == "err_quota"
-                               else "APIキーが使えません（未設定・間違い・無効・削除済み）。")
-                    break
-                _say(f"  うまくいきませんでした（{key}）" + ("。小分けにしてやり直します" if key == "err_timeout" else ""))
-                small = small or key == "err_timeout"
-                if attempt + 1 < TRIES:
-                    sleep(RETRY_WAIT_SEC * (attempt + 1))
-        if stopped:
-            break
-        if not done:
-            busy_in_a_row += 1
-            _say("  この言語は今回あきらめて、次へ進みます")
-            if busy_in_a_row >= STOP_AFTER_BUSY:
-                stopped = "Google 側が混んでいて、続けて失敗しています。"
-                break
-            continue
+    translator._generate = counted
+    try:
+        made = 0
         busy_in_a_row = 0
-        made += got
-        _say(f"  +{got}個を保存" + (f"（まだ {left}個足りません。もう一度実行すると続きから作ります）" if left else "（揃いました）"))
+        stopped = ""
+        for name in names:
+            if force:
+                ui_i18n._mem.pop(name, None)
+                try:
+                    os.remove(ui_i18n._path(name))
+                except OSError:
+                    pass
+            if not ui_i18n._missing(name):
+                _say(f"skip   {name}（揃っています）")
+                continue
+            _say(f"make   {name} ...")
+            done = False
+            small = False   # 時間切れになったら、次は小分けにして頼む
+            for attempt in range(TRIES):
+                try:
+                    got, left = ui_i18n.build_labels(name, chunk=40, whole=not small)
+                    done = True
+                    break
+                except Exception as e:
+                    key = getattr(e, "key", "") or type(e).__name__
+                    if key in ("err_quota", "err_api_key", "err_budget"):
+                        stopped = ("今日の無料枠の上限に達しました。" if key == "err_quota"
+                                   else f"この実行の呼び出し上限（{max_calls}回）まで使いました。" if key == "err_budget"
+                                   else "APIキーが使えません（未設定・間違い・無効・削除済み）。")
+                        break
+                    _say(f"  うまくいきませんでした（{key}）" + ("。小分けにしてやり直します" if key == "err_timeout" else ""))
+                    small = small or key == "err_timeout"
+                    if attempt + 1 < TRIES:
+                        sleep(RETRY_WAIT_SEC * (attempt + 1))
+            if stopped:
+                break
+            if not done:
+                busy_in_a_row += 1
+                _say("  この言語は今回あきらめて、次へ進みます")
+                if busy_in_a_row >= STOP_AFTER_BUSY:
+                    stopped = "Google 側が混んでいて、続けて失敗しています。"
+                    break
+                continue
+            busy_in_a_row = 0
+            made += got
+            _say(f"  +{got}個を保存" + (f"（まだ {left}個足りません。もう一度実行すると続きから作ります）" if left else "（揃いました）"))
 
-    _say("")
+    finally:
+        translator._generate = real
+
+    _say(f"\nAPI の呼び出し: {calls[0]}回（上限 {max_calls}回）")
     code = check(names)
     if stopped:
         _say(f"\n{stopped}保存済みの分は残っています。" + ("日本時間の夕方（17時ごろ）以降" if "上限" in stopped else "しばらく（30分〜数時間）置いてから") + "、もう一度同じコマンドを実行してください（続きから作ります）。")
