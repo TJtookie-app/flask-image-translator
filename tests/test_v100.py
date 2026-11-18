@@ -93,11 +93,26 @@ def test_run_check_without_api_and_missing_key(lab, monkeypatch, capsys):
     import generate_ui_labels as g
     assert g.run(["--check", "--only", "Thai"]) == 1       # 足りない → 1
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    assert g.run(["--only", "Thai"]) == 2                  # キーがない → API は呼ばない
+    assert g.run(["--only", "Thai"]) == 2                  # キーがない（聞けない環境）→ API は呼ばない
+    assert g.run(["--only", "Thai"], ask=lambda prompt: "  ") == 2        # 聞かれて何も入れなかった → API は呼ばない
     assert g.run(["--only", "Klingon"]) == 2               # 知らない言語名
     assert g.run(["--only", "Thai", "--max-calls", "abc"]) == 2
     out = capsys.readouterr().out
-    assert "GEMINI_API_KEY" in out and "Klingon" in out and "sk-" not in out
+    assert "APIキーが入力されませんでした" in out and "Klingon" in out and "sk-" not in out
+
+
+def test_run_asks_for_the_key_when_missing_and_does_not_print_it(lab, monkeypatch, capsys):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    st = fake_api(translator)
+    asked = []
+    code = g.run(["--only", "Thai"], sleep=lambda s: None, ask=lambda prompt: (asked.append(prompt), "  secret-key-123  ")[1])
+    out = capsys.readouterr().out
+    assert code == 0 and len(asked) == 1 and st["n"] == 1
+    assert "secret-key-123" not in out                     # 入れたキーは、画面（ログ）に出さない
+    assert os.environ["GEMINI_API_KEY"] == "secret-key-123"
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
 
 def test_run_generates_and_paces_every_real_call(lab):

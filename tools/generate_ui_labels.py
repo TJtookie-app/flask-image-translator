@@ -6,14 +6,13 @@
   python tools/generate_ui_labels.py --force --only Thai  指定した言語を作り直す（--only なしの --force は全言語）
   python tools/generate_ui_labels.py --max-calls 10       1回の実行で使う API の呼び出しの上限（既定 15。失敗した呼び出しも数える）
 
-APIキーは、実行する端末の環境変数 GEMINI_API_KEY に入れてから実行します（コードやチャットには書かない）。
-画面に出さずに入れる方法（入力は ****** と表示され、画面を人に見せても写らない）:
-  $k = Read-Host "APIキー" -AsSecureString
-  $env:GEMINI_API_KEY = [System.Net.NetworkCredential]::new("", $k).Password
+APIキー: 実行すると「APIキーを貼り付けて Enter」と聞かれます。貼り付けても画面には何も出ません（それで正しい）。
+  キーは、このツールが動いている間だけ使い、ファイルには保存しません。環境変数 GEMINI_API_KEY に入れてある場合は、聞かれません。
 無料枠は「プロジェクトごと・モデルごとに 1分5回・1日20回」程度です。1回ごとに約13秒待ち、1日の上限か、この実行の上限（--max-calls）に達したら、保存済みの分を残して止まります。
 **同じプロジェクトのキーは、公開中のサイトと同じ枠を使います。** 文言づくりには、別のプロジェクトで作ったキーを使うと、サイトの枠を減らしません。
 その場合は、日本時間の夕方（17時ごろ）に上限が戻るので、もう一度同じコマンドを実行してください（続きから作ります）。
 """
+import getpass
 import os
 import sys
 import time
@@ -69,7 +68,7 @@ def check(names):
     return 0 if not short else 1
 
 
-def run(argv, now=time.time, sleep=time.sleep):
+def run(argv, now=time.time, sleep=time.sleep, ask=None):
     force = "--force" in argv
     only = []
     if "--only" in argv:
@@ -90,9 +89,19 @@ def run(argv, now=time.time, sleep=time.sleep):
     if "--check" in argv:
         return check(names)
     if not os.environ.get("GEMINI_API_KEY", "").strip():
-        _say("環境変数 GEMINI_API_KEY が空です。PowerShell なら次のように設定してから、もう一度実行してください（キーはここに貼らないでください）。")
-        _say('  $env:GEMINI_API_KEY = "（自分のキー）"')
-        return 2
+        if ask is None and sys.stdin.isatty():
+            ask = getpass.getpass
+        key = ""
+        if ask:
+            _say("APIキーを貼り付けて Enter を押してください（貼り付けても画面には何も表示されません。それで正しい動作です）。")
+            try:
+                key = (ask("APIキー: ") or "").strip()
+            except (EOFError, KeyboardInterrupt):
+                key = ""
+        if not key:
+            _say("APIキーが入力されませんでした。もう一度実行して、聞かれたらキーを貼り付けてください。")
+            return 2
+        os.environ["GEMINI_API_KEY"] = key   # このツールの実行中だけ。ファイルには保存しない
 
     import translator
     real = translator._generate   # 本当の API 呼び出し1回。アプリ本体の再挑戦・予備モデルへの切り替えも、ここを通る
