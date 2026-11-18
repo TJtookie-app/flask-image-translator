@@ -1,6 +1,6 @@
 """画面の文言（UIラベル）の多言語化。
 
-- 日本語・英語は languages.UI_LABELS に手書きで用意
+- 日本語・英語は labels_ja.py / labels_en.py に手書きで用意（languages.UI_LABELS で取り出せる）
 - それ以外の言語は ui_labels/<言語コード>.json から読む
 - ファイルが無ければ、表示言語の選択時に Gemini で自動翻訳して保存（失敗したら英語で表示）
 """

@@ -32,6 +32,7 @@ def badge(pg, ui, detected, via="image"):
     pg.set_input_files("#tab-image input[type=file]", imgpath)
     pg.click("#tab-image button[type=submit]")
     pg.wait_for_selector(".lang-badge")
+    pg.wait_for_load_state("load")   # 言語名の書き換え（display.js）は読み込み後に走る。先に読むと「Español (Spanish)」のままになる
     return pg.inner_text(".lang-badge").replace("🌐", "").strip()
 
 with sync_playwright() as p:

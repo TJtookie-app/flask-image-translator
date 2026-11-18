@@ -52,6 +52,15 @@ def test_fetch_and_cache(net):
     assert len(net.calls) == 1                      # 保存した値を返すだけ。外のAPIへは1回だけ
 
 
+def read_js(*names):
+    """分割したJSをまとめて読む（V12.11 で money.js / overlay.js を複数ファイルに分けた）"""
+    return "\n".join(read("static", "js", n + ".js") for n in names)
+
+
+MONEY_JS = ("money", "money_start", "money_where", "money_view")
+OVERLAY_JS = ("overlay", "overlay_zoom", "overlay_save", "overlay_boot")
+
+
 def test_refetch_after_ttl(net):
     net.mp.setenv("RATES_TTL_SEC", "0")
     net.rates.store.get(); net.rates.store.get()
@@ -185,7 +194,7 @@ def test_switch_tab_wiring():
 
 
 def test_money_js_key_points():
-    js = read("static", "js", "money.js")
+    js = read_js(*MONEY_JS)
     for needle in ("tl_money_v1", "tl_rates_v1", "/api/rates", "resolvedOptions().timeZone", "navigator.geolocation",
                    "api.bigdatacloud.net/data/reverse-geocode-client", "toFixed(2)", "Intl.DisplayNames", "enableHighAccuracy: false",
                    "online", "offline", "mParseAmount", "MONEY_REFRESH_MS"):
@@ -234,5 +243,5 @@ def test_country_select_is_readable_and_tidy():
     assert ".money-select option" in css and "color-scheme: dark" in css      # 開いたリストが白背景＋薄い文字にならない
     assert "html[data-theme=light] .money-select option" in css and ".money-popup option" in css
     assert 'class="money-popup' in read("templates", "components", "money_tab.html")   # 国を選ぶ見えない select にも配色が効く
-    js = read("static", "js", "money.js")
+    js = read_js(*MONEY_JS)
     assert "MONEY_HIDE_COUNTRIES" in js and all(c in js for c in ("'DG'", "'EA'", "'IC'", "'TA'"))

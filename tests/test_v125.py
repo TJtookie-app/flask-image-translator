@@ -18,6 +18,15 @@ def read(*parts):
         return f.read()
 
 
+def read_js(*names):
+    """分割したJSをまとめて読む（V12.11 で money.js / overlay.js を複数ファイルに分けた）"""
+    return "\n".join(read("static", "js", n + ".js") for n in names)
+
+
+MONEY_JS = ("money", "money_start", "money_where", "money_view")
+OVERLAY_JS = ("overlay", "overlay_zoom", "overlay_save", "overlay_boot")
+
+
 def test_image_tab_has_the_four_tools(env):
     app, *_ = env
     c = app.test_client(); start(c, "Japanese")
@@ -63,7 +72,7 @@ def test_scripts_loaded_and_precached(env):
 
 
 def test_overlay_js_wiring():
-    js = read("static", "js", "overlay.js")
+    js = read_js(*OVERLAY_JS)
     for needle in ("function openZoom", "function saveOverlayImage", "function renderOverlayBlob", "function wrapLines",
                    "tl_last_img_camera", "OV_VIEWS", "AbortError", "ZOOM_LEVELS", "Escape"):
         assert needle in js, needle
