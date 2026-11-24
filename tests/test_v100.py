@@ -107,7 +107,7 @@ def test_run_asks_for_the_key_when_missing_and_does_not_print_it(lab, monkeypatc
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     st = fake_api(translator)
     asked = []
-    code = g.run(["--only", "Thai"], sleep=lambda s: None, ask=lambda prompt: (asked.append(prompt), "  secret-key-123  ")[1])
+    code = g.run(["--only", "Thai", "--no-check"], sleep=lambda s: None, ask=lambda prompt: (asked.append(prompt), "  secret-key-123  ")[1])
     out = capsys.readouterr().out
     assert code == 0 and len(asked) == 1 and st["n"] == 1
     assert "secret-key-123" not in out                     # 入れたキーは、画面（ログ）に出さない
@@ -122,13 +122,13 @@ def test_run_generates_and_paces_every_real_call(lab):
     stub = translator._generate
     slept = []
     t = [100.0]
-    code = g.run(["--only", "Thai,Dutch"], now=lambda: t[0], sleep=lambda s: (slept.append(s), t.__setitem__(0, t[0] + s)))
+    code = g.run(["--only", "Thai,Dutch", "--no-check"], now=lambda: t[0], sleep=lambda s: (slept.append(s), t.__setitem__(0, t[0] + s)))
     assert code == 0
     assert (tmp / "th-th.json").exists() and (tmp / "nl-nl.json").exists()
     assert st["n"] == 2 and len(slept) == 1 and slept[0] <= g.PACE_SEC + 0.01   # 2回目の呼び出しの前に待っている
     assert translator._generate is stub                                          # 終わったら差し替えを元に戻す
     assert g.run(["--check", "--only", "Thai,Dutch"]) == 0
-    assert g.run(["--only", "Thai,Dutch"], sleep=lambda s: None) == 0
+    assert g.run(["--only", "Thai,Dutch"], sleep=lambda s: None) == 0   # 揃っていれば、混雑チェックもしない
     assert st["n"] == 2                                                          # 揃っていれば何も呼ばない
 
 
@@ -136,7 +136,7 @@ def test_run_stops_safely_when_daily_quota_is_used(lab):
     ui_i18n, translator, tmp = lab
     import generate_ui_labels as g
     fake_api(translator, failing("err_quota", lambda s: s["n"] > 1))
-    code = g.run(["--only", "Thai,Dutch,Polish"], sleep=lambda s: None)
+    code = g.run(["--only", "Thai,Dutch,Polish", "--no-check"], sleep=lambda s: None)
     assert code == 1
     assert (tmp / "th-th.json").exists()                   # 作れた分は残る
     assert not (tmp / "nl-nl.json").exists() and not (tmp / "pl-pl.json").exists()
@@ -146,7 +146,7 @@ def test_run_stops_at_call_budget_and_counts_failed_calls(lab, capsys):
     ui_i18n, translator, tmp = lab
     import generate_ui_labels as g
     st = fake_api(translator, failing("err_overloaded"))
-    code = g.run(["--only", "Thai,Dutch", "--max-calls", "4"], sleep=lambda s: None)
+    code = g.run(["--only", "Thai,Dutch", "--max-calls", "4", "--no-check"], sleep=lambda s: None)
     assert code == 1
     assert st["n"] == 4                                    # 失敗した呼び出しも数えて、上限で止まる（それ以上は呼ばない）
     out = capsys.readouterr().out
@@ -163,7 +163,7 @@ def test_timeout_falls_back_to_small_chunks(lab):
         if len(labels) > 40:
             raise TranslationError("err_timeout")
     st = fake_api(translator, big_times_out)
-    assert g.run(["--only", "Thai", "--max-calls", "30"], sleep=lambda s: None) == 0
+    assert g.run(["--only", "Thai", "--max-calls", "30", "--no-check"], sleep=lambda s: None) == 0
     assert ui_i18n.has_labels("Thai")
     assert st["sizes"][0] == len(need) and max(st["sizes"][-3:]) <= 40   # 全部を頼んで時間切れ→40個ずつ
 
@@ -173,9 +173,9 @@ def test_run_stops_when_google_is_busy_for_several_languages(lab):
     import generate_ui_labels as g
     st = fake_api(translator, failing("err_overloaded"))
     waits = []
-    code = g.run(["--only", "Thai,Dutch,Polish,Czech,Danish", "--max-calls", "100"], sleep=lambda s: waits.append(s))
+    code = g.run(["--only", "Thai,Dutch,Polish,Czech,Danish", "--max-calls", "100", "--no-check"], sleep=lambda s: waits.append(s))
     assert code == 1
-    assert st["n"] <= 3 * g.TRIES * 2                      # 3言語で打ち切り（4言語目は試さない）
+    assert st["n"] <= g.STOP_AFTER_BUSY * g.TRIES * 2      # 続けて失敗した言語が上限に達したら打ち切り（次の言語は試さない）
     assert max(waits) >= g.RETRY_WAIT_SEC                  # 同じ言語のやり直しの前に、間を空けている
 
 
@@ -183,7 +183,7 @@ def test_run_retries_a_busy_language_then_succeeds(lab):
     ui_i18n, translator, tmp = lab
     import generate_ui_labels as g
     fake_api(translator, failing("err_overloaded", lambda s: s["n"] <= 2))   # 最初の2回（予備モデルへの切り替え含む）は失敗
-    assert g.run(["--only", "Thai"], sleep=lambda s: None) == 0
+    assert g.run(["--only", "Thai", "--no-check"], sleep=lambda s: None) == 0
     assert ui_i18n.has_labels("Thai")
 
 
@@ -208,6 +208,65 @@ def test_tool_uses_longer_timeout_without_touching_app_defaults():
     assert '_env_num("GEMINI_TEXT_TIMEOUT", 25.0)' in src   # アプリ本体の既定（25秒）は変えていない
 
 
-def test_version_is_1_0_x():
+def test_preflight_stops_at_once_when_google_is_busy(lab, capsys):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    st = fake_api(translator, failing("err_overloaded"))
+    waits = []
+    code = g.run(["--only", "Thai,Dutch"], sleep=lambda s: waits.append(s))
+    out = capsys.readouterr().out
+    assert code == 3 and st["n"] <= 2                      # 混んでいれば、本番に入らず 1〜2 回の呼び出しだけで止まる
+    assert not (tmp / "th-th.json").exists() and max(waits or [0]) < g.RETRY_WAIT_SEC
+    assert "混雑チェック: 失敗" in out and "Google 側が混んでいます" in out and "make   Thai" not in out
+    assert "OK  " not in out                                # 長い一覧は出さない（数だけ）
+
+
+def test_preflight_ok_then_proceeds_and_is_counted(lab, capsys):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    st = fake_api(translator)
+    assert g.run(["--only", "Thai"], sleep=lambda s: None) == 0
+    out = capsys.readouterr().out
+    assert st["n"] == 2 and st["sizes"][0] == len(g.PROBE)   # 試しの1回 + 本番1回
+    assert "混雑チェック: OK" in out and ui_i18n.has_labels("Thai")
+    st["n"] = 0
+    assert g.run(["--only", "Thai"], sleep=lambda s: None) == 0
+    assert st["n"] == 0                                       # 何も足りなければ、試しの呼び出しもしない
+    ui_i18n._mem.clear()
+    for f in tmp.glob("*.json"):
+        f.unlink()
+    assert g.run(["--only", "Thai", "--max-calls", "1"], sleep=lambda s: None) == 1
+    out = capsys.readouterr().out
+    assert st["n"] == 1 and "呼び出し上限（1回）" in out     # 試しの1回も上限に数える
+
+
+def test_preflight_quota_message_and_no_check_flag(lab, capsys):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    st = fake_api(translator, failing("err_quota"))
+    assert g.run(["--only", "Thai"], sleep=lambda s: None) == 1
+    out = capsys.readouterr().out
+    assert st["n"] == 1 and "無料枠の上限" in out and "17時" in out
+    st["n"] = 0
+    g.run(["--only", "Thai", "--no-check"], sleep=lambda s: None)
+    assert st["n"] == 1 and "混雑チェック" not in capsys.readouterr().out
+
+
+def test_budget_stop_message_does_not_blame_the_daily_limit(lab, capsys):
+    ui_i18n, translator, tmp = lab
+    import generate_ui_labels as g
+    fake_api(translator)
+    g.run(["--only", "Thai,Dutch", "--max-calls", "2"], sleep=lambda s: None)
+    out = capsys.readouterr().out
+    assert "呼び出し上限（2回）" in out and "同じコマンドをすぐ実行できます" in out
+    assert "今日の無料枠の上限に達しました" not in out
+
+
+def test_version_is_1_0_4():
     import app as appmod
-    assert appmod.APP_VERSION.startswith("1.0")
+    assert appmod.APP_VERSION == "1.0.4"
+
+
+def test_requirements_pin_google_genai_below_next_major():
+    reqs = open(os.path.join(ROOT, "requirements.txt"), encoding="utf-8").read()
+    assert re.search(r"^google-genai>=3\.6,<4\s*$", reqs, re.M)

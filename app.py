@@ -39,7 +39,7 @@ def _asset_version():
 
 
 ASSET_V = _asset_version()
-APP_VERSION = "1.0.3"   # 画面（設定の下）と X-App-Version ヘッダーに出る。どの版が動いているかの目印
+APP_VERSION = "1.0.4"   # 画面（設定の下）と X-App-Version ヘッダーに出る。どの版が動いているかの目印
 
 
 @app.context_processor

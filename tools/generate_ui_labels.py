@@ -5,12 +5,14 @@
   python tools/generate_ui_labels.py --only Thai,Dutch    言語を指定（英語名。カンマ区切り）
   python tools/generate_ui_labels.py --force --only Thai  指定した言語を作り直す（--only なしの --force は全言語）
   python tools/generate_ui_labels.py --max-calls 10       1回の実行で使う API の呼び出しの上限（既定 15。失敗した呼び出しも数える）
+  python tools/generate_ui_labels.py --no-check           最初の「混雑チェック」を省く（既定では、本番の前に短い依頼を1回だけ試す）
 
 APIキー: 実行すると「APIキーを貼り付けて Enter」と聞かれます。貼り付けても画面には何も出ません（それで正しい）。
   キーは、このツールが動いている間だけ使い、ファイルには保存しません。環境変数 GEMINI_API_KEY に入れてある場合は、聞かれません。
+混雑チェック: 本番の前に、ごく短い依頼を1回だけ試します。Google が混んでいれば、そこで止まります（使う呼び出しは1〜2回だけ。終了コード 3）。
 無料枠は「プロジェクトごと・モデルごとに 1分5回・1日20回」程度です。1回ごとに約13秒待ち、1日の上限か、この実行の上限（--max-calls）に達したら、保存済みの分を残して止まります。
 **同じプロジェクトのキーは、公開中のサイトと同じ枠を使います。** 文言づくりには、別のプロジェクトで作ったキーを使うと、サイトの枠を減らしません。
-その場合は、日本時間の夕方（17時ごろ）に上限が戻るので、もう一度同じコマンドを実行してください（続きから作ります）。
+1日の上限に達したときは、日本時間の夕方（17時ごろ）に戻ります。別のプロジェクトのキーなら、すぐ続けられます（続きから作ります）。
 """
 import getpass
 import os
@@ -30,9 +32,12 @@ from languages import LANGUAGES, UI_LABELS  # noqa: E402
 PACE_SEC = float(os.environ.get("LABEL_PACE_SEC", "13"))   # API の呼び出しの間隔（無料枠は1分5回）
 MAX_CALLS = int(os.environ.get("LABEL_MAX_CALLS", "15"))   # 1回の実行で使う API 呼び出しの上限（失敗も数える。無料枠は1日20回）
 RETRY_WAIT_SEC = float(os.environ.get("LABEL_RETRY_WAIT_SEC", "30"))   # 混雑・時間切れのとき、同じ言語をやり直すまでの待ち（回数をかけて長くなる）
-TRIES = 3             # 1言語あたりの挑戦回数
-STOP_AFTER_BUSY = 3   # 続けてこれだけの言語が混雑・時間切れで失敗したら、Google側が混んでいるとみて止まる
+TRIES = 2             # 1言語あたりの挑戦回数（混んでいるときに、呼び出しを使い切らないよう少なめ）
+STOP_AFTER_BUSY = 2   # 続けてこれだけの言語が混雑・時間切れで失敗したら、Google側が混んでいるとみて止まる
 BUSY_KEYS = {"err_timeout", "err_overloaded", "err_connection"}
+PROBE = {"ping": "Hello"}   # 混雑チェック用の、ごく短い依頼
+
+BUSY_HINT = "Google 側が混んでいます。1〜2時間あけて、もう一度同じコマンドを実行してください（日本時間の夜〜朝は混みやすい傾向があります。昼〜夕方のほうが通りやすいです）。"
 
 
 class _OutOfBudget(TranslationError):
@@ -58,14 +63,57 @@ def _targets(only):
     return picked, unknown
 
 
-def check(names):
-    """揃っているか表示する。全部揃っていれば 0、足りなければ 1"""
+def check(names, brief=False):
+    """揃っているか表示する。全部揃っていれば 0、足りなければ 1。brief=True なら一覧は出さず、数だけ"""
     rows = [(n, ) + tuple(r[1:]) for n in names for r in ui_i18n.audit() if r[0] == n]
     short = [r for r in rows if r[2]]
-    for n, have, miss in rows:
-        _say(f"{'OK  ' if not miss else 'あと'+str(miss).rjust(3)+'個'}  {n}  ({have}個あり)")
-    _say(f"\n{len(rows) - len(short)} / {len(rows)} 言語が揃っています。" + ("" if not short else f"（足りない言語: {len(short)}）"))
+    if not brief:
+        for n, have, miss in rows:
+            _say(f"{'OK  ' if not miss else 'あと'+str(miss).rjust(3)+'個'}  {n}  ({have}個あり)")
+        _say("")
+    _say(f"{len(rows) - len(short)} / {len(rows)} 言語が揃っています。" + ("" if not short else f"（足りない言語: {len(short)}）"))
     return 0 if not short else 1
+
+
+def _kind_of(key):
+    """エラーの種類を、止まり方の種類に分ける"""
+    if key == "err_quota":
+        return "quota"
+    if key == "err_budget":
+        return "budget"
+    if key in ("err_api_key", "err_no_key"):
+        return "key"
+    if key in BUSY_KEYS:
+        return "busy"
+    return "other"
+
+
+def _probe():
+    """本番の前に、ごく短い依頼を1回だけ試す。空いていれば ("", "")、止めるなら (止まり方の種類, エラー名)"""
+    import translator
+    try:
+        translator.translate_labels(dict(PROBE), "English")
+        return "", ""
+    except Exception as e:
+        key = getattr(e, "key", "") or type(e).__name__
+        kind = _kind_of(key)
+        return ("" if kind == "other" else kind), key   # 混雑・枠・キーの問題だけ止める。形式の不一致などは、本番で扱う
+
+
+def _stop_text(kind, key, max_calls):
+    """止まった理由（1行）と、次にすること"""
+    if kind == "quota":
+        return ("今日の無料枠の上限に達しました。",
+                "日本時間の夕方（17時ごろ）に枠が戻ります。別のプロジェクトで作ったキーなら、すぐ続けられます。保存済みの分は残っています。")
+    if kind == "budget":
+        return (f"この実行の呼び出し上限（{max_calls}回）まで使いました。",
+                "無料枠が残っていれば、同じコマンドをすぐ実行できます（続きから作ります）。1日の上限（1モデル20回ほど）に近いときは、夕方（17時ごろ）以降か、別のプロジェクトのキーで。保存済みの分は残っています。")
+    if kind == "key":
+        return ("APIキーが使えません（未設定・間違い・無効・削除済み）。",
+                "キーを確かめて、もう一度実行してください。")
+    if kind == "busy":
+        return ("Google 側が混んでいて、失敗が続いています。", BUSY_HINT + "保存済みの分は残っています。")
+    return (f"予期しないエラーで止まりました（{key}）。", "この表示を、そのまま送ってください。保存済みの分は残っています。")
 
 
 def run(argv, now=time.time, sleep=time.sleep, ask=None):
@@ -88,6 +136,9 @@ def run(argv, now=time.time, sleep=time.sleep, ask=None):
         return 2
     if "--check" in argv:
         return check(names)
+    if not force and not any(ui_i18n._missing(n) for n in names):
+        _say("作る言語はありません（すべて揃っています）。")
+        return check(names, brief=True)
     if not os.environ.get("GEMINI_API_KEY", "").strip():
         if ask is None and sys.stdin.isatty():
             ask = getpass.getpass
@@ -119,11 +170,18 @@ def run(argv, now=time.time, sleep=time.sleep, ask=None):
         return real(parts, system=system)
 
     translator._generate = counted
+    made_names = []
+    kind = key = ""
     try:
-        made = 0
+        if "--no-check" not in argv:
+            _say("Google が空いているか、短い依頼を1回だけ試します ...")
+            kind, key = _probe()
+            if kind:
+                _say("  混雑チェック: 失敗（" + key + "）")
+            else:
+                _say("  混雑チェック: OK。文言づくりを始めます。")
         busy_in_a_row = 0
-        stopped = ""
-        for name in names:
+        for name in ([] if kind else names):
             if force:
                 ui_i18n._mem.pop(name, None)
                 try:
@@ -143,36 +201,38 @@ def run(argv, now=time.time, sleep=time.sleep, ask=None):
                     break
                 except Exception as e:
                     key = getattr(e, "key", "") or type(e).__name__
-                    if key in ("err_quota", "err_api_key", "err_budget"):
-                        stopped = ("今日の無料枠の上限に達しました。" if key == "err_quota"
-                                   else f"この実行の呼び出し上限（{max_calls}回）まで使いました。" if key == "err_budget"
-                                   else "APIキーが使えません（未設定・間違い・無効・削除済み）。")
+                    if _kind_of(key) in ("quota", "key", "budget"):
+                        kind = _kind_of(key)
                         break
                     _say(f"  うまくいきませんでした（{key}）" + ("。小分けにしてやり直します" if key == "err_timeout" else ""))
                     small = small or key == "err_timeout"
                     if attempt + 1 < TRIES:
                         sleep(RETRY_WAIT_SEC * (attempt + 1))
-            if stopped:
+            if kind:
                 break
             if not done:
                 busy_in_a_row += 1
                 _say("  この言語は今回あきらめて、次へ進みます")
                 if busy_in_a_row >= STOP_AFTER_BUSY:
-                    stopped = "Google 側が混んでいて、続けて失敗しています。"
+                    kind = "busy"
                     break
                 continue
             busy_in_a_row = 0
-            made += got
+            made_names.append(name)
             _say(f"  +{got}個を保存" + (f"（まだ {left}個足りません。もう一度実行すると続きから作ります）" if left else "（揃いました）"))
 
     finally:
         translator._generate = real
 
     _say(f"\nAPI の呼び出し: {calls[0]}回（上限 {max_calls}回）")
-    code = check(names)
-    if stopped:
-        _say(f"\n{stopped}保存済みの分は残っています。" + ("日本時間の夕方（17時ごろ）以降" if "上限" in stopped else "しばらく（30分〜数時間）置いてから") + "、もう一度同じコマンドを実行してください（続きから作ります）。")
-    elif code:
+    _say("今回できた言語: " + (", ".join(made_names) if made_names else "なし"))
+    probe_stopped = bool(kind) and not made_names and calls[0] <= 2 and "--no-check" not in argv
+    code = check(names, brief=probe_stopped)
+    if kind:
+        why, then = _stop_text(kind, key, max_calls)
+        _say(f"\n{why}{then}")
+        return 3 if probe_stopped and kind == "busy" else code
+    if code:
         _say("\n足りない言語があります。もう一度同じコマンドを実行してください（続きから作ります）。")
     else:
         _say("\nすべての言語が揃いました。ui_labels/ の変更を git add -A → commit → push してください。")
