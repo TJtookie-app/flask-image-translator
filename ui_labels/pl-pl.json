@@ -249,5 +249,10 @@
  "pron_label": "Wymowa",
  "warn_same_lang": "Język źródłowy i docelowy są takie same. Sprawdź wybrane języki.",
  "warn_detected_same": "Wprowadzony tekst wydaje się być już w języku docelowym.",
- "warn_same_chat": "Obie osoby używają tego samego języka. Sprawdź wybrane języki."
+ "warn_same_chat": "Obie osoby używają tego samego języka. Sprawdź wybrane języki.",
+ "tone_btn": "Zmień ton",
+ "tone_label": "Wybierz ton (stuknij, aby użyć)",
+ "tone_neutral": "Standardowy",
+ "summary_btn": "Podsumuj",
+ "summary_label": "Podsumowanie"
 }

@@ -249,5 +249,10 @@
  "pron_label": "Bacaan",
  "warn_same_lang": "Daripada dan Kepada adalah bahasa yang sama. Sila semak bahasa.",
  "warn_detected_same": "Input nampaknya sudah dalam bahasa sasaran.",
- "warn_same_chat": "Kedua-dua orang menggunakan bahasa yang sama. Sila semak bahasa."
+ "warn_same_chat": "Kedua-dua orang menggunakan bahasa yang sama. Sila semak bahasa.",
+ "tone_btn": "Tukar nada",
+ "tone_label": "Pilih nada (ketik untuk guna)",
+ "tone_neutral": "Standard",
+ "summary_btn": "Ringkaskan",
+ "summary_label": "Ringkasan"
 }

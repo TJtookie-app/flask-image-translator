@@ -249,5 +249,10 @@
  "pron_label": "발음",
  "warn_same_lang": "출발 언어와 도착 언어가 같습니다. 언어를 확인해 주세요.",
  "warn_detected_same": "입력한 내용이 이미 목표 언어인 것 같습니다.",
- "warn_same_chat": "두 사람 모두 같은 언어를 사용 중입니다. 언어를 확인해 주세요."
+ "warn_same_chat": "두 사람 모두 같은 언어를 사용 중입니다. 언어를 확인해 주세요.",
+ "tone_btn": "어조 변경",
+ "tone_label": "어조 선택 (탭하여 사용)",
+ "tone_neutral": "표준",
+ "summary_btn": "요약",
+ "summary_label": "요약"
 }

@@ -252,5 +252,10 @@
  "pron_label": "Cara baca",
  "warn_same_lang": "Bahasa Asal dan Tujuan sama. Harap periksa bahasanya.",
  "warn_detected_same": "Input tampaknya sudah dalam bahasa target.",
- "warn_same_chat": "Kedua orang menggunakan bahasa yang sama. Harap periksa bahasanya."
+ "warn_same_chat": "Kedua orang menggunakan bahasa yang sama. Harap periksa bahasanya.",
+ "tone_btn": "Ubah nada",
+ "tone_label": "Pilih nada (ketuk untuk menggunakan)",
+ "tone_neutral": "Standar",
+ "summary_btn": "Ringkas",
+ "summary_label": "Ringkasan"
 }

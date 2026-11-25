@@ -249,5 +249,10 @@
  "pron_label": "Leitura",
  "warn_same_lang": "O idioma de origem e destino são iguais. Verifique os idiomas.",
  "warn_detected_same": "A entrada já parece estar no idioma de destino.",
- "warn_same_chat": "Ambas as pessoas usam o mesmo idioma. Verifique os idiomas."
+ "warn_same_chat": "Ambas as pessoas usam o mesmo idioma. Verifique os idiomas.",
+ "tone_btn": "Alterar tom",
+ "tone_label": "Escolha um tom (toque para usar)",
+ "tone_neutral": "Padrão",
+ "summary_btn": "Resumir",
+ "summary_label": "Resumo"
 }

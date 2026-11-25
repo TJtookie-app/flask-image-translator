@@ -229,7 +229,8 @@ html[data-theme=light] .bottom-nav-in { background: rgba(255, 255, 255, .88); bo
 
 /* ---- v1.3: 設定タブの上のボタン列は、折り返さず1行で横にスクロール。「履歴を消去」は、その下の行 ---- */
 .hist-bar { display: flex; flex-direction: column; gap: .4rem; }
-.hist-chips { display: flex; flex-wrap: nowrap; gap: .25rem; overflow-x: auto; padding-bottom: .25rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+.hist-scroll { position: relative; }
+.hist-chips { scroll-padding-inline: 2.2rem; display: flex; flex-wrap: nowrap; gap: .25rem; overflow-x: auto; padding-bottom: .25rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 .hist-chips::-webkit-scrollbar { display: none; }
 .hist-chip { flex: 0 0 auto; white-space: nowrap; }
 .hist-clear { align-self: flex-end; padding: .25rem .25rem; }
@@ -239,3 +240,13 @@ html[data-fs] .bottom-nav .nav-btn span,
 html[data-fs=xl] .bottom-nav .nav-btn span { font-size: clamp(9px, 2.7vw, 11px) !important; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 /* とても狭い画面（320px 前後）: ロゴの下の小さい文字を省いて、言語ボタンと重ならないようにする */
 @media (max-width: 349px) { .hdr-brand > div > span:nth-child(2) { display: none; } }
+
+/* v1.3.1: ボタン列に、まだ先がある合図（端がうすくなる＋小さな矢印。タップで横に動く）。端まで来たら消える */
+.hist-chips.fade-l { -webkit-mask-image: linear-gradient(to right, transparent, #000 2rem); mask-image: linear-gradient(to right, transparent, #000 2rem); }
+.hist-chips.fade-r { -webkit-mask-image: linear-gradient(to left, transparent, #000 2rem); mask-image: linear-gradient(to left, transparent, #000 2rem); }
+.hist-chips.fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 2rem, #000 calc(100% - 2rem), transparent); mask-image: linear-gradient(to right, transparent, #000 2rem, #000 calc(100% - 2rem), transparent); }
+.hist-arrow { display: none; position: absolute; top: 0; bottom: .25rem; width: 1.7rem; z-index: 2; align-items: center; justify-content: center;
+  border: 0; border-radius: 9999px; font-size: 1.25rem; line-height: 1; color: #fff; background: rgba(79,70,229,.92); box-shadow: 0 0 6px rgba(0,0,0,.35); }
+.hist-arrow-l { left: 0; }
+.hist-arrow-r { right: 0; }
+.hist-scroll.can-l .hist-arrow-l, .hist-scroll.can-r .hist-arrow-r { display: flex; }

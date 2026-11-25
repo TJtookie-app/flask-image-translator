@@ -252,5 +252,10 @@
  "pron_label": "Lecture",
  "warn_same_lang": "Les langues source et cible sont identiques. Veuillez vérifier.",
  "warn_detected_same": "Le texte semble déjà être dans la langue cible.",
- "warn_same_chat": "Les deux personnes utilisent la même langue. Veuillez vérifier."
+ "warn_same_chat": "Les deux personnes utilisent la même langue. Veuillez vérifier.",
+ "tone_btn": "Changer le ton",
+ "tone_label": "Choisir un ton (appuyer pour utiliser)",
+ "tone_neutral": "Standard",
+ "summary_btn": "Résumer",
+ "summary_label": "Résumé"
 }

@@ -74,6 +74,23 @@ function historyItem(e) {
     return card;
 }
 
+// ボタン列に、まだ先があるかを見て、端のうすれと矢印を出し入れする（右から左の言語でも、見た目の左右で判断）
+function updateChipHints() {
+    const c = $('hist-chips'), box = $('hist-scroll');
+    if (!c || !box) return;
+    if (!c._hintBound) { c._hintBound = true; c.addEventListener('scroll', updateChipHints, { passive: true }); window.addEventListener('resize', updateChipHints); }
+    const rtl = getComputedStyle(c).direction === 'rtl';
+    const span = c.scrollWidth - c.clientWidth, sl = c.scrollLeft;
+    const lo = rtl ? -span : 0, hi = rtl ? 0 : span;
+    const l = span > 2 && sl > lo + 2, r = span > 2 && sl < hi - 2;
+    box.classList.toggle('can-l', l); box.classList.toggle('can-r', r);
+    c.classList.toggle('fade-l', l); c.classList.toggle('fade-r', r);
+}
+function scrollChips(dir) {
+    const c = $('hist-chips'); if (!c) return;
+    try { c.scrollBy({ left: dir * Math.max(120, c.clientWidth * 0.6), behavior: 'smooth' }); } catch (e) { c.scrollLeft += dir * 160; }
+}
+
 function renderHistory() {
     const on = 'bg-indigo-600 text-white', off = 'bg-slate-800 text-slate-300';
     ['all', 'fav', 'gl', 'phrases', 'study', 'trash', 'settings'].forEach(k => {
@@ -83,6 +100,7 @@ function renderHistory() {
     // ボタンの列は1行で横にスクロールする。選んだボタンが隠れないよう、見える位置まで動かす（縦のスクロールは動かさない）
     const cur = $('hf-' + histFilter);
     if (cur && cur.scrollIntoView) { try { cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {} }
+    updateChipHints(); setTimeout(updateChipHints, 350);   // 動いたあと（スムーズに動く間）にも、もう一度確かめる
     const isGl = histFilter === 'gl', isPh = histFilter === 'phrases', isSet = histFilter === 'settings', isStudy = histFilter === 'study';
     const isTr = histFilter === 'trash';
     $('history-section').classList.toggle('hidden', isGl || isPh || isSet || isStudy || isTr);

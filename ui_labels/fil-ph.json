@@ -249,5 +249,10 @@
  "pron_label": "Pagbasa",
  "warn_same_lang": "Ang From at To ay parehong wika. Pakisuri ang mga wika.",
  "warn_detected_same": "Mukhang nasa target na wika na ang input.",
- "warn_same_chat": "Parehong wika ang ginagamit ng dalawang tao. Pakisuri ang mga wika."
+ "warn_same_chat": "Parehong wika ang ginagamit ng dalawang tao. Pakisuri ang mga wika.",
+ "tone_btn": "Baguhin ang tono",
+ "tone_label": "Pumili ng tono (i-tap para gamitin)",
+ "tone_neutral": "Karaniwan",
+ "summary_btn": "Ibuod",
+ "summary_label": "Buod"
 }

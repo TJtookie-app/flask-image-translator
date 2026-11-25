@@ -249,5 +249,10 @@
  "pron_label": "讀音",
  "warn_same_lang": "來源語言與目標語言相同，請檢查語言設定。",
  "warn_detected_same": "輸入的內容似乎已經是目標語言。",
- "warn_same_chat": "雙方使用相同的語言，請檢查語言設定。"
+ "warn_same_chat": "雙方使用相同的語言，請檢查語言設定。",
+ "tone_btn": "更改語氣",
+ "tone_label": "選擇語氣（點擊使用）",
+ "tone_neutral": "標準",
+ "summary_btn": "摘要",
+ "summary_label": "摘要"
 }

@@ -249,5 +249,10 @@
  "pron_label": "Cách đọc",
  "warn_same_lang": "Ngôn ngữ nguồn và đích giống nhau. Vui lòng kiểm tra lại.",
  "warn_detected_same": "Văn bản đầu vào dường như đã là ngôn ngữ đích.",
- "warn_same_chat": "Cả hai người đều sử dụng cùng một ngôn ngữ. Vui lòng kiểm tra lại."
+ "warn_same_chat": "Cả hai người đều sử dụng cùng một ngôn ngữ. Vui lòng kiểm tra lại.",
+ "tone_btn": "Đổi giọng văn",
+ "tone_label": "Chọn giọng văn (chạm để dùng)",
+ "tone_neutral": "Chuẩn",
+ "summary_btn": "Tóm tắt",
+ "summary_label": "Bản tóm tắt"
 }

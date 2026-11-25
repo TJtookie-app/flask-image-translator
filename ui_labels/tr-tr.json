@@ -249,5 +249,10 @@
  "pron_label": "Okunuş",
  "warn_same_lang": "Kaynak ve Hedef dil aynı. Lütfen dilleri kontrol edin.",
  "warn_detected_same": "Girdi zaten hedef dilde görünüyor.",
- "warn_same_chat": "Her iki kişi de aynı dili kullanıyor. Lütfen dilleri kontrol edin."
+ "warn_same_chat": "Her iki kişi de aynı dili kullanıyor. Lütfen dilleri kontrol edin.",
+ "tone_btn": "Tonu değiştir",
+ "tone_label": "Bir ton seçin (kullanmak için dokunun)",
+ "tone_neutral": "Standart",
+ "summary_btn": "Özetle",
+ "summary_label": "Özet"
 }

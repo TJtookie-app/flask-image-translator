@@ -249,5 +249,10 @@
  "pron_label": "Uitspraak",
  "warn_same_lang": "Van en Naar zijn dezelfde taal. Controleer de talen.",
  "warn_detected_same": "De invoer lijkt al in de doeltaal te zijn.",
- "warn_same_chat": "Beide personen gebruiken dezelfde taal. Controleer de talen."
+ "warn_same_chat": "Beide personen gebruiken dezelfde taal. Controleer de talen.",
+ "tone_btn": "Toon wijzigen",
+ "tone_label": "Kies een toon (tik om te gebruiken)",
+ "tone_neutral": "Standaard",
+ "summary_btn": "Samenvatten",
+ "summary_label": "Samenvatting"
 }

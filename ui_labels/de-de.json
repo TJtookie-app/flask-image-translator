@@ -252,5 +252,10 @@
  "pron_label": "Lesung",
  "warn_same_lang": "Ausgangs- und Zielsprache sind gleich. Bitte prüfen Sie die Sprachen.",
  "warn_detected_same": "Die Eingabe scheint bereits in der Zielsprache zu sein.",
- "warn_same_chat": "Beide Personen verwenden dieselbe Sprache. Bitte prüfen Sie die Sprachen."
+ "warn_same_chat": "Beide Personen verwenden dieselbe Sprache. Bitte prüfen Sie die Sprachen.",
+ "tone_btn": "Tonfall ändern",
+ "tone_label": "Tonfall wählen (tippen zur Nutzung)",
+ "tone_neutral": "Standard",
+ "summary_btn": "Zusammenfassen",
+ "summary_label": "Zusammenfassung"
 }
