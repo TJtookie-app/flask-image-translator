@@ -226,3 +226,16 @@ html[data-theme=light] .bottom-nav-in { background: rgba(255, 255, 255, .88); bo
 .hdr-brand > div { min-width: 0; }
 .hdr-brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 379px) { .hdr-lang-text { display: none; } }
+
+/* ---- v1.3: 設定タブの上のボタン列は、折り返さず1行で横にスクロール。「履歴を消去」は、その下の行 ---- */
+.hist-bar { display: flex; flex-direction: column; gap: .4rem; }
+.hist-chips { display: flex; flex-wrap: nowrap; gap: .25rem; overflow-x: auto; padding-bottom: .25rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+.hist-chips::-webkit-scrollbar { display: none; }
+.hist-chip { flex: 0 0 auto; white-space: nowrap; }
+.hist-clear { align-self: flex-end; padding: .25rem .25rem; }
+/* 下のナビの文字: 画面が狭い・文字を大きくしたときでも、隣と重ならないよう画面の幅に合わせて縮める */
+.bottom-nav .nav-btn span,
+html[data-fs] .bottom-nav .nav-btn span,
+html[data-fs=xl] .bottom-nav .nav-btn span { font-size: clamp(9px, 2.7vw, 11px) !important; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+/* とても狭い画面（320px 前後）: ロゴの下の小さい文字を省いて、言語ボタンと重ならないようにする */
+@media (max-width: 349px) { .hdr-brand > div > span:nth-child(2) { display: none; } }

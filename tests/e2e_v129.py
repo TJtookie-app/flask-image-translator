@@ -24,7 +24,7 @@ JS = "(()=>{const s=document.createElement('style');s.textContent=%s;document.he
 PROBE = """() => {
   const card = document.querySelector('.max-w-xl'); const cr = card.getBoundingClientRect(); const vw = innerWidth; const out = [];
   document.querySelectorAll('body *').forEach(e => {
-    if (e.closest('#bottom-nav') || e.closest('.hidden') || ['SCRIPT', 'OPTION', 'STYLE'].includes(e.tagName) || e.closest('.money-popup')) return;
+    if (e.closest('#bottom-nav') || e.closest('.hidden') || e.closest('.hist-chips') || ['SCRIPT', 'OPTION', 'STYLE'].includes(e.tagName) || e.closest('.money-popup')) return;
     const r = e.getBoundingClientRect(); if (!r.width || !r.height) return;
     const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || cs.position === 'fixed') return;
     if (r.right > vw + 0.5 || r.left < -0.5 || r.right > cr.right + 0.5) out.push([e.id || e.className.toString().slice(0, 50), Math.round(r.left), Math.round(r.right)]);

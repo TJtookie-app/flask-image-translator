@@ -78,8 +78,11 @@ function renderHistory() {
     const on = 'bg-indigo-600 text-white', off = 'bg-slate-800 text-slate-300';
     ['all', 'fav', 'gl', 'phrases', 'study', 'trash', 'settings'].forEach(k => {
         const pill = $('hf-' + k);
-        if (pill) pill.className = 'px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-700 transition ' + (histFilter === k ? on : off);
+        if (pill) pill.className = 'hist-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-700 transition ' + (histFilter === k ? on : off);
     });
+    // ボタンの列は1行で横にスクロールする。選んだボタンが隠れないよう、見える位置まで動かす（縦のスクロールは動かさない）
+    const cur = $('hf-' + histFilter);
+    if (cur && cur.scrollIntoView) { try { cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {} }
     const isGl = histFilter === 'gl', isPh = histFilter === 'phrases', isSet = histFilter === 'settings', isStudy = histFilter === 'study';
     const isTr = histFilter === 'trash';
     $('history-section').classList.toggle('hidden', isGl || isPh || isSet || isStudy || isTr);
