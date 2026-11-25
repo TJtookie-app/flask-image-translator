@@ -57,26 +57,22 @@ with sync_playwright() as p:
     pg.wait_for_selector("#overlay-box:not(.hidden)")
     pg.wait_for_function("document.getElementById('overlay-img').complete && document.getElementById('overlay-img').naturalWidth>0")
     check("overlay image is the (downscaled) upload", pg.evaluate("document.getElementById('overlay-img').src.startsWith('data:image/jpeg')"))
-    n = pg.evaluate("document.querySelectorAll('#overlay-layer .ov-block').length")
-    check(f"2 blocks drawn ({n})", n == 2)
+    n = pg.evaluate("document.querySelectorAll('#overlay-layer .ov-pick').length")
+    check(f"2 blocks drawn as tappable outlines ({n})", n == 2)
     check("overlay sits below the picker", pg.evaluate("""(() => { const a = document.getElementById('img-file-name').getBoundingClientRect();
         const b = document.getElementById('overlay-box').getBoundingClientRect(); return b.top >= a.bottom - 1; })()"""))
     pos = pg.evaluate("""(() => { const s = document.getElementById('overlay-stage').getBoundingClientRect();
-        const e = document.querySelector('.ov-block').getBoundingClientRect();
+        const e = document.querySelector('.ov-pick').getBoundingClientRect();
         return [(e.left - s.left) / s.width, (e.top - s.top) / s.height, e.width / s.width, e.height / s.height]; })()""")
     check(f"block position/size match box_2d {['%.2f' % v for v in pos]}",
           abs(pos[0] - .1) < .02 and abs(pos[1] - .1) < .02 and abs(pos[2] - .5) < .02 and abs(pos[3] - .15) < .02)
+    check("result box also shows text", "Ramen noodles" in pg.inner_text("#resultText-image"))
+    pg.click("#overlay-toggle")
+    check("即翻訳 replaces the text in the image", pg.evaluate("document.querySelectorAll('#overlay-layer .ov-block').length") == 2 and pg.inner_text(".ov-block >> nth=0") == "Ramen noodles")
     fits = pg.evaluate("[...document.querySelectorAll('.ov-block')].every(e => e.scrollHeight <= e.clientHeight + 1 && e.scrollWidth <= e.clientWidth + 1)")
     check("text fits inside each block", fits)
-    check("result box also shows text", "Ramen noodles" in pg.inner_text("#resultText-image"))
-    pg.click(".ov-block >> nth=0")
-    check("tap shows original", pg.inner_text(".ov-block >> nth=0") == "ラーメン")
-    pg.click(".ov-block >> nth=0")
-    check("tap again shows translation", pg.inner_text(".ov-block >> nth=0") == "Ramen noodles")
     pg.click("#overlay-toggle")
-    check("toggle hides overlay", not pg.is_visible("#overlay-layer"))
-    pg.click("#overlay-toggle")
-    check("toggle shows overlay", pg.is_visible("#overlay-layer"))
+    check("toggle restores the original image", pg.evaluate("document.querySelectorAll('#overlay-layer .ov-block').length") == 0)
 
     # ---- 画像を保持できない形式(ブラウザが読めないHEICなど)は訳文の一覧になる ----
     heic = os.path.join(tmp, "x.heic"); open(heic, "wb").write(b"\x00\x00\x00\x18ftypheic" + b"0" * 64)

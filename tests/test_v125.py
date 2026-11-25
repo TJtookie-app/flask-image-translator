@@ -32,9 +32,9 @@ def test_image_tab_has_the_four_tools(env):
     c = app.test_client(); start(c, "Japanese")
     html = c.get("/").get_data(as_text=True)
     for p in ("overlay", "ovc"):   # 画像タブとカメラタブ
-        for part in ("box", "stage", "img", "layer", "list", "toggle", "listbtn", "zoom", "save"):
+        for part in ("box", "stage", "img", "layer", "list", "toggle", "selbtn", "copy", "zoom", "save"):
             assert f'id="{p}-{part}"' in html, f"{p}-{part}"
-        for action in ("toggle", "list", "zoom", "save"):
+        for action in ("toggle", "select", "copy", "zoom", "save"):
             assert f"ovAction('{p}', '{action}')" in html
     assert "拡大" in html and "画像を保存" in html
 
@@ -78,8 +78,8 @@ def test_overlay_js_wiring():
         assert needle in js, needle
     # 保存はスマホでは共有シート、PCではダウンロード
     assert "pointer: coarse" in js and "navigator.canShare" in js and "a.download" in js
-    media = read("static", "js", "media.js")
-    assert "storeLastImage($('camera_data').value, 'camera')" in media
+    cam = read("static", "js", "camera_full.js")
+    assert "storeLastImage(dataUrl, 'camera')" in cam and "camera_data" in cam
 
 
 def test_pdf_js_progress_and_history():

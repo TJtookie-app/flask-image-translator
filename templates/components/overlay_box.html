@@ -5,13 +5,14 @@
         <img id="{{ p }}-img" class="block w-full h-auto" alt="">
         <div id="{{ p }}-layer" class="ov-layer absolute inset-0"></div>
     </div>
-    <div id="{{ p }}-list" class="hidden space-y-1.5 text-left"></div>
-    <p class="text-xs text-slate-400">{{ ui.ov_hint }}</p>
+    <p class="text-xs text-slate-400">{{ ui.ov_pick_hint }}</p>
     <div class="ov-tools">
-        <button type="button" id="{{ p }}-toggle" onclick="ovAction('{{ p }}', 'toggle')" class="ov-tool"></button>
-        <button type="button" id="{{ p }}-listbtn" onclick="ovAction('{{ p }}', 'list')" class="ov-tool"></button>
+        <button type="button" id="{{ p }}-toggle" onclick="ovAction('{{ p }}', 'toggle')" class="ov-tool ov-tool-main"></button>
+        <button type="button" id="{{ p }}-selbtn" onclick="ovAction('{{ p }}', 'select')" class="ov-tool"></button>
+        <button type="button" id="{{ p }}-copy" onclick="ovAction('{{ p }}', 'copy')" class="ov-tool">{{ ui.copy_btn }}</button>
         <button type="button" id="{{ p }}-zoom" onclick="ovAction('{{ p }}', 'zoom')" class="ov-tool"><i class="fa-solid fa-magnifying-glass-plus"></i><span>{{ ui.ov_zoom }}</span></button>
         <button type="button" id="{{ p }}-save" onclick="ovAction('{{ p }}', 'save')" class="ov-tool"><i class="fa-solid fa-download"></i><span class="ov-save-label">{{ ui.ov_save }}</span></button>
     </div>
+    <div id="{{ p }}-list" class="space-y-1.5 text-left"></div>
 </div>
 {% endmacro %}

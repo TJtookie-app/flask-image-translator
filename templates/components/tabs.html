@@ -67,9 +67,7 @@
 
 <!-- 4. カメラ -->
 <div id="tab-camera" class="tab-content hidden space-y-4 text-center">
-    <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 aspect-video flex items-center justify-center">
-        <video id="camera-video" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
-        <canvas id="camera-canvas" class="hidden"></canvas>
+    <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 flex items-center justify-center">
         <div id="camera-placeholder" class="p-6 text-slate-400 text-xs">
             <i class="fa-solid fa-camera text-3xl text-slate-500 block mb-2"></i>
             {{ ui.camera_instruction }}
@@ -81,14 +79,9 @@
         <input type="hidden" name="overlay" value="1">
         <input type="hidden" name="formality" value="auto"><input type="hidden" name="pron" value="0">
         <input type="hidden" id="camera_data" name="camera_data" value="">
-        <div class="flex gap-2">
-            <button type="button" onclick="startCamera()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 px-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-camera"></i> {{ ui.btn_camera_start }}
-            </button>
-            <button type="button" id="camera-capture-btn" onclick="captureCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-2xl text-xs transition shadow-lg flex items-center justify-center gap-2">
-                <i class="fa-solid fa-bolt"></i> <span class="btn-label">{{ ui.btn_camera_capture }}</span>
-            </button>
-        </div>
+        <button type="button" id="camera-open-btn" onclick="startCamera()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+            <i class="fa-solid fa-camera"></i> <span class="btn-label">{{ ui.btn_camera_start }}</span>
+        </button>
     </form>
     <!-- 撮った写真の上に訳文を重ねて表示（画像タブと同じ部品） -->
     {{ overlay_box('ovc') }}

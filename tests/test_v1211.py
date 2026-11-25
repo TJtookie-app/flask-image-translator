@@ -11,7 +11,7 @@ from conftest import ROOT
 
 JS_DIR = os.path.join(ROOT, "static", "js")
 MONEY_PARTS = ["money", "money_start", "money_where", "money_view"]
-OVERLAY_PARTS = ["overlay", "overlay_zoom", "overlay_save", "overlay_boot"]
+OVERLAY_PARTS = ["overlay", "overlay_pick", "overlay_zoom", "overlay_save", "overlay_boot"]
 
 
 def _lines(*parts):
@@ -54,7 +54,7 @@ def test_js_parts_exist_short_and_loaded_in_order(env):
     order = re.findall(r"js/([a-z_]+)\.js", tpl)
     for group in (MONEY_PARTS, OVERLAY_PARTS):
         idx = [order.index(n) for n in group]
-        assert idx == sorted(idx) and idx == list(range(idx[0], idx[0] + 4)), group   # 連続して、この順
+        assert idx == sorted(idx) and idx == list(range(idx[0], idx[0] + len(group))), group   # 連続して、この順
     assert order.index("overlay_boot") < order.index("pdf") < order.index("study")
     assert order.index("money_view") < order.index("app")
 

@@ -41,6 +41,20 @@
         <p id="money-rate-line" dir="auto" class="text-xs text-slate-400 text-right"></p>
     </section>
 
+    <!-- 単位変換（長さ・重さ・温度・体積・面積。API は使わない。オフラインでも使える） -->
+    <section id="unit-card" class="money-card space-y-2" aria-labelledby="unit-h">
+        <p id="unit-h" class="text-xs font-semibold text-slate-300"><i class="fa-solid fa-ruler-combined text-sky-300"></i> {{ ui.unit_title }}</p>
+        <div id="unit-cats" class="unit-cats" role="tablist"></div>
+        <input id="unit-amount" type="text" inputmode="decimal" autocomplete="off" aria-label="{{ ui.money_amount }}" value="1"
+               oninput="unitConvert()" class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2.5 text-lg font-semibold text-slate-100 text-right">
+        <div class="money-pair">
+            <select id="unit-from" onchange="unitConvert()" aria-label="{{ ui.money_from }}" class="money-select"></select>
+            <button type="button" onclick="unitSwap()" aria-label="{{ ui.money_swap }}" class="money-swap"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+            <select id="unit-to" onchange="unitConvert()" aria-label="{{ ui.money_to }}" class="money-select"></select>
+        </div>
+        <p id="unit-result" dir="auto" class="text-2xl font-extrabold text-sky-300 text-right break-words" role="status" aria-live="polite">—</p>
+    </section>
+
     <!-- 主な通貨の一覧 -->
     <section class="money-card space-y-2" aria-labelledby="money-list-h">
         <p id="money-list-h" class="text-xs font-semibold text-slate-300">{{ ui.money_list }}</p>

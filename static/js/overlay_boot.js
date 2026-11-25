@@ -1,4 +1,4 @@
-// 画像の重ね翻訳（4/4）: 送信前の処理と起動時の復元。overlay.js の後に読み込む
+// 画像の重ね翻訳（5/5）: 送信前の処理と起動時の復元。overlay.js の後に読み込む
 
 // ---- 送信前の処理（画像は縮小して保持／PDF は別処理） ----
 document.addEventListener('submit', async (ev) => {

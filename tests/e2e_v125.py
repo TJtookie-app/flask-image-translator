@@ -58,19 +58,16 @@ with sync_playwright() as p:
     pg.click("#tab-image button[type=submit]")
     pg.wait_for_selector("#overlay-box:not(.hidden)")
     pg.wait_for_function("document.getElementById('overlay-img').complete && document.getElementById('overlay-img').naturalWidth>0")
-    check("4 tool buttons visible (toggle/list/zoom/save)", all(not hidden(pg, f"#overlay-{b}") for b in ("toggle", "listbtn", "zoom", "save")))
+    check("5 tool buttons visible (toggle/select/copy/zoom/save)", all(not hidden(pg, f"#overlay-{b}") for b in ("toggle", "selbtn", "copy", "zoom", "save")))
     check("buttons are tall enough to tap (>=44px)", pg.evaluate("[...document.querySelectorAll('#overlay-box .ov-tool')].every(b => b.getBoundingClientRect().height >= 43)"))
 
     # 一覧で見る
-    pg.click("#overlay-listbtn")
-    check("list mode shows translations and originals", not hidden(pg, "#overlay-list") and "Gyoza" in pg.inner_text("#overlay-list") and "餃子" in pg.inner_text("#overlay-list"))
-    check("list mode hides the image and the overlay toggle", hidden(pg, "#overlay-stage") and hidden(pg, "#overlay-toggle"))
-    check("list button now says 'show image'", "画像で見る" in pg.inner_text("#overlay-listbtn"))
-    pg.click("#overlay-listbtn")
-    check("back to the image", not hidden(pg, "#overlay-stage") and hidden(pg, "#overlay-list") and "一覧" in pg.inner_text("#overlay-listbtn"))
+    check("panel under the image shows translations and originals", not hidden(pg, "#overlay-list") and "Gyoza" in pg.inner_text("#overlay-list") and "餃子" in pg.inner_text("#overlay-list"))
+    check("image stays visible next to the panel", not hidden(pg, "#overlay-stage"))
     check("fallback note not shown when the image exists", "表示できませんでした" not in pg.inner_text("#overlay-list"))
 
     # 拡大
+    pg.click("#overlay-toggle")   # 即翻訳（何も選んでいなければ全部）
     pg.click("#overlay-zoom")
     pg.wait_for_selector(".ov-zoom")
     check("zoom viewer opens with both blocks", pg.evaluate("document.querySelectorAll('.ov-zoom .ov-block').length") == 2)
@@ -119,11 +116,9 @@ with sync_playwright() as p:
     pg.wait_for_selector("#ovc-box:not(.hidden)", timeout=20000)
     pg.wait_for_function("document.getElementById('ovc-img').complete && document.getElementById('ovc-img').naturalWidth>0")
     check("camera result is shown on the camera tab", pg.is_visible("#tab-camera") and "Ramen" in pg.inner_text("#resultText-camera"))
-    check("camera photo is shown with the translation laid over it", pg.evaluate("document.getElementById('ovc-img').src.startsWith('data:image/jpeg')") and pg.evaluate("document.querySelectorAll('#ovc-layer .ov-block').length") == 2)
+    check("camera photo is shown with the translation laid over it", pg.evaluate("document.getElementById('ovc-img').src.startsWith('data:image/jpeg')") and pg.evaluate("document.querySelectorAll('#ovc-layer .ov-pick').length") == 2)
     check("image tab overlay not touched", hidden(pg, "#overlay-box"))
-    pg.click("#ovc-listbtn")
-    check("camera list view works", not hidden(pg, "#ovc-list") and "Gyoza" in pg.inner_text("#ovc-list"))
-    pg.click("#ovc-listbtn")
+    check("camera panel lists the translations", not hidden(pg, "#ovc-list") and "Gyoza" in pg.inner_text("#ovc-list"))
     with pg.expect_download() as dl2:
         pg.click("#ovc-save")
     check("camera photo can be saved", dl2.value.suggested_filename.endswith(".jpg") and Image.open(dl2.value.path()).size[0] > 100)

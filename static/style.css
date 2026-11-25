@@ -179,7 +179,7 @@ html[data-theme=light] .pbar { background: #cbd5e1; }
 .money-select option, .money-select optgroup, .money-popup option { background: #0f172a; color: #f1f5f9; }
 .money-select option:disabled { color: #64748b; }
 .money-pair { display: grid; grid-template-columns: minmax(0, 1fr) 2.75rem; grid-template-areas: "from swap" "to swap"; gap: .5rem; align-items: stretch; }
-.money-pair #money-from { grid-area: from; } .money-pair #money-to { grid-area: to; }
+.money-pair #money-from, .money-pair #unit-from { grid-area: from; } .money-pair #money-to, .money-pair #unit-to { grid-area: to; }
 .money-swap { grid-area: swap; align-self: center; width: 2.75rem; height: 2.75rem; border-radius: .75rem; background: #1e293b; color: #e2e8f0; border: 0; cursor: pointer; }
 .money-swap:hover { background: #334155; }
 .money-swap i { display: inline-block; transform: rotate(90deg); }   /* 上下に入れ替える向き */
@@ -250,3 +250,41 @@ html[data-fs=xl] .bottom-nav .nav-btn span { font-size: clamp(9px, 2.7vw, 11px) 
 .hist-arrow-l { left: 0; }
 .hist-arrow-r { right: 0; }
 .hist-scroll.can-l .hist-arrow-l, .hist-scroll.can-r .hist-arrow-r { display: flex; }
+
+/* ---- v1.5: 画像の文字をタップで選ぶ ---- */
+.ov-pick { position: absolute; box-sizing: border-box; border: 2px dashed rgba(129, 140, 248, .95); border-radius: 4px; background: rgba(79, 70, 229, .08); cursor: pointer; }
+.ov-pick:focus-visible, .ov-block:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.ov-pick.sel { border-style: solid; border-color: #818cf8; background: rgba(79, 70, 229, .38); }
+.ov-block.ov-picked { cursor: pointer; box-shadow: 0 0 0 2px #818cf8; }
+.ov-tool-main { background: #4f46e5; border-color: #6366f1; color: #fff; }
+.ov-tool-main:hover, .ov-tool-main:active { background: #6366f1; }
+html[data-theme=light] .ov-tool-main { background: #4f46e5; border-color: #4338ca; color: #fff; }
+html[data-theme=light] .ov-tool-main:hover, html[data-theme=light] .ov-tool-main:active { background: #4338ca; }
+html[data-theme=light] .ov-pick { border-color: #4f46e5; }
+
+/* ---- v1.5: 全画面のカメラ ---- */
+.cam-full { position: fixed; top: 0; right: 0; bottom: 0; left: 0; height: 100vh; height: 100dvh; z-index: 80; background: #000; color: #fff; }
+.cam-full.hidden { display: none; }
+.cam-full video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+.cam-top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    padding: calc(.6rem + env(safe-area-inset-top, 0px)) .75rem .9rem; background: linear-gradient(to bottom, rgba(0,0,0,.55), transparent); }
+.cam-pair { flex: 1 1 auto; min-width: 0; text-align: center; font-size: .9rem; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,.7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cam-btn { width: 2.9rem; height: 2.9rem; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 9999px;
+    background: rgba(0,0,0,.45); color: #fff; font-size: 1.15rem; cursor: pointer; }
+.cam-btn[aria-pressed=true] { background: #f59e0b; color: #111; }
+.cam-btn.hidden { display: none; }
+.cam-ghost { background: transparent; pointer-events: none; }
+[dir=rtl] .cam-back i { transform: scaleX(-1); }
+.cam-hint { position: absolute; left: 0; right: 0; bottom: calc(8.2rem + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: .8rem; padding: 0 1rem; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.cam-bottom { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.6rem calc(1.4rem + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to top, rgba(0,0,0,.6), transparent); }
+.cam-shutter { width: 4.6rem; height: 4.6rem; border-radius: 9999px; border: 4px solid #fff; background: #fff; box-shadow: inset 0 0 0 4px #000; cursor: pointer; padding: 0; }
+.cam-shutter:active { transform: scale(.94); background: #c7d2fe; }
+html.cam-open, html.cam-open body { overflow: hidden; }
+
+/* ---- v1.5: 単位変換 ---- */
+.unit-cats { display: flex; flex-wrap: wrap; gap: .35rem; }
+.unit-cat { flex: 1 1 auto; min-height: 2.5rem; padding: .35rem .75rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+.unit-cat.on { background: #0369a1; border-color: #38bdf8; color: #fff; }
+html[data-theme=light] .unit-cat { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+html[data-theme=light] .unit-cat.on { background: #0284c7; color: #fff; border-color: #0369a1; }

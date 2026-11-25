@@ -1,4 +1,4 @@
-// 画像の重ね翻訳（1/4）: 画像の縮小・重ね表示。続きは overlay_zoom.js / overlay_save.js / overlay_boot.js
+// 画像の重ね翻訳（1/5）: 画像の縮小・重ね表示。続きは overlay_pick.js（タップで選ぶ）/ overlay_zoom.js / overlay_save.js / overlay_boot.js
 // 画像の重ね翻訳（画像・カメラの結果に、訳文を文字の位置へ重ねて表示）
 // 操作: 重ね表示の切り替え / 一覧で見る / 拡大 / 画像として保存。PDF 翻訳は pdf.js
 const IMG_MAX_SIDE = 1600;
@@ -7,7 +7,7 @@ const OV_VIEWS = {
     image: { p: 'overlay', key: 'tl_last_img' },
     camera: { p: 'ovc', key: 'tl_last_img_camera' },
 };
-const ovState = {};   // mode -> { blocks, imgUrl, on（重ね表示）, list（一覧表示）, observed }
+const ovState = {};   // mode -> { blocks, imgUrl, sel（選んだブロックの番号の集合）, on（選んだ部分を訳文で置き換える）, list（画像が無いときの一覧）, observed }
 
 const isPdf = (f) => f && (f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''));
 
@@ -91,70 +91,34 @@ function fillLayer(layer, blocks) {
 function ovEls(mode) {
     const p = OV_VIEWS[mode].p;
     return { box: $(p + '-box'), stage: $(p + '-stage'), img: $(p + '-img'), layer: $(p + '-layer'), list: $(p + '-list'),
-        toggle: $(p + '-toggle'), listbtn: $(p + '-listbtn'), zoom: $(p + '-zoom'), save: $(p + '-save') };
+        toggle: $(p + '-toggle'), selbtn: $(p + '-selbtn'), copy: $(p + '-copy'), zoom: $(p + '-zoom'), save: $(p + '-save') };
 }
 
-// 状態（重ね表示・一覧）に合わせて、表示とボタンを整える
+// 状態（選んだ部分・置き換え）に合わせて、表示とボタンを整える
 function ovApply(mode) {
     const st = ovState[mode], el = ovEls(mode);
     if (!st || !el.box) return;
     const hasImg = !!st.imgUrl;
-    const showList = st.list || !hasImg;          // 画像を保持できなかったときは、自動で一覧にする
-    el.stage.classList.toggle('hidden', showList);
-    el.list.classList.toggle('hidden', !showList);
-    el.layer.classList.toggle('hidden', !st.on);
-    el.toggle.classList.toggle('hidden', !hasImg || showList);
-    el.toggle.textContent = st.on ? UI.ov_hide : UI.ov_show;
-    el.listbtn.classList.toggle('hidden', !hasImg);
-    el.listbtn.replaceChildren();
-    const ic = document.createElement('i');
-    ic.className = showList ? 'fa-solid fa-image' : 'fa-solid fa-list';
-    const tx = document.createElement('span');
-    tx.textContent = showList ? UI.ov_list_hide : UI.ov_list;
-    el.listbtn.append(ic, tx);
+    st.list = !hasImg;                             // 画像を保持できなかったときだけ、一覧だけを見せる
+    el.stage.classList.toggle('hidden', !hasImg);
+    el.list.classList.remove('hidden');
+    el.toggle.classList.toggle('hidden', !hasImg);
+    el.toggle.textContent = st.on && st.sel.size ? UI.ov_hide : UI.ov_instant;
+    el.selbtn.classList.toggle('hidden', !hasImg);
+    el.selbtn.textContent = st.sel.size === st.blocks.length ? UI.ov_select_none : UI.ov_select_all;
     el.zoom.classList.toggle('hidden', !hasImg);
     el.save.classList.toggle('hidden', !hasImg);
-    if (!showList && st.on) fitLayer(el.layer);
-}
-
-function renderOvList(mode) {
-    const st = ovState[mode], list = ovEls(mode).list;
-    list.replaceChildren();
-    if (!st.imgUrl) {
-        const note = document.createElement('p');
-        note.className = 'text-xs text-slate-400';
-        note.textContent = UI.ov_fallback;
-        list.appendChild(note);
-    }
-    st.blocks.forEach(b => {
-        const d = document.createElement('div');
-        d.className = 'p-2 rounded-xl bg-slate-950/60 border border-slate-800 space-y-0.5';
-        const tr = document.createElement('div');
-        tr.dir = 'auto';
-        tr.className = 'text-sm text-indigo-100 whitespace-pre-wrap';
-        tr.textContent = b.translation;
-        d.appendChild(tr);
-        if (b.text && st.imgUrl) {
-            const src = document.createElement('div');
-            src.dir = 'auto';
-            src.className = 'text-xs text-slate-400 whitespace-pre-wrap';
-            src.textContent = b.text;
-            d.appendChild(src);
-        }
-        list.appendChild(d);
-    });
+    pickRender(mode);
 }
 
 function renderOverlay(blocks, imgUrl, mode) {
     mode = mode || 'image';
     const el = ovEls(mode);
     if (!el.box) return;
-    const st = ovState[mode] = Object.assign(ovState[mode] || {}, { blocks, imgUrl: imgUrl || '', on: true, list: false });
+    const st = ovState[mode] = Object.assign(ovState[mode] || {}, { blocks, imgUrl: imgUrl || '', sel: new Set(), on: false, list: false });
     el.box.classList.remove('hidden');
-    renderOvList(mode);
     if (st.imgUrl) {
         el.img.src = st.imgUrl;
-        fillLayer(el.layer, blocks);
         if (!st.observed) {   // タブが開いたとき・回転したときに合わせ直す
             st.observed = true;
             if (window.ResizeObserver) new ResizeObserver(() => fitLayer(el.layer)).observe(el.stage);
@@ -169,8 +133,9 @@ function ovAction(p, action) {
     const mode = Object.keys(OV_VIEWS).find(m => OV_VIEWS[m].p === p);
     const st = mode && ovState[mode];
     if (!st) return;
-    if (action === 'toggle') { st.on = !st.on; ovApply(mode); }
-    else if (action === 'list') { st.list = !st.list; ovApply(mode); }
+    if (action === 'toggle') ovToggleOn(mode);
+    else if (action === 'select') ovSelectAll(mode);
+    else if (action === 'copy') ovCopyPicked(mode);
     else if (action === 'zoom') openZoom(mode);
     else if (action === 'save') saveOverlayImage(mode);
 }

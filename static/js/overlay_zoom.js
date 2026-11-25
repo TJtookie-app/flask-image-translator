@@ -1,4 +1,4 @@
-// 画像の重ね翻訳（2/4）: 拡大表示。overlay.js の後に読み込む
+// 画像の重ね翻訳（3/5）: 拡大表示。overlay.js の後に読み込む
 
 // ---- 拡大表示（全画面。＋－ボタンかピンチで大きくして、指でなぞって動かす） ----
 let zoomEl = null;
@@ -39,7 +39,7 @@ function openZoom(mode) {
     img.src = st.imgUrl;
     const layer = document.createElement('div');
     layer.className = 'ov-layer';
-    fillLayer(layer, st.blocks);
+    fillLayer(layer, ovPicked(st));
     layer.classList.toggle('hidden', !st.on);
     stage.append(img, layer);
     scroll.appendChild(stage);

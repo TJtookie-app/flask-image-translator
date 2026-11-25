@@ -1,4 +1,4 @@
-// 画像の重ね翻訳（3/4）: 画像として保存。overlay.js の後に読み込む
+// 画像の重ね翻訳（4/5）: 画像として保存。overlay.js の後に読み込む
 
 // ---- 画像として保存（元の画像に訳文を重ねて書き出す。スマホは共有シート、PC はダウンロード） ----
 function loadImageEl(url) {
@@ -72,7 +72,7 @@ async function saveOverlayImage(mode) {
     const label = btn.querySelector('.ov-save-label');
     const say = (t) => { if (label) { label.textContent = t; setTimeout(() => { label.textContent = UI.ov_save; }, 2200); } };
     try {
-        const blob = await renderOverlayBlob(st.blocks, st.imgUrl);
+        const blob = await renderOverlayBlob(ovPicked(st), st.imgUrl);
         const d = new Date(), z = (n) => String(n).padStart(2, '0');
         const name = `tookie-${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}.jpg`;
         const file = new File([blob], name, { type: 'image/jpeg' });

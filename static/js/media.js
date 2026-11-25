@@ -68,32 +68,3 @@ function toggleVoiceRecording() {
     };
     recognition.start();
 }
-
-// カメラ
-let videoStream = null;
-
-async function startCamera() {
-    try {
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        const video = $('camera-video');
-        video.srcObject = videoStream;
-        video.classList.remove('hidden');
-        $('camera-placeholder').classList.add('hidden');
-    } catch (err) {
-        alert(UI.err_camera + ': ' + err.message);
-    }
-}
-
-function captureCamera() {
-    const video = $('camera-video');
-    if (!videoStream || !video.videoWidth) { alert(UI.err_camera_first); return; }
-    const scale = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
-    const canvas = $('camera-canvas');
-    canvas.width = Math.round(video.videoWidth * scale);
-    canvas.height = Math.round(video.videoHeight * scale);
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    $('camera_data').value = canvas.toDataURL('image/jpeg', 0.85);
-    if (typeof storeLastImage === 'function') storeLastImage($('camera_data').value, 'camera');   // 結果に写真を重ねて見せるため、端末に一時保持
-    videoStream.getTracks().forEach(t => t.stop());
-    $('camera-form').requestSubmit();
-}

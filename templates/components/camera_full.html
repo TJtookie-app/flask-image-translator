@@ -1,0 +1,18 @@
+{# 全画面のカメラ（カメラタブを開く／「カメラ起動」で出る）。左上の矢印でもとの画面へ。撮影すると、そのまま翻訳へ（camera-form を送る） #}
+<div id="cam-full" class="cam-full hidden" role="dialog" aria-modal="true" aria-label="{{ ui.nav_camera }}">
+    <video id="camera-video" autoplay playsinline muted></video>
+    <canvas id="camera-canvas" class="hidden"></canvas>
+    <div class="cam-top">
+        <button type="button" class="cam-btn cam-back" onclick="closeCameraFull()" aria-label="{{ ui.big_close }}"><i class="fa-solid fa-arrow-left"></i></button>
+        <span id="cam-pair" class="cam-pair" dir="auto"></span>
+        <button type="button" id="cam-torch" class="cam-btn hidden" onclick="toggleTorch()" aria-pressed="false" aria-label="{{ ui.cam_light }}"><i class="fa-solid fa-bolt"></i></button>
+    </div>
+    <p id="cam-hint" class="cam-hint">{{ ui.cam_hint }}</p>
+    <div class="cam-bottom">
+        <label class="cam-btn" aria-label="{{ ui.cam_gallery }}"><i class="fa-solid fa-image"></i>
+            <input type="file" accept="image/*" class="hidden" onchange="cameraFromFile(this)">
+        </label>
+        <button type="button" id="camera-capture-btn" class="cam-shutter" onclick="captureCamera()" aria-label="{{ ui.btn_camera_capture }}"></button>
+        <span class="cam-btn cam-ghost" aria-hidden="true"></span>
+    </div>
+</div>
