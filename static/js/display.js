@@ -110,6 +110,7 @@ async function showAlternatives(mode, btn) {
     }
 }
 
+// 訳を、選んだ言い方に置き換える（読み方は、新しい訳に合わないので消す）。履歴も同じ内容にする
 function useAlternative(mode, alt) {
     const el = $('resultText-' + mode);
     if (!el || !RESULT) return;
@@ -119,7 +120,94 @@ function useAlternative(mode, alt) {
     const pr = $('pron-' + mode);
     if (pr) { pr.textContent = ''; pr.classList.add('hidden'); }
     if (currentEntryId) updateHistory(currentEntryId, x => { x.out = alt; x.pron = ''; });
-    $('alts-' + mode).classList.add('hidden');
+    ['alts-', 'tones-'].forEach(p => { const b = $(p + mode); if (b) b.classList.add('hidden'); });
+}
+
+// ---- 口調を変える: 1回の呼び出しで、丁寧・標準・くだけたの3つを受け取り、選んだものに置き換える ----
+async function showTones(mode, btn) {
+    const box = $('tones-' + mode), el = $('resultText-' + mode);
+    if (!box || !el || !RESULT) return;
+    const alts = $('alts-' + mode);
+    if (alts) alts.classList.add('hidden');
+    box.classList.remove('hidden');
+    box.replaceChildren();
+    const note = document.createElement('p');
+    note.className = 'text-xs text-slate-400';
+    note.textContent = UI.alts_loading;
+    box.appendChild(note);
+    if (btn) btn.disabled = true;
+    try {
+        const r = await fetch('/api/tones', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: RESULT.src || RESULT.out,
+                translation: el.innerText,
+                source: langByName(RESULT.srcLang) ? RESULT.srcLang : 'Auto',
+                target: RESULT.tgt,
+            }),
+        });
+        let data = {};
+        try { data = await r.json(); } catch (e) {}
+        if (!r.ok || !data.tones) throw new Error(data.error || UI.err_failed);
+        const label = document.createElement('p');
+        label.className = 'text-xs font-semibold text-slate-400';
+        label.textContent = UI.tone_label;
+        box.replaceChildren(label);
+        [['formal', UI.formality_formal], ['neutral', UI.tone_neutral], ['casual', UI.formality_casual]].forEach(([k, name]) => {
+            const text = data.tones[k];
+            if (!text) return;
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tone-chip w-full text-left text-sm px-3 py-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-100 transition';
+            const tag = document.createElement('span');
+            tag.className = 'block text-xs font-semibold text-indigo-300 mb-0.5';
+            tag.textContent = name;
+            const body = document.createElement('span');
+            body.dir = 'auto';
+            body.className = 'block whitespace-pre-wrap';
+            body.textContent = text;
+            b.append(tag, body);
+            b.addEventListener('click', () => useAlternative(mode, text));
+            box.appendChild(b);
+        });
+    } catch (e) {
+        note.textContent = e instanceof TypeError ? UI.err_network : (e.message || UI.err_failed);
+        note.className = 'text-xs text-red-300';
+        box.replaceChildren(note);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ---- 要約（長文のときだけボタンが出る。押したときだけ API を呼ぶ）----
+async function summarizeResult(mode, btn) {
+    const box = $('summary-' + mode);
+    if (!box || !RESULT) return;
+    box.classList.remove('hidden');
+    box.textContent = UI.alts_loading;
+    if (btn) btn.disabled = true;
+    try {
+        const r = await fetch('/api/summarize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: RESULT.src || '' }),
+        });
+        let data = {};
+        try { data = await r.json(); } catch (e) {}
+        if (!r.ok || !data.summary) throw new Error(data.error || UI.err_failed);
+        const label = document.createElement('p');
+        label.className = 'text-xs font-semibold text-indigo-300 mb-1';
+        label.textContent = UI.summary_label;
+        const body = document.createElement('div');
+        body.textContent = data.summary;
+        box.replaceChildren(label, body);
+    } catch (e) {
+        box.textContent = e instanceof TypeError ? UI.err_network : (e.message || UI.err_failed);
+        box.classList.add('text-red-300');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
 
 // ---- 結果の「🌐 言語」バッジ: 「Español（スペイン語）」のように、その言語自身の名前＋いまの画面の言語での名前にする ----

@@ -33,6 +33,9 @@
                     <button type="button" role="menuitem" class="rc-item" onclick="closeResultMenus(); showAlternatives('{{ mode }}', this)">
                         <i class="fa-solid fa-shuffle"></i><span class="rc-label">{{ ui.alts_btn }}</span>
                     </button>
+                    <button type="button" role="menuitem" class="rc-item" onclick="closeResultMenus(); showTones('{{ mode }}', this)">
+                        <i class="fa-solid fa-sliders"></i><span class="rc-label">{{ ui.tone_btn }}</span>
+                    </button>
                     <button type="button" role="menuitem" class="rc-item" onclick="closeResultMenus(); explainResult('{{ mode }}', this)">
                         <i class="fa-solid fa-lightbulb"></i><span class="rc-label">{{ ui.explain }}</span>
                     </button>
@@ -49,7 +52,14 @@
     {% if same_detected %}
     <p class="text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-2" role="status"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-1"></i>{{ ui.warn_detected_same }}</p>
     {% endif %}
+    {% if result_entry and (result_entry.src or '')|length >= summary_min %}
+    <button type="button" id="summary-btn-{{ mode }}" class="summary-btn w-full text-sm text-indigo-200 hover:text-white border border-indigo-800/60 hover:bg-indigo-900/40 rounded-xl py-2 transition" onclick="summarizeResult('{{ mode }}', this)">
+        <i class="fa-solid fa-list-ul"></i> {{ ui.summary_btn }}
+    </button>
+    <div id="summary-{{ mode }}" dir="auto" class="hidden text-sm text-indigo-100 bg-indigo-950/60 border border-indigo-800/60 rounded-xl p-3 whitespace-pre-wrap leading-relaxed"></div>
+    {% endif %}
     <div id="alts-{{ mode }}" class="hidden space-y-1.5"></div>
+    <div id="tones-{{ mode }}" class="hidden space-y-1.5"></div>
     <div id="explain-{{ mode }}" dir="auto" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed"></div>
     {% if show_original and original_text %}
     <details class="text-xs text-slate-400">

@@ -16,6 +16,7 @@ from translator import PDF_MAX_PAGES, TranslationError
 from ui_i18n import get_ui_labels
 
 MAX_TEXT_LEN = 5000
+SUMMARY_MIN_CHARS = 600   # 原文がこの文字数以上のときだけ、結果カードに「要約」ボタンを出す
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
 VALID_MODES = {"text", "image", "voice", "camera"}
 
@@ -151,6 +152,7 @@ def render_main(status=200, **ctx):
         pronunciation=None,
         overlay_blocks=None,
         pdf_max_pages=PDF_MAX_PAGES,
+        summary_min=SUMMARY_MIN_CHARS,
         same_detected=False,
         same_lang=(source_lang == target_lang),
         phrase_langs=available_languages(),

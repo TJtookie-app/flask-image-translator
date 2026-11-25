@@ -11,7 +11,7 @@ from json_reply import MAX_BLOCKS, _loads_object, _parse, clean_blocks
 from languages import AUTO
 from prompts import (
     ALT_SYSTEM, EXPLAIN_SYSTEM, FORMALITY_HINTS, LABEL_SYSTEM, OVERLAY_SYSTEM, PDF_SYSTEM,
-    PRON_HINT, SYSTEM_INSTRUCTION, VALID_FORMALITY, clean_formality,
+    PRON_HINT, SUMMARY_SYSTEM, SYSTEM_INSTRUCTION, TONE_SYSTEM, VALID_FORMALITY, clean_formality,
 )
 
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-4-hydrogen")
@@ -260,6 +260,50 @@ def alternative_translations(text, translation, source_lang, target_lang, formal
     if not out:
         raise TranslationError("err_failed")
     return out[:3]
+
+
+TONES = ("formal", "neutral", "casual")
+
+
+def tone_translations(text, translation, source_lang, target_lang):
+    """同じ原文の訳を、3つの口調（丁寧・標準・くだけた）で1回の呼び出しで返す。{"formal": ..., "neutral": ..., "casual": ...}
+    3つとも空でない文字列が返らなければ失敗にする（半端な結果で今の訳を置き換えない）"""
+    src = "the source language (detect it)" if source_lang == AUTO else source_lang
+    prompt = (
+        f"The text between <text> tags is in {src}. It was translated into {target_lang} as: {translation}\n"
+        f"Write that same translation in {target_lang} in three registers, with exactly the same meaning and information: "
+        "formal = polite and courteous (honorific forms where the language has them); "
+        "neutral = standard, neutral everyday wording; "
+        "casual = relaxed and friendly, as between friends. "
+        "If the language has no clear formal/casual forms, vary word choice and phrasing slightly. "
+        "Keep line breaks. Do not add or drop information."
+        "\n<text>\n" + text + "\n</text>"
+    )
+    data = _loads_object(_call([prompt], system=TONE_SYSTEM))
+    if not isinstance(data, dict):
+        raise TranslationError("err_failed")
+    out = {}
+    for k in TONES:
+        v = str(data.get(k) or "").strip()
+        if not v:
+            raise TranslationError("err_failed")
+        out[k] = v
+    return out
+
+
+def summarize_text(text, summary_lang):
+    """長い文章の要約を summary_lang で返す（箇条書き3〜5個。原文の言語は問わない）"""
+    prompt = (
+        f"Summarize the text between <text> tags in {summary_lang}. "
+        "Write 3 to 5 short bullet points, each starting with \"- \", covering the main points only "
+        "(about 120 words or fewer in total). Do not add information that is not in the text.\n"
+        "<text>\n" + text + "\n</text>"
+    )
+    data = _loads_object(_call([prompt], system=SUMMARY_SYSTEM))
+    summary = str((data or {}).get("summary") or "").strip()
+    if not summary:
+        raise TranslationError("err_failed")
+    return summary
 
 
 def translate_image(image_bytes, mime_type, target_lang, pronunciation=False):
