@@ -62,7 +62,7 @@ with sync_playwright() as p:
     check("menu opens with 7 items", pg.is_visible(".rc-menu") and pg.locator(".rc-menu .rc-item").count() == 7)
     check("aria-expanded true", pg.get_attribute(".rc-more", "aria-expanded") == "true")
     labels = pg.locator(".rc-menu .rc-label").all_inner_texts()
-    check(f"menu labels {labels}", labels == ["訳を修正", "大きく表示", "別の言い方", "口調を変える", "スラング・意味を解説", "単語帳に保存", "お気に入り"])
+    check(f"menu labels {labels}", labels == ["訳を修正", "大きく表示", "別の言い方", "口調を変える", "ニュアンス・使い方を解説", "単語帳に保存", "お気に入り"])
     box = pg.evaluate("(() => { const r = document.querySelector('.rc-menu').getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, innerWidth, innerHeight]; })()")
     check(f"menu fits in the screen {['%.0f' % v for v in box]}", box[0] >= 0 and box[2] <= box[4] and box[1] >= 0 and box[3] <= box[5])
     check("every item is at least 44px tall", pg.evaluate("[...document.querySelectorAll('.rc-item')].every(e => e.getBoundingClientRect().height >= 43)"))
@@ -77,7 +77,7 @@ with sync_playwright() as p:
     pg.wait_for_selector(".big-overlay")
     check("big display opened from the menu and menu closed", pg.is_visible(".big-overlay") and not pg.is_visible(".rc-menu"))
     pg.click(".big-close"); 
-    pg.click(".rc-more"); pg.click(".rc-item:has-text('スラング')")
+    pg.click(".rc-more"); pg.click(".rc-item:has-text('ニュアンス')")
     pg.wait_for_function("document.getElementById('explain-text').textContent.includes('slang!')")
     check("explain from the menu", True)
     pg.click(".rc-more"); pg.click(".rc-item.fav-btn")

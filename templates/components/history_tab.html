@@ -82,11 +82,15 @@
         <div class="space-y-3">
             <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">{{ ui.set_group_translate }}</p>
             <div class="space-y-1.5">
-                <p class="text-xs font-semibold text-slate-300">{{ ui.set_formality }}</p>
-                <div class="grid grid-cols-3 gap-1.5" data-setting="formality">
+                <p class="text-xs font-semibold text-slate-300">{{ ui.set_style }}</p>
+                <div class="grid grid-cols-4 gap-1.5" data-setting="formality">
                     <button type="button" data-v="auto" class="set-opt">{{ ui.formality_auto }}</button>
+                    <button type="button" data-v="natural" class="set-opt">{{ ui.formality_natural }}</button>
+                    <button type="button" data-v="literal" class="set-opt">{{ ui.formality_literal }}</button>
                     <button type="button" data-v="formal" class="set-opt">{{ ui.formality_formal }}</button>
+                    <button type="button" data-v="business" class="set-opt">{{ ui.formality_business }}</button>
                     <button type="button" data-v="casual" class="set-opt">{{ ui.formality_casual }}</button>
+                    <button type="button" data-v="slang" class="set-opt">{{ ui.formality_slang }}</button>
                 </div>
             </div>
             <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-200"><input type="checkbox" id="set-pron" class="accent-indigo-500"> {{ ui.set_pron }}</label>

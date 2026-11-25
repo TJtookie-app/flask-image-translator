@@ -11,7 +11,7 @@ from json_reply import MAX_BLOCKS, _loads_object, _parse, clean_blocks
 from languages import AUTO
 from prompts import (
     ALT_SYSTEM, EXPLAIN_SYSTEM, FORMALITY_HINTS, LABEL_SYSTEM, OVERLAY_SYSTEM, PDF_SYSTEM,
-    PRON_HINT, SUMMARY_SYSTEM, SYSTEM_INSTRUCTION, TONE_SYSTEM, VALID_FORMALITY, clean_formality,
+    PRON_HINT, SUMMARY_SYSTEM, explain_prompt, SYSTEM_INSTRUCTION, TONE_SYSTEM, VALID_FORMALITY, clean_formality,
 )
 
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-4-hydrogen")
@@ -209,12 +209,7 @@ def translate_text(text, source_lang, target_lang, context=None, glossary=None, 
 
 def explain_text(text, text_lang, explain_lang):
     """スラング・略語・ニュアンスの解説を explain_lang で返す"""
-    prompt = (
-        f"Explain the message between <text> tags (written in {text_lang or 'an unknown language'}). "
-        "Point out slang, abbreviations, idioms, typos and implied meaning or tone, then give a plain paraphrase. "
-        f"Be concise (under 120 words). Write the explanation in {explain_lang}.\n"
-        "<text>\n" + text + "\n</text>"
-    )
+    prompt = explain_prompt(text, text_lang, explain_lang)
     data = _loads_object(_call([prompt], system=EXPLAIN_SYSTEM))
     if data is None:
         raise TranslationError("err_failed")

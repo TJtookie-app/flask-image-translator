@@ -42,7 +42,10 @@ function toggleFavCurrent() {
 
 function explainResult(mode) {
     if (!RESULT) return;
-    explainText(RESULT.src || RESULT.out, RESULT.srcLang, $('explain-' + mode));
+    // 外国語の文を読むときは原文を、自分の言語で入力したときは、相手に言う訳文のほうを解説する
+    const reading = RESULT.srcLang && RESULT.srcLang !== UI_LANG;
+    if (reading || !RESULT.out) explainText(RESULT.src || RESULT.out, RESULT.srcLang, $('explain-' + mode));
+    else explainText(RESULT.out, RESULT.tgt, $('explain-' + mode));
 }
 
 function editResult(elementId) {
