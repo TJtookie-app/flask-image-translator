@@ -72,10 +72,3 @@ document.addEventListener('DOMContentLoaded', () => {
     bindSettings();
     renderSettings();
 });
-
-// ヘッダーの歯車ボタン: 履歴タブの「設定」を開く
-function openSettings() {
-    switchTab('history');
-    setHistFilter('settings');
-    window.scrollTo(0, 0);
-}

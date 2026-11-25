@@ -35,7 +35,7 @@ with sync_playwright() as p:
     ctx.request.post(B + "/set-display-language", form={"ui_lang": "Japanese"})
     pg.goto(B + "/"); pg.evaluate(SEED); pg.reload()
 
-    pg.click("#open-settings")
+    pg.click("#nav-history"); pg.click("#hf-settings")
     check("data tab shows counts", "履歴 2件" in pg.inner_text("#data-counts") and "用語集 1件" in pg.inner_text("#data-counts"))
     check("never-backed-up message", "まだバックアップしていません" in pg.inner_text("#data-last"))
 
@@ -55,11 +55,11 @@ with sync_playwright() as p:
     left = pg.evaluate("Object.keys(localStorage).filter(k=>k.startsWith('tl_')).length")
     check("localStorage emptied", left == 0)
     ctx.request.post(B + "/set-display-language", form={"ui_lang": "Japanese"})
-    pg.goto(B + "/"); pg.click("#nav-history")
+    pg.goto(B + "/"); pg.click("#nav-history"); pg.click("#hf-all")
     check("history empty after delete", pg.is_visible("#history-empty"))
 
     # --- 読み込み（復元） ---
-    pg.click("#open-settings")
+    pg.click("#nav-history"); pg.click("#hf-settings")
     pg.set_input_files("#data-section input[type=file]", path)
     pg.wait_for_function("document.getElementById('data-status').textContent.includes('読み込みました')")
     check("restored counts", pg.evaluate(LS('tl_history_v1')) == 2 and pg.evaluate(LS('tl_glossary_v1')) == 1 and pg.evaluate(LS('tl_chat_v1')) == 1)
@@ -68,7 +68,7 @@ with sync_playwright() as p:
     pg.click("#nav-conversation")
     check("restored chat bubble visible", "Hi" in pg.inner_text("#conv-log"))
     # 2回読み込んでも重複しない（統合）
-    pg.click("#open-settings")
+    pg.click("#nav-history"); pg.click("#hf-settings")
     pg.set_input_files("#data-section input[type=file]", path)
     pg.wait_for_function("document.getElementById('data-status').textContent.includes('読み込みました')")
     check("no duplicates on re-import", pg.evaluate(LS('tl_history_v1')) == 2 and pg.evaluate(LS('tl_chat_v1')) == 1)
@@ -100,7 +100,7 @@ with sync_playwright() as p:
     check("unknown language glossary dropped", pg.evaluate(LS('tl_glossary_v1')) == 2)
     check("bad chat side coerced to A", pg.evaluate("JSON.parse(localStorage.getItem('tl_chat_v1')).every(m=>m.side==='A'||m.side==='B')"))
     # 大きすぎるファイル
-    pg.click("#open-settings")
+    pg.click("#nav-history"); pg.click("#hf-settings")
     pg.set_input_files("#data-section input[type=file]", bad("x" * (5 * 1024 * 1024 + 10)))
     pg.wait_for_function("document.getElementById('data-status').textContent.includes('大きすぎ')")
     check("rejects >5MB", True)

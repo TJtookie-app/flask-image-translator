@@ -33,10 +33,11 @@ with sync_playwright() as p:
     pg.goto(B + "/", wait_until="domcontentloaded")
     pg.wait_for_function("typeof renderSettings==='function' && typeof showBig==='function'")
 
-    # --- ヘッダーの歯車から設定を開く ---
-    pg.click("#open-settings")
-    check("header gear opens settings", pg.is_visible("#settings-section") and not pg.is_visible("#tab-text"))
-    pg.click("#open-settings")
+    # --- v1.1: 歯車は無い。下のナビの右端「設定」を開くと、最初に設定が出る ---
+    check("no gear in header", not pg.is_visible("#open-settings") and pg.locator("#open-settings").count() == 0)
+    pg.click("#nav-history")
+    check("settings tab opens on settings", pg.is_visible("#settings-section") and not pg.is_visible("#tab-text"))
+    pg.click("#hf-all"); pg.click("#hf-settings")
     check("settings section visible", pg.is_visible("#settings-section") and not pg.is_visible("#history-list"))
     pg.click("#settings-section [data-setting=formality] [data-v=formal]")
     pg.click("#settings-section [data-setting=fs] [data-v=xl]")

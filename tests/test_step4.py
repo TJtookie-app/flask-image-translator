@@ -145,9 +145,16 @@ def test_step4_labels_exist_in_both_languages():
             assert languages.UI_LABELS[lang].get(k), (lang, k)
 
 
-def test_header_has_settings_button(env):
+def test_header_has_no_gear_and_nav_ends_with_settings(env):
+    """v1.1: 右上の歯車は無い。設定は、下のナビの右端（歯車アイコン）のタブの中"""
     app, *_ = env
     c = app.test_client()
     start(c, "Japanese")
     html = c.get("/").get_data(as_text=True)
-    assert 'id="open-settings"' in html and "openSettings()" in html
+    head = html[:html.index('id="language-bar-wrapper"')]
+    assert 'id="open-settings"' not in html and "openSettings" not in html and "fa-gear" not in head
+    nav = html[html.index('id="bottom-nav"'):]
+    nav = nav[:nav.index("</nav>")]
+    assert nav.rindex('id="nav-history"') > nav.index('id="nav-money"')                 # 右端は今までどおり
+    last = nav[nav.index('id="nav-history"'):]
+    assert "fa-gear" in last and "設定" in last and "履歴" not in last and "fa-clock-rotate-left" not in last

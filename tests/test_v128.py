@@ -31,7 +31,7 @@ def test_header_has_no_money_button(env):
     html = page(env)
     head = html[:html.index('id="language-bar-wrapper"')]
     assert 'id="nav-money"' not in head and "fa-coins" not in head     # 通貨はヘッダーではなく下のバー
-    assert head.index('href="/start"') < head.index('id="open-settings"')
+    assert 'id="open-settings"' not in head and "fa-gear" not in head           # 歯車は無い（設定は、下のナビの右端）
 
 
 def test_css_fixed_bar_rules():

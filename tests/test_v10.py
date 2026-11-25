@@ -1,7 +1,9 @@
 """V10: 文言・favicon・設定へのデータ統合"""
 import re
 
-from conftest import start
+import os
+
+from conftest import ROOT, start
 
 
 def test_image_tab_wording_mentions_pdf(env):
@@ -26,8 +28,8 @@ def test_data_lives_inside_settings_on_main(env):
     app, *_ = env
     c = app.test_client(); start(c, "Japanese")
     html = c.get("/").get_data(as_text=True)
-    assert 'id="hf-data"' not in html and 'id="hf-settings"' not in html     # メインでは歯車から開く
-    for pill in ("hf-all", "hf-fav", "hf-gl", "hf-phrases", "hf-study"):
+    assert 'id="hf-data"' not in html                                          # 「データ」ボタンは無い（設定の中にある）
+    for pill in ("hf-settings", "hf-all", "hf-fav", "hf-gl", "hf-phrases", "hf-study"):
         assert f'id="{pill}"' in html, pill
     s = html.index('id="settings-section"')
     e = html.index('id="glossary-section"')
@@ -38,7 +40,7 @@ def test_data_lives_inside_settings_on_main(env):
     assert not re.search(r'id="data-section" class="[^"]*hidden', html)
 
 
-def test_offline_page_keeps_a_settings_pill(env):
+def test_offline_page_has_a_settings_pill(env):
     app, *_ = env
     c = app.test_client()
     off = c.get("/offline").get_data(as_text=True)
@@ -53,3 +55,17 @@ def test_vocab_counts_in_backup_labels():
             assert "{v}" in L[k], (lang, k)
         assert L["btn_file_translate"] and L["file_input_label"]
         assert L["set_group_translate"] and L["set_group_display"]
+
+
+def test_settings_tab_chips_order_and_default(env):
+    """v1.1: 設定タブの中の並びは、設定 → 履歴 → お気に入り → ... 。最初に見せるのは設定"""
+    app, *_ = env
+    c = app.test_client(); start(c, "Japanese")
+    html = c.get("/").get_data(as_text=True)
+    ids = [html.index(f'id="{p}"') for p in ("hf-settings", "hf-all", "hf-fav", "hf-gl")]
+    assert ids == sorted(ids)
+    chip = html[html.index('id="hf-all"'):]
+    assert "履歴" in chip[:chip.index("</button>")] and "すべて" not in chip[:chip.index("</button>")]
+    js = open(os.path.join(ROOT, "static", "js", "history.js"), encoding="utf-8").read()
+    assert "let histFilter = 'settings'" in js
+    assert "openSettings" not in open(os.path.join(ROOT, "static", "js", "settings.js"), encoding="utf-8").read()

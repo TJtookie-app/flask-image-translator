@@ -2,7 +2,7 @@
 let currentEntryId = null;
 const OFFLINE_PAGE = !!window.IS_OFFLINE_PAGE;
 
-let histFilter = 'all';
+let histFilter = 'settings';   // 設定タブを開いたとき最初に見せるもの（履歴は、すぐ隣の「履歴」ボタン）
 function setHistFilter(f) { histFilter = (f === 'data') ? 'settings' : f; renderHistory(); }
 
 function iconBtn(icon, title, onClick) {

@@ -188,7 +188,7 @@ def test_header_buttons_are_big_enough_to_tap():
     # ロゴの画像（押すボタンではない）以外に、36px以下の指定がない
     stripped = re.sub(r'<img[^>]*>', '', header, flags=re.S)
     assert not re.search(r'(?<![\w-])(w|h)-(8|9|10)(?![\w.])', stripped)
-    assert header.count("h-11") >= 3 and header.count("w-11") >= 2
+    assert header.count("h-11") >= 2 and header.count("w-11") >= 1     # 言語ボタンと、入れ替えボタン（v1.1 で歯車を撤去）
     assert "w-11 h-11" in read("templates", "select_language.html")
     assert "w-11 h-11" in read("templates", "components", "history_tab.html")
 

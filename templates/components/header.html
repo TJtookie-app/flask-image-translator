@@ -11,14 +11,11 @@
         </div>
     </a>
 
-    <!-- 右側：UI言語切り替えボタン + 設定ボタン -->
+    <!-- 右側：UI言語切り替えボタン（設定は、下のナビの「設定」タブに入っている） -->
     <div class="flex items-center gap-1.5 flex-shrink-0">
         <a href="{{ url_for('start') }}" title="{{ ui.change_language }}" aria-label="{{ ui.change_language }}" class="flex items-center gap-1.5 px-3 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
             <i class="fa-solid fa-globe text-indigo-400"></i><span dir="auto" class="hdr-lang-text max-w-[5rem] truncate">{{ ui_native }}</span>
         </a>
-        <button type="button" id="open-settings" onclick="openSettings()" title="{{ ui.filter_settings }}" aria-label="{{ ui.filter_settings }}" class="flex items-center justify-center w-11 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs border border-slate-700 transition flex-shrink-0">
-            <i class="fa-solid fa-gear text-indigo-400"></i>
-        </button>
     </div>
 </div>
 
