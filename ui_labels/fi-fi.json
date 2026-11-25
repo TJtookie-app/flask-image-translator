@@ -249,5 +249,10 @@
  "pron_label": "Lukutapa",
  "warn_same_lang": "Lähde- ja kohdekieli ovat samat. Tarkista kielet.",
  "warn_detected_same": "Syöte näyttää olevan jo kohdekielellä.",
- "warn_same_chat": "Molemmat henkilöt käyttävät samaa kieltä. Tarkista kielet."
+ "warn_same_chat": "Molemmat henkilöt käyttävät samaa kieltä. Tarkista kielet.",
+ "tone_btn": "Muuta sävyä",
+ "tone_label": "Valitse sävy (napauta käyttääksesi)",
+ "tone_neutral": "Standardi",
+ "summary_btn": "Tiivistä",
+ "summary_label": "Tiivistelmä"
 }

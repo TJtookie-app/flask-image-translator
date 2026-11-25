@@ -249,5 +249,10 @@
  "pron_label": "Uttal",
  "warn_same_lang": "Från och Till är samma språk. Vänligen kontrollera språken.",
  "warn_detected_same": "Inmatningen verkar redan vara på målspråket.",
- "warn_same_chat": "Båda personerna använder samma språk. Vänligen kontrollera språken."
+ "warn_same_chat": "Båda personerna använder samma språk. Vänligen kontrollera språken.",
+ "tone_btn": "Ändra ton",
+ "tone_label": "Välj en ton (tryck för att använda)",
+ "tone_neutral": "Standard",
+ "summary_btn": "Sammanfatta",
+ "summary_label": "Sammanfattning"
 }

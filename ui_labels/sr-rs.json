@@ -249,5 +249,10 @@
  "pron_label": "Čitanje",
  "warn_same_lang": "Izvorni i ciljni jezik su isti. Proverite jezike.",
  "warn_detected_same": "Čini se da je unos već na ciljnom jeziku.",
- "warn_same_chat": "Obe osobe koriste isti jezik. Proverite jezike."
+ "warn_same_chat": "Obe osobe koriste isti jezik. Proverite jezike.",
+ "tone_btn": "Promeni ton",
+ "tone_label": "Izaberi ton (dodirni za korišćenje)",
+ "tone_neutral": "Standardno",
+ "summary_btn": "Sumiraj",
+ "summary_label": "Rezime"
 }

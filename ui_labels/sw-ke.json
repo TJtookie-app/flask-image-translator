@@ -249,5 +249,10 @@
  "pron_label": "Usomaji",
  "warn_same_lang": "Kutoka na Kwenda ni lugha moja. Tafadhali angalia lugha.",
  "warn_detected_same": "Maandishi yaliyoingizwa yanaonekana tayari kuwa katika lugha lengwa.",
- "warn_same_chat": "Watu wote wawili wanatumia lugha moja. Tafadhali angalia lugha."
+ "warn_same_chat": "Watu wote wawili wanatumia lugha moja. Tafadhali angalia lugha.",
+ "tone_btn": "Badilisha toni",
+ "tone_label": "Chagua toni (gusa ili utumie)",
+ "tone_neutral": "Kawaida",
+ "summary_btn": "Muhtasari",
+ "summary_label": "Muhtasari"
 }

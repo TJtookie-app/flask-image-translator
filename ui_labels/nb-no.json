@@ -249,5 +249,10 @@
  "pron_label": "Lesemåte",
  "warn_same_lang": "Fra og Til er samme språk. Sjekk språkene.",
  "warn_detected_same": "Inndataene ser allerede ut til å være på målspråket.",
- "warn_same_chat": "Begge personer bruker samme språk. Sjekk språkene."
+ "warn_same_chat": "Begge personer bruker samme språk. Sjekk språkene.",
+ "tone_btn": "Endre tone",
+ "tone_label": "Velg en tone (trykk for å bruke)",
+ "tone_neutral": "Standard",
+ "summary_btn": "Oppsummer",
+ "summary_label": "Oppsummering"
 }

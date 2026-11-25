@@ -249,5 +249,10 @@
  "pron_label": "Čtení",
  "warn_same_lang": "Zdrojový a cílový jazyk jsou stejné. Zkontrolujte prosím jazyky.",
  "warn_detected_same": "Vstup se zdá být již v cílovém jazyce.",
- "warn_same_chat": "Obě osoby používají stejný jazyk. Zkontrolujte prosím jazyky."
+ "warn_same_chat": "Obě osoby používají stejný jazyk. Zkontrolujte prosím jazyky.",
+ "tone_btn": "Změnit tón",
+ "tone_label": "Vyberte tón (klepnutím použijete)",
+ "tone_neutral": "Standardní",
+ "summary_btn": "Shrnout",
+ "summary_label": "Shrnutí"
 }

@@ -249,5 +249,10 @@
  "pron_label": "Citire",
  "warn_same_lang": "Limbile sursă și țintă sunt identice. Vă rugăm să verificați limbile.",
  "warn_detected_same": "Se pare că textul introdus este deja în limba țintă.",
- "warn_same_chat": "Ambele persoane folosesc aceeași limbă. Vă rugăm să verificați limbile."
+ "warn_same_chat": "Ambele persoane folosesc aceeași limbă. Vă rugăm să verificați limbile.",
+ "tone_btn": "Schimbă tonul",
+ "tone_label": "Alege un ton (apasă pentru a folosi)",
+ "tone_neutral": "Standard",
+ "summary_btn": "Rezumat",
+ "summary_label": "Rezumat"
 }

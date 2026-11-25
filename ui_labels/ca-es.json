@@ -249,5 +249,10 @@
  "pron_label": "Lectura",
  "warn_same_lang": "L'idioma d'origen i el de destinació són el mateix. Si us plau, comprova els idiomes.",
  "warn_detected_same": "L'entrada ja sembla estar en l'idioma de destinació.",
- "warn_same_chat": "Ambdues persones utilitzen el mateix idioma. Si us plau, comprova els idiomes."
+ "warn_same_chat": "Ambdues persones utilitzen el mateix idioma. Si us plau, comprova els idiomes.",
+ "tone_btn": "Canvia el to",
+ "tone_label": "Tria un to (toca per utilitzar)",
+ "tone_neutral": "Estàndard",
+ "summary_btn": "Resumir",
+ "summary_label": "Resum"
 }

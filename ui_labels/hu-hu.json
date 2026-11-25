@@ -249,5 +249,10 @@
  "pron_label": "Olvasat",
  "warn_same_lang": "A forrás és a cél nyelv ugyanaz. Kérjük, ellenőrizze a nyelveket.",
  "warn_detected_same": "A bevitt szöveg már a célnyelven van.",
- "warn_same_chat": "Mindkét személy ugyanazt a nyelvet használja. Kérjük, ellenőrizze a nyelveket."
+ "warn_same_chat": "Mindkét személy ugyanazt a nyelvet használja. Kérjük, ellenőrizze a nyelveket.",
+ "tone_btn": "Hangnem módosítása",
+ "tone_label": "Válassz hangnemet (koppints a használathoz)",
+ "tone_neutral": "Normál",
+ "summary_btn": "Összegzés",
+ "summary_label": "Összegzés"
 }
