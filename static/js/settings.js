@@ -1,7 +1,7 @@
 // 表示・翻訳の設定（丁寧さ・読み方・文字サイズ・配色）。この端末の localStorage に保存する
 const SKEY = 'tl_settings_v1';
-const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark' };
-const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light'] };
+const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark', contrast: false };
+const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light', 'auto'] };
 
 function loadSettings() {
     const st = Object.assign({}, SETTING_DEFAULTS);
@@ -9,6 +9,7 @@ function loadSettings() {
         const saved = JSON.parse(localStorage.getItem(SKEY) || '{}') || {};
         Object.keys(SETTING_CHOICES).forEach(k => { if (SETTING_CHOICES[k].indexOf(saved[k]) >= 0) st[k] = saved[k]; });
         if (typeof saved.pron === 'boolean') st.pron = saved.pron;
+        if (typeof saved.contrast === 'boolean') st.contrast = saved.contrast;
     } catch (e) {}
     return st;
 }
@@ -17,9 +18,19 @@ function saveSettings(st) {
     try { localStorage.setItem(SKEY, JSON.stringify(st)); } catch (e) {}
 }
 
+// 実際に使う配色（「自動」のときは、端末の設定に合わせる）
+function effectiveTheme(st) {
+    if (st.theme === 'auto') {
+        try { return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch (e) { return 'dark'; }
+    }
+    return st.theme === 'light' ? 'light' : 'dark';
+}
+
 function applySettings(st) {
     const d = document.documentElement;
-    if (st.theme === 'light') d.setAttribute('data-theme', 'light'); else d.removeAttribute('data-theme');
+    const theme = effectiveTheme(st);
+    if (theme === 'light') d.setAttribute('data-theme', 'light'); else d.removeAttribute('data-theme');
+    if (st.contrast) d.setAttribute('data-contrast', 'high'); else d.removeAttribute('data-contrast');
     if (st.fs === 'l' || st.fs === 'xl') {
         d.setAttribute('data-fs', st.fs);
         d.style.fontSize = st.fs === 'xl' ? '128%' : '114%';
@@ -28,7 +39,7 @@ function applySettings(st) {
         d.style.fontSize = '';
     }
     const meta = document.querySelector('meta[name=theme-color]');
-    if (meta) meta.setAttribute('content', st.theme === 'light' ? '#f1f5f9' : '#0f172a');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#F4F8FB' : '#0B1020');
 }
 
 function renderSettings() {
@@ -44,6 +55,8 @@ function renderSettings() {
     });
     const pron = document.getElementById('set-pron');
     if (pron) pron.checked = !!st.pron;
+    const con = document.getElementById('set-contrast');
+    if (con) con.checked = !!st.contrast;
 }
 
 function bindSettings() {
@@ -65,6 +78,18 @@ function bindSettings() {
         st.pron = pron.checked;
         saveSettings(st);
     });
+    const con = document.getElementById('set-contrast');
+    if (con) con.addEventListener('change', () => {
+        const st = loadSettings();
+        st.contrast = con.checked;
+        saveSettings(st);
+        applySettings(st);
+    });
+    try {   // 「自動」のとき、端末の設定が変わったら、すぐ反映する
+        const mq = window.matchMedia('(prefers-color-scheme: light)');
+        const on = () => { const st = loadSettings(); if (st.theme === 'auto') applySettings(st); };
+        if (mq.addEventListener) mq.addEventListener('change', on); else if (mq.addListener) mq.addListener(on);
+    } catch (e) {}
 }
 
 document.addEventListener('DOMContentLoaded', () => {

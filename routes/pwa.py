@@ -33,7 +33,7 @@ def register(app):
             "id": "/", "name": "TOOKIE - AI Universal Translator", "short_name": "TOOKIE",
             "description": "AI translator for text, images, voice and chat",
             "start_url": "/", "scope": "/", "display": "standalone", "orientation": "portrait",
-            "background_color": "#020617", "theme_color": "#0f172a",
+            "background_color": "#0B1020", "theme_color": "#0B1020",
             "icons": [
                 {"src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
                 {"src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},

@@ -47,7 +47,7 @@ def test_menu_script_and_styles_present():
     for fn in ("function toggleResultMenu", "function closeResultMenus", "Escape"):
         assert fn in js
     css = open(os.path.join(ROOT, "static/style.css"), encoding="utf-8").read()
-    for sel in (".rc-btn", ".rc-menu", ".rc-item", ".undo-toast", "html[data-theme=light] .rc-menu"):
+    for sel in (".rc-btn", ".rc-menu", ".rc-item", ".undo-toast"):
         assert sel in css, sel
 
 

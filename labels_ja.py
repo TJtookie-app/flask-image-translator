@@ -251,6 +251,7 @@ LABELS = {
     'fs_xl': '特大',
     'set_theme': '配色',
     'theme_dark': 'ダーク',
+    'set_contrast': '高コントラスト（日差しの下で見やすく）',
     'theme_light': 'ライト',
     'set_note': 'この設定はこの端末に保存されます。',
     'big_show': '大きく表示',

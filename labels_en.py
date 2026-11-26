@@ -251,6 +251,7 @@ LABELS = {
     'fs_xl': 'Extra large',
     'set_theme': 'Theme',
     'theme_dark': 'Dark',
+    'set_contrast': 'High contrast (easier to read in sunlight)',
     'theme_light': 'Light',
     'set_note': 'These settings are saved on this device.',
     'big_show': 'Show large',

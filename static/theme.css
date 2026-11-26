@@ -1,0 +1,137 @@
+/* v1.7 配色。ダーク「ナイト・インク」／ライト「クリア・ミント」。
+   色は役割の名前（変数）で持つ。ダーク/ライトは変数の中身を切り替えるだけ。style.css のあとに読み込む。 */
+
+/* ---- 色の土台（既定＝ダーク） ---- */
+:root {
+    --bg: #0B1020; --bg-rgb: 11, 16, 32;
+    --card: #121A2E; --card-rgb: 18, 26, 46;
+    --card2: #1A2440; --card2-hover: #243052;
+    --line: rgba(148, 163, 184, .17); --line2: rgba(148, 163, 184, .26);
+    --text: #D7DCEA; --text2: #B4BDD3; --text3: #8D98B4; --text4: #6F7A96;
+    --accent: #7C83F0; --accent-text: #9AA0F5; --accent-soft: rgba(124, 131, 240, .15); --accent-line: rgba(124, 131, 240, .3);
+    --btn: #5D64E0; --btn-hover: #6E75EA;
+    --grad-btn: linear-gradient(135deg, #5D64E0 0%, #9B49D2 56%, #CF4C86 100%);
+    --grad-ring: linear-gradient(135deg, #F2A33E 0%, #E8546F 34%, #B246D0 66%, #5E63EE 100%);
+    --glass: rgba(18, 26, 46, .66); --glass-line: rgba(255, 255, 255, .11); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .07);
+    --glass-blur: blur(16px) saturate(1.35);
+    --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+html[data-theme=light] {
+    --bg: #F4F8FB; --bg-rgb: 244, 248, 251;
+    --card: #FFFFFF; --card-rgb: 255, 255, 255;
+    --card2: #E6EEF6; --card2-hover: #D5E1EE;
+    --line: #C9D6E3; --line2: #AFC0D2;
+    --text: #0F172A; --text2: #1E293B; --text3: #475569; --text4: #56637A;
+    --accent: #2F5BFF; --accent-text: #2447D6; --accent-soft: #E3EBFF; --accent-line: #B8C8FF;
+    --btn: #2F5BFF; --btn-hover: #2449D6;
+    --grad-btn: linear-gradient(135deg, #2F5BFF 0%, #8B3FE0 56%, #D6407F 100%);
+    --grad-ring: linear-gradient(135deg, #FFA43A 0%, #F2545B 34%, #C13DD0 66%, #3F63FF 100%);
+    --glass: rgba(255, 255, 255, .9); --glass-line: rgba(100, 116, 139, .28); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9);
+    --glass-blur: blur(12px) saturate(1.2);
+    --shadow: 0 10px 28px rgba(15, 23, 42, .18);
+}
+/* 高コントラスト（屋外・まぶしい場所向け）。文字と境界線を濃くする */
+html[data-contrast=high] { --line: rgba(203, 213, 225, .42); --line2: rgba(203, 213, 225, .6); --text: #F4F6FC; --text2: #E1E6F3; --text3: #C2CADF; --text4: #A4AFCB; }
+html[data-theme=light][data-contrast=high] { --bg: #FFFFFF; --bg-rgb: 255, 255, 255; --card2: #DCE6F1; --line: #7F93AB; --line2: #64788F; --text: #020617; --text2: #0F172A; --text3: #1E293B; --text4: #334155; --accent-text: #1A36A8; --accent-soft: #EAF0FF; --glass: rgba(255, 255, 255, .97); --btn: #2447D6; --btn-hover: #1E3BB0; }
+
+/* ---- 画面の下地 ---- */
+html:not([data-theme=light]) body, html:not([data-theme=light]) body[class*="bg-slate-950"] { background-color: var(--bg); color: var(--text); }
+html[data-theme=light] body, html[data-theme=light] body[class*="bg-slate-950"] { background-color: var(--bg) !important; color: var(--text) !important; }
+
+/* ---- ダーク: Tailwind の色を、新しい色の名前に置き換える ---- */
+html:not([data-theme=light]) [class~="bg-slate-900"] { background-color: var(--card); }
+html:not([data-theme=light]) [class~="bg-slate-800"] { background-color: var(--card2); }
+html:not([data-theme=light]) [class~="bg-slate-800/80"] { background-color: rgba(26, 36, 64, .8); }
+html:not([data-theme=light]) [class~="hover:bg-slate-700"]:hover { background-color: var(--card2-hover); }
+html:not([data-theme=light]) [class~="hover:bg-slate-800/40"]:hover { background-color: rgba(26, 36, 64, .4); }
+html:not([data-theme=light]) [class~="bg-slate-950/40"] { background-color: rgba(var(--bg-rgb), .4); }
+html:not([data-theme=light]) [class~="bg-slate-950/50"] { background-color: rgba(var(--bg-rgb), .5); }
+html:not([data-theme=light]) [class~="bg-slate-950/60"] { background-color: rgba(var(--bg-rgb), .6); }
+html:not([data-theme=light]) [class~="bg-slate-950/70"] { background-color: rgba(var(--bg-rgb), .7); }
+html:not([data-theme=light]) [class~="bg-slate-950/90"] { background-color: rgba(var(--bg-rgb), .9); }
+html:not([data-theme=light]) [class*="border-slate-"] { border-color: var(--line); }
+html:not([data-theme=light]) [class~="border-slate-700"] { border-color: var(--line2); }
+html:not([data-theme=light]) .text-slate-100, html:not([data-theme=light]) .text-slate-200 { color: var(--text); }
+html:not([data-theme=light]) .text-slate-300 { color: var(--text2); }
+html:not([data-theme=light]) .text-slate-400 { color: var(--text3); }
+html:not([data-theme=light]) .text-slate-500 { color: var(--text4); }
+html:not([data-theme=light]) .text-white:not([class*="bg-indigo-"]):not([class*="from-indigo-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]) { color: #EEF1FA; }
+html:not([data-theme=light]) [class~="hover:text-slate-200"]:hover, html:not([data-theme=light]) [class~="hover:text-slate-300"]:hover { color: var(--text); }
+html:not([data-theme=light]) .text-indigo-100, html:not([data-theme=light]) .text-indigo-200 { color: #C9CDFB; }
+html:not([data-theme=light]) .text-indigo-300, html:not([data-theme=light]) .text-indigo-400 { color: var(--accent-text); }
+html:not([data-theme=light]) [class~="bg-indigo-950/30"], html:not([data-theme=light]) [class~="bg-indigo-950/40"],
+html:not([data-theme=light]) [class~="bg-indigo-950/50"], html:not([data-theme=light]) [class~="bg-indigo-950/60"] { background-color: var(--accent-soft); }
+html:not([data-theme=light]) [class~="hover:bg-indigo-950/40"]:hover, html:not([data-theme=light]) [class~="hover:bg-indigo-900/40"]:hover { background-color: rgba(124, 131, 240, .22); }
+html:not([data-theme=light]) [class*="border-indigo-8"], html:not([data-theme=light]) [class*="border-indigo-9"], html:not([data-theme=light]) [class~="border-indigo-400/40"] { border-color: var(--accent-line); }
+html:not([data-theme=light]) [class~="placeholder-slate-400"]::placeholder { color: var(--text4); }
+html:not([data-theme=light]) ::selection { background: rgba(124, 131, 240, .45); color: #fff; }
+
+/* ---- 主役のボタン（ダーク・ライト共通。色は変数で切り替わる） ---- */
+html [class~="bg-indigo-600"]:not([class*="from-"]) { background-color: var(--btn); }
+html [class~="hover:bg-indigo-500"]:hover:not([class*="from-"]) { background-color: var(--btn-hover); }
+html [class~="from-indigo-600"] { background-image: var(--grad-btn); }
+html [class~="hover:from-indigo-500"]:hover { filter: brightness(1.08); }
+html[data-theme=light] .set-opt[aria-pressed=true] { background-color: var(--btn) !important; }
+html[data-theme=light] [class~="focus:border-indigo-500"]:focus { border-color: var(--accent); }
+
+/* ---- ライト: 新しい色（style.css のライト指定を、変数で上書き） ---- */
+html[data-theme=light] [class*="bg-slate-950"] { background-color: var(--bg) !important; }
+html[data-theme=light] [class*="bg-slate-900"] { background-color: var(--card) !important; }
+html[data-theme=light] [class*="bg-slate-800"] { background-color: var(--card2) !important; }
+html[data-theme=light] [class*="hover:bg-slate-700"]:hover { background-color: var(--card2-hover) !important; }
+html[data-theme=light] [class*="border-slate-"] { border-color: var(--line) !important; }
+html[data-theme=light] .text-slate-100, html[data-theme=light] .text-slate-200 { color: var(--text) !important; }
+html[data-theme=light] .text-slate-300 { color: var(--text2) !important; }
+html[data-theme=light] .text-slate-400 { color: var(--text3) !important; }
+html[data-theme=light] .text-slate-500, html[data-theme=light] .text-slate-600 { color: var(--text4) !important; }
+html[data-theme=light] .text-indigo-300, html[data-theme=light] .text-indigo-400 { color: var(--accent-text) !important; }
+html[data-theme=light] [class*="bg-indigo-950"] { background-color: var(--accent-soft) !important; }
+html[data-theme=light] [class*="border-indigo-"] { border-color: var(--accent-line) !important; }
+
+/* ---- ガラス風（3か所だけ: 下のナビ・「…」メニュー・カメラの丸ボタン／お知らせ） ---- */
+.bottom-nav-in, .rc-menu, .undo-toast {
+    background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--shadow), var(--glass-hi);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+.rc-menu, .undo-toast { color: var(--text); }
+.cam-btn:not(.cam-ghost), .cam-back { background: rgba(10, 14, 28, .42); border: 1px solid rgba(255, 255, 255, .16);
+    -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3); }
+.cam-btn[aria-pressed=true] { background: #f59e0b; color: #111; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-nav-in, .rc-menu, .undo-toast { background: var(--card); }
+    .cam-btn:not(.cam-ghost), .cam-back { background: rgba(10, 14, 28, .7); }
+}
+@media (prefers-reduced-transparency: reduce) {
+    .bottom-nav-in, .rc-menu, .undo-toast { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+html[data-theme=light] .rc-item { color: var(--text); }
+html[data-theme=light] .rc-item i { color: var(--text3); }
+
+/* ---- グラデーション（部分使い: ロゴの縁・いま開いているタブの印・進捗バー） ---- */
+.hdr-brand img { background: var(--grad-ring); padding: 2px; border: 0; }
+.nav-btn.text-indigo-400 { position: relative; }
+.nav-btn.text-indigo-400::after {
+    content: ""; position: absolute; top: 3px; left: 50%; width: 1.2rem; height: 3px; margin-left: -.6rem;
+    border-radius: 2px; background: var(--grad-ring);
+}
+.pbar-fill { background: var(--grad-ring) !important; }
+
+/* ---- 控えめな動き ---- */
+@keyframes tl-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes tl-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes tl-sheen { to { transform: translateX(100%); } }
+.tab-content:not(.hidden) { animation: tl-fade .2s ease-out; }
+.rc-menu:not(.hidden) { animation: tl-pop .14s ease-out; transform-origin: bottom right; }
+.rc-menu.rc-down:not(.hidden) { transform-origin: top right; }
+.as-card { animation: tl-fade .22s ease-out; }
+.nav-btn, .rc-btn, .set-opt, .rc-item, .cam-btn { transition: background-color .15s ease, color .15s ease, transform .1s ease; }
+.nav-btn:active, .rc-btn:active, .set-opt:active, .cam-btn:active { transform: scale(.95); }
+.is-busy { position: relative; overflow: hidden; }
+.is-busy::after {
+    content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; transform: translateX(-100%);
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .3) 50%, transparent 70%);
+    animation: tl-sheen 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

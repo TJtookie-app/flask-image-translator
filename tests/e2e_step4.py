@@ -51,7 +51,7 @@ with sync_playwright() as p:
     check("light attr", pg.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
     bg = pg.evaluate("getComputedStyle(document.body).backgroundColor")
     card = pg.evaluate("getComputedStyle(document.querySelector('[class*=bg-slate-900]')).backgroundColor")
-    check(f"light colors body={bg} card={card}", bg == "rgb(241, 245, 249)" and card == "rgb(255, 255, 255)")
+    check(f"light colors body={bg} card={card}", bg == "rgb(244, 248, 251)" and card == "rgb(255, 255, 255)")
 
     # --- 翻訳（丁寧さ・読み方がサーバーに届く） ---
     pg.click("#nav-text")

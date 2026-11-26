@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const f = form.querySelector('input[name=formality]'), pr = form.querySelector('input[name=pron]');
             if (f) f.value = st.formality;
             if (pr) pr.value = st.pron ? '1' : '0';
-            form.querySelectorAll('button[type=submit]').forEach(b => { b.disabled = true; b.classList.add('opacity-60'); });
+            form.querySelectorAll('button[type=submit]').forEach(b => { b.disabled = true; b.classList.add('opacity-60', 'is-busy'); });
             const label = form.querySelector('button[type=submit] .btn-label');
             if (label) {
                 if (!label.dataset.label) label.dataset.label = label.textContent;
