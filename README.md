@@ -127,6 +127,9 @@ JSは、`templates/components/scripts.html`（と `offline.html`）に書いた�
 - 画面文言: `btn_camera_start`（カメラで撮る / Take Photo）と `camera_instruction` の日本語・英語を変更、`cam_retake`（撮り直す / Retake）を追加。他の言語は、前の言い方（Start camera など）のまま表示される
 - テスト: `tests/e2e_v150.py` を新しい流れに更新
 
+## v1.6.2 の変更（カメラタブのボタン）
+- 「翻訳する」を、ほかのタブと同じ紙飛行機のアイコン・同じ色（青紫のグラデーション）・横いっぱいの大きさにした。「カメラで撮る」はその上に横いっぱいで置く。撮るまでの「翻訳する」は薄く表示される
+
 ## 画面の多言語化
 - 日本語・英語は `labels_ja.py` / `labels_en.py` に手書き（`languages.UI_LABELS` で取り出せます）。それ以外は `ui_labels/<言語コード>.json` を読みます。
 - 足りない文言がある言語は、スタート画面で選んだ時に Gemini が足りない分だけ自動翻訳して保存します（失敗したら、その分は英語で表示）。
