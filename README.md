@@ -184,6 +184,16 @@ JSは、`templates/components/scripts.html`（と `offline.html`）に書いた�
 - v1.7.3 の結果カード・手ごたえ・フレーズ集ツールは、そのまま残る。
 - テスト: `tests/test_v174.py`、`python tests/e2e_v173.py`（背景・アクセント色が無いこと、結果カードなど）
 
+## v1.8.0 の変更（V13a: 外部の読み込み＝CDN をなくす）
+- **Tailwind と FontAwesome を、アプリの中に同梱**した。これまでは、画面を開くたびに `cdn.tailwindcss.com` と `cdnjs.cloudflare.com` から読み込んでいたため、通信できないと画面やアイコンが崩れた（Android アプリ化とオフラインの前提）。
+  - `static/vendor/tailwind.css`: 今までと同じ Tailwind v3 の CDN 版のエンジン（`tools/vendor/tailwind-play-cdn.js`）をブラウザで一度だけ動かし、できた CSS をそのまま保存した。**見た目は変わらない**（ダーク・ライト・幅 390/320・全画面・スタート・言語選択・プライバシー・オフラインを、CDN 版と並べて比べ、ピクセルの差は 0）。
+  - `static/vendor/fontawesome/`: Font Awesome Free 7.3.1（solid と regular のみ。ブランド用フォントは使っていないので同梱しない）。これまでの 6.4 と同じ、アイコンの幅は自動（`--fa-width: auto`）。使っているアイコンがすべてあることを確認済み。
+  - 5つの画面（index・offline・start・privacy・select_language）から、外部の `<script>` / `<link>` を外した。Tailwind は `<head>` の最後に置く（これまで CDN が `<style>` を足していた場所と同じなので、CSS の優先順位が変わらない）。
+  - Service Worker: 同梱ファイルは `static/` の全ファイルとして自動で端末に保存される（フォントは `?v=` なしで呼ばれるので、付けずに保存）。以前の外部ファイル用のキャッシュ（`tookie-runtime-v1`）は、更新時に消える。
+- **クラス名を足したり変えたりしたら**: `python tools/build_css.py` を実行して、`static/vendor/tailwind.css` を作り直す（Python の playwright が必要）。忘れると `tests/test_v180.py` が落ちて教えてくれる。`--check` で、作り直しが要るかだけ確かめられる。
+- 配信する外部のサイトは、ほかにない（通貨画面の「現在地で判定」を押したときの逆引き API と、為替の出典リンクだけ）。
+- テスト: `tests/test_v180.py`、`python tests/e2e_v180.py`（外部へのアクセスがゼロ・圏外でも崩れない・320px 特大）
+
 ## 画面の多言語化
 - 日本語・英語は `labels_ja.py` / `labels_en.py` に手書き（`languages.UI_LABELS` で取り出せます）。それ以外は `ui_labels/<言語コード>.json` を読みます。
 - 足りない文言がある言語は、スタート画面で選んだ時に Gemini が足りない分だけ自動翻訳して保存します（失敗したら、その分は英語で表示）。
@@ -265,7 +275,8 @@ python tests/e2e_v11.py         # 結果カードの「…」メニュー・ゴ�
 python tests/e2e_v12.py         # 待ち時間の案内・今日の残り回数
 python tests/e2e_v170.py        # 配色（ダーク・ライト・自動）・高コントラスト・ガラス・動き・320px
 python tests/e2e_v172.py        # 単色のボタン・各画面のタイトル（320px 特大・右から左）
-python tests/e2e_v173.py        # 背景3種・アクセント色・結果カード・手ごたえ（320px 特大・右から左）
+python tests/e2e_v173.py        # 結果カード・手ごたえ・背景/アクセント色が無いこと
+python tests/e2e_v180.py        # 外部の読み込みがゼロ・圏外でも画面とアイコンが崩れない
 python tests/e2e_v160.py        # 返信の提案・辞書と文法（メニュー表示・コピー・読み上げ・単語帳保存）
 python tests/e2e_v125.py        # 画像・カメラの拡大/保存/一覧・PDFの進捗バーと履歴・単語帳の逆引き
 python tests/e2e_v126.py        # 言語バッジ（Español（スペイン語））

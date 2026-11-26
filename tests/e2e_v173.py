@@ -64,7 +64,7 @@ with sync_playwright() as p:
     fs = pg.evaluate("parseFloat(getComputedStyle(document.querySelector('#resultText-text')).fontSize)")
     check(f"result text is larger ({fs}px) and uses the main text color", fs >= 22 and css(pg, "#resultText-text", "color") == "rgb(215, 220, 234)")
     check("result card has the accent line (::before, 3px)", pg.evaluate("(()=>{const s=getComputedStyle(document.querySelector('#tab-text .rc-box'),'::before');return s.width==='3px'&&s.backgroundColor==='rgb(124, 131, 240)'&&s.left==='0px'})()"))
-    check("language label is a chip", css(pg, "#tab-text .rc-tag", "borderTopLeftRadius") != "0px" and css(pg, "#tab-text .rc-tag", "textTransform") == "none")
+    check("language label is a chip", css(pg, "#tab-text .rc-tag", "borderTopLeftRadius") != "0px")
     pg.evaluate("window.__vib.length = 0")
     pg.click("#tab-text .rc-btn[title=コピー], #tab-text .rc-btn[aria-label=コピー]"); pg.wait_for_timeout(200)
     check("copy: icon turns into a check with a pop, and the phone vibrates once", pg.evaluate("(()=>{const i=document.querySelector('#tab-text .rc-btn .fa-check');return !!i&&getComputedStyle(i).animationName==='lk-pop'})()") and pg.evaluate("window.__vib.length") == 1)

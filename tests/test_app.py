@@ -275,10 +275,13 @@ def test_service_worker(env):
     from app import ASSET_V
     assert f'"{ASSET_V}"' in js
     for needle in ["/static/js/app.js?v=" + ASSET_V, "/static/js/phrasebook.js?v=" + ASSET_V,
-                   "/static/phrasebook/ja-jp.json", "/static/phrasebook/index.json", "cdn.tailwindcss.com"]:
+                   "/static/phrasebook/ja-jp.json", "/static/phrasebook/index.json",
+                   "/static/vendor/tailwind.css?v=" + ASSET_V, "/static/vendor/fontawesome/css/all.min.css?v=" + ASSET_V,
+                   "/static/vendor/fontawesome/webfonts/fa-solid-900.woff2\"", "/static/vendor/fontawesome/webfonts/fa-regular-400.woff2\""]:
         assert needle in js, needle
     assert "/static/icon-512.png" not in js            # 大きいアイコンは事前保存しない
-    assert "/api/" not in js.split("const PRECACHE")[1].split("const CDN_PRECACHE")[0]
+    assert "cdn" not in js.lower() and "RUNTIME" not in js                  # V13: 外部の読み込みはない
+    assert "/api/" not in js.split("const PRECACHE")[1].split("self.addEventListener")[0]
 
 
 def test_offline_page_needs_no_session(env):

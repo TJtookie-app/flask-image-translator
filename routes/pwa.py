@@ -9,15 +9,6 @@ from languages import LANGUAGES, get_lang_code, is_rtl
 from phrasebook import available_languages
 
 
-# 初回に端末へ保存しておく外部ファイル（Tailwind・FontAwesome）。以後は通信できなくても画面が崩れない
-CDN_PRECACHE = [
-    "https://cdn.tailwindcss.com",
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2",
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2",
-]
-
-
 def register(app):
     # ---- PWA（ホーム画面に追加）・オフライン ----
     @app.route("/favicon.ico")
@@ -52,14 +43,11 @@ def register(app):
                 rel = os.path.relpath(os.path.join(base, name), static_dir).replace(os.sep, "/")
                 if rel.startswith(("icon-", "apple-touch")):
                     continue   # アイコンはホーム画面登録時にブラウザが取得する
-                if rel.startswith("phrasebook/"):
-                    precache.append(url_for("static", filename=rel))
+                if rel.startswith(("phrasebook/", "vendor/fontawesome/webfonts/")):
+                    precache.append(url_for("static", filename=rel))   # 版の印（?v=）を付けずに呼ばれるファイル（CSS の中から読まれるフォント・フレーズ集）
                 else:
                     precache.append(url_for("static", filename=rel, v=version))
-        body = render_template(
-            "sw.js", version=version, precache=precache, cdn=CDN_PRECACHE,
-            cdn_hosts=["cdn.tailwindcss.com", "cdnjs.cloudflare.com"],
-        )
+        body = render_template("sw.js", version=version, precache=precache)
         resp = Response(body, mimetype="application/javascript")
         resp.headers["Cache-Control"] = "no-cache"
         resp.headers["Service-Worker-Allowed"] = "/"

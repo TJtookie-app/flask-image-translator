@@ -1,28 +1,23 @@
 /* TOOKIE Service Worker — 版が変わるたびに新しいキャッシュを作り、古いものは消す */
 const VERSION = {{ version|tojson }};
 const CACHE = 'tookie-' + VERSION;
-const RUNTIME = 'tookie-runtime-v1';     // CDN（Tailwind・FontAwesome）は版をまたいで残す
 const MODE_CACHE = 'tookie-mode';        // スタート画面で選んだ接続モード（online / offline）。ページ側が書き込む
 const MODE_URL = '/__net_mode';
 const OFFLINE_URL = '/offline';
-const PRECACHE = {{ precache|tojson }};
-const CDN_PRECACHE = {{ cdn|tojson }};
-const CDN_HOSTS = {{ cdn_hosts|tojson }};
+const PRECACHE = {{ precache|tojson }};   // Tailwind・FontAwesome も static/vendor/ に同梱しているので、ここに入る（V13: 外部の読み込みはなくなった）
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const c = await caches.open(CACHE);
     // 1つ取れなくても全体を失敗させない
     await Promise.allSettled([OFFLINE_URL, ...PRECACHE].map((u) => c.add(new Request(u, { cache: 'reload' }))));
-    const r = await caches.open(RUNTIME);
-    await Promise.allSettled(CDN_PRECACHE.map((u) => r.add(new Request(u, { mode: u.endsWith('.css') || u.endsWith('.woff2') ? 'cors' : 'no-cors' }))));
     await self.skipWaiting();
   })());
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const keep = [CACHE, RUNTIME, MODE_CACHE];
+    const keep = [CACHE, MODE_CACHE];   // 以前の外部ファイル用のキャッシュ（tookie-runtime-v1）は、ここで消える
     for (const k of await caches.keys()) if (!keep.includes(k)) await caches.delete(k);
     await self.clients.claim();
   })());
@@ -81,16 +76,6 @@ async function networkFirstUpdate(req) {
   }
 }
 
-async function staleWhileRevalidate(req) {
-  const cache = await caches.open(RUNTIME);
-  const hit = await cache.match(req);
-  const fresh = fetch(req).then((res) => {
-    if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
-    return res;
-  }).catch(() => null);
-  return hit || (await fresh) || Response.error();
-}
-
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.mode === 'navigate') {
@@ -110,5 +95,4 @@ self.addEventListener('fetch', (event) => {
     else if (url.pathname === OFFLINE_URL) event.respondWith(networkFirstUpdate(req));
     return;   // API などはそのままネットワークへ
   }
-  if (CDN_HOSTS.includes(url.hostname)) event.respondWith(staleWhileRevalidate(req));
 });

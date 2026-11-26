@@ -6,7 +6,7 @@
 .rc-box::before { content: ""; position: absolute; top: 1rem; bottom: 1rem; inset-inline-start: 0; width: 3px; border-radius: 3px; background: var(--accent); pointer-events: none; }
 html .rc-box .rc-out { color: var(--text) !important; font-size: 1.42rem; line-height: 1.5; font-weight: 600; letter-spacing: .01em; }
 .rc-box .rc-pron { padding-top: .55rem; border-top: 1px dashed var(--line2); font-size: .95rem; }
-.rc-tag { display: inline-flex; align-items: center; padding: .12rem .65rem; border-radius: 999px; background: var(--accent-soft); letter-spacing: .02em; text-transform: none; }
+.rc-tag { display: inline-flex; align-items: center; padding: .12rem .65rem; border-radius: 999px; background: var(--accent-soft); letter-spacing: .02em; }   /* 大文字にする指定は、クラス uppercase（Tailwind）が決める。これまでの本番と同じ見た目 */
 html[data-theme=light] .rc-box { --shadow-card: 0 6px 18px rgba(52, 48, 42, .1); }
 
 /* ---- 操作の手ごたえ（動きを減らす設定のときは、すべて止まる） ---- */
