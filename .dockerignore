@@ -6,3 +6,9 @@ node_modules
 .venv
 tests
 *.zip
+android
+app-shell
+assets
+package.json
+package-lock.json
+capacitor.config.json

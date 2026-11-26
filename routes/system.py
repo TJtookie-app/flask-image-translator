@@ -2,11 +2,14 @@
 
 import os
 
-from flask import abort, jsonify, render_template, request, session
+from flask import abort, jsonify, make_response, render_template, request, session
 from helpers import client_ip, get_ui, get_ui_lang
 from limits import limiter, stats
 from languages import get_lang_code, is_rtl
 import rates
+
+# アプリ（Capacitor）の画面の出どころ。この3つだけ、起動確認の応答を読めるようにする
+APP_ORIGINS = {"https://localhost", "http://localhost", "capacitor://localhost"}
 
 
 def register(app):
@@ -56,4 +59,11 @@ def register(app):
 
     @app.route("/healthz")
     def healthz():
-        return "ok"
+        """生きているかの確認。Android アプリの起動画面（別のオリジン）からも、応答の中身まで読めるようにする"""
+        resp = make_response("ok")
+        origin = request.headers.get("Origin", "")
+        if origin in APP_ORIGINS:
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers["Vary"] = "Origin"
+        resp.headers["Cache-Control"] = "no-store"
+        return resp

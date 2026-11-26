@@ -21,6 +21,7 @@ def lab(monkeypatch, tmp_path):
     monkeypatch.setattr(ui_i18n, "LABEL_DIR", str(tmp_path))
     monkeypatch.setattr(translator, "RETRY_WAIT", 0)
     monkeypatch.setattr(translator, "_generate", translator._generate)   # 終わったら元に戻す
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-3.1-flash-lite")   # 軽いモデルの指定（安全装置）
     monkeypatch.setenv("GEMINI_API_KEY", "dummy")
     ui_i18n._mem.clear()
     yield ui_i18n, translator, tmp_path

@@ -7,6 +7,8 @@
   python tools/generate_ui_labels.py --max-calls 10       1回の実行で使う API の呼び出しの上限（既定 15。失敗した呼び出しも数える）
   python tools/generate_ui_labels.py --no-check           最初の「混雑チェック」を省く（既定では、本番の前に短い依頼を1回だけ試す）
 
+軽いモデル: 実行前に、軽いモデルの指定（GEMINI_MODEL に "lite" を含む名前）を確認します。ターミナルを開き直すと指定が消え、公開サイトと同じモデルで動いてサイトの枠を使い切るため、
+  指定がなければキーを聞く前に止まり、設定のしかたを表示します（わかっていて使うときだけ --prod-model）。
 APIキー: 実行すると「APIキーを貼り付けて Enter」と聞かれます。貼り付けても画面には何も出ません（それで正しい）。
   キーは、このツールが動いている間だけ使い、ファイルには保存しません。環境変数 GEMINI_API_KEY に入れてある場合は、聞かれません。
 混雑チェック: 本番の前に、ごく短い依頼を1回だけ試します。Google が混んでいれば、そこで止まります（使う呼び出しは1〜2回だけ。終了コード 3）。
@@ -38,6 +40,21 @@ BUSY_KEYS = {"err_timeout", "err_overloaded", "err_connection"}
 PROBE = {"ping": "Hello"}   # 混雑チェック用の、ごく短い依頼
 
 BUSY_HINT = "Google 側が混んでいます。1〜2時間あけて、もう一度同じコマンドを実行してください（日本時間の夜〜朝は混みやすい傾向があります。昼〜夕方のほうが通りやすいです）。"
+
+
+def model_guard(argv):
+    """軽いモデルが指定されていないとき（ターミナルを開き直すと設定が消える）は、サイトと同じモデルを使って
+    サイトの無料枠を使い切らないよう、キーを聞く前に止める。わかっていて使うときだけ --prod-model。"""
+    model = os.environ.get("GEMINI_MODEL", "").strip()
+    if "--prod-model" in argv or "lite" in model.lower():
+        return True
+    _say("止めました。軽いモデルの指定が見つかりません（ターミナルを開き直すと消えます）。")
+    _say("このまま動かすと、公開サイトと同じモデルを使い、サイトの1日の枠を使い切るおそれがあります。")
+    _say("次の2行を実行してから、もう一度同じコマンドを実行してください。")
+    _say('  $env:GEMINI_MODEL = "gemini-3.1-flash-lite"')
+    _say('  $env:GEMINI_FALLBACK_MODEL = "gemini-3.5-flash-lite"')
+    _say("（サイトと同じモデルで動かしてよいときだけ、--prod-model を付けます）")
+    return False
 
 
 class _OutOfBudget(TranslationError):
@@ -139,6 +156,8 @@ def run(argv, now=time.time, sleep=time.sleep, ask=None):
     if not force and not any(ui_i18n._missing(n) for n in names):
         _say("作る言語はありません（すべて揃っています）。")
         return check(names, brief=True)
+    if not model_guard(argv):
+        return 2
     if not os.environ.get("GEMINI_API_KEY", "").strip():
         if ask is None and sys.stdin.isatty():
             ask = getpass.getpass

@@ -1,0 +1,14 @@
+{
+  "appId": "app.tookie.translator",
+  "appName": "TOOKIE",
+  "webDir": "app-shell",
+  "backgroundColor": "#0B1020",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": ["tookie-translator.onrender.com"]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0B1020"
+  }
+}

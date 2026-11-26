@@ -1,0 +1,23 @@
+{
+  "name": "tookie-translator",
+  "version": "1.8.1",
+  "private": true,
+  "description": "TOOKIE – AI Universal Translator の Android アプリ（Capacitor の殻）。画面は公開サイトを読み込みます。",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "android:add": "cap add android",
+    "android:patch": "python tools/android_patch.py",
+    "android:assets": "capacitor-assets generate --android --assetPath assets",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
+    "android:init": "npm run android:add && npm run android:patch && npm run android:assets && npm run android:sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.0.0"
+  }
+}

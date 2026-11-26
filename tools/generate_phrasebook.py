@@ -6,6 +6,7 @@
   python tools/generate_phrasebook.py --force --only Thai  指定した言語を作り直す（--only なしの --force は、足りない言語だけ）
   python tools/generate_phrasebook.py --max-calls 10       1回の実行で使う API の呼び出しの上限（既定 15。失敗も数える）
   python tools/generate_phrasebook.py --no-check           最初の「混雑チェック」を省く
+  python tools/generate_phrasebook.py --prod-model         軽いモデルの指定がなくても動かす（サイトと同じモデル・同じ枠を使うので、通常は使わない）
 
 APIキー・無料枠・混雑チェックの考え方は、tools/generate_ui_labels.py と同じです（キーは実行すると隠し入力で聞かれ、ファイルには保存しません。
 環境変数 GEMINI_API_KEY に入れてある場合は聞かれません。無料枠は「モデルごとに 1分5回・1日20回」程度なので、1回ごとに約13秒待ちます）。
@@ -117,6 +118,8 @@ def run(argv, now=time.time, sleep=time.sleep, ask=None):
     if not todo:
         g._say("作る言語はありません（すべて揃っています）。")
         return 0
+    if not g.model_guard(argv):
+        return 2
     if not _ask_key(ask):
         return 2
 

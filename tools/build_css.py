@@ -19,7 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CDN_JS = os.path.join(ROOT, "tools", "vendor", "tailwind-play-cdn.js")
 OUT = os.path.join(ROOT, "static", "vendor", "tailwind.css")
 MANIFEST = os.path.join(ROOT, "static", "vendor", "tailwind.manifest.json")
-SKIP_DIRS = {".git", "__pycache__", "tests", "tools", "ui_labels", "phrasebook", "vendor", "money", "node_modules", "android"}
+SKIP_DIRS = {".git", "__pycache__", "tests", "tools", "ui_labels", "phrasebook", "vendor", "money", "node_modules", "android", "app-shell", "assets"}
 TOKEN = re.compile(r"[A-Za-z0-9_\-:/.\[\]%#!&>()=,'\"*]+")
 SINGLE = {  # ハイフンのない1語のクラス
     "flex", "grid", "block", "inline", "hidden", "relative", "absolute", "fixed", "sticky", "static", "truncate", "italic", "underline", "uppercase",

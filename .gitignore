@@ -4,6 +4,10 @@ __pycache__/
 .venv/
 venv/
 node_modules/
-package-lock.json
 *.tmp
 .DS_Store
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/
