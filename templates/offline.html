@@ -25,7 +25,9 @@
             <a href="{{ url_for('index') }}" onclick="leaveOffline(event)" class="block text-center bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition">{{ ui.offline_retry }}</a>
         </div>
 
+        {% include 'components/page_title.html' %}
         {% include 'components/history_tab.html' %}
+        <div class="page-title"><span class="pt-ico" aria-hidden="true"><i class="fa-solid fa-coins"></i></span><h2 class="pt-text" dir="auto">{{ ui.money_title }}</h2></div>
         {% include 'components/money_tab.html' %}
     </div>
 
@@ -51,6 +53,7 @@
     <script src="{{ url_for('static', filename='js/money_start.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/money_where.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/money_view.js', v=asset_v) }}"></script>
+    <script src="{{ url_for('static', filename='js/page_title.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/offline.js', v=asset_v) }}"></script>
     <script src="{{ url_for('static', filename='js/pwa.js', v=asset_v) }}"></script>
 </body>

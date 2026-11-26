@@ -13,7 +13,7 @@ def test_chip_row_has_scroll_hint_arrows(env):
     c = app.test_client(); start(c, "Japanese")
     html = c.get("/").get_data(as_text=True)
     assert 'id="hist-scroll"' in html and 'id="hist-arrow-l"' in html and 'id="hist-arrow-r"' in html
-    assert html.index('id="hist-arrow-l"') < html.index('id="hist-chips"') < html.index('id="hist-arrow-r"') < html.index('id="history-clear-btn"')
+    assert html.index('id="hist-arrow-l"') < html.index('id="hist-chips"') < html.index('id="hist-arrow-r"')
     # 矢印は飾り（読み上げ・Tab の対象にしない）
     for i in ("hist-arrow-l", "hist-arrow-r"):
         tag = html[html.index(f'id="{i}"'):].split(">", 1)[0]

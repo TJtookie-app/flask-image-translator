@@ -15,13 +15,13 @@ def test_settings_tab_chips_are_one_scrolling_row(env):
     html = c.get("/").get_data(as_text=True)
     assert 'class="hist-bar"' in html and 'id="hist-chips"' in html
     row = html[html.index('id="hist-chips"'):]
-    row = row[:row.index('id="history-clear-btn"')]
+    row = row[:row.index('id="hist-arrow-r"')]
     chips = re.findall(r'<button type="button" id="hf-(\w+)"', row)
     assert chips[:4] == ["settings", "all", "fav", "gl"] and chips[-1] == "trash" and "study" in chips
     assert row.count('class="hist-chip ') == len(chips)                       # 全部が、折り返さないボタンの部品
     assert "flex-wrap" not in row                                             # Tailwind の折り返し指定は、もう無い
     # 「履歴を消去」は、ボタン列の外（下の行）にある
-    assert html.index('id="history-clear-btn"') > html.index('id="hf-trash"')
+    assert html.index('id="history-clear-btn"') < html.index('id="hf-trash"')   # v1.7.2: 「履歴を消去」は、上のタイトル行へ移った
     css = _read("static", "style.css")
     rule = css.split(".hist-chips {", 1)[1].split("}", 1)[0]
     assert "flex-wrap: nowrap" in rule and "overflow-x: auto" in rule

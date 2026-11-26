@@ -49,7 +49,7 @@ with sync_playwright() as p:
     check("main card is NOT glass", css(pg, ".max-w-xl", "backdropFilter") == "none")
     # グラデーション
     check("logo has no gradient ring (removed in v1.7.1)", "gradient" not in css(pg, ".hdr-brand img", "backgroundImage"))
-    check("primary translate button has the gradient", "linear-gradient" in css(pg, "#tab-text button[type=submit]", "backgroundImage"))
+    check("primary translate button is single-color (v1.7.2)", css(pg, "#tab-text button[type=submit]", "backgroundImage") == "none")
     check("active tab has no gradient line (removed in v1.7.1)", pg.evaluate("getComputedStyle(document.querySelector('.nav-btn.text-indigo-400'), '::after').content") in ("none", "normal"))
     # 下のナビの丸い面が、押したタブへ動く
     pg.wait_for_timeout(500)

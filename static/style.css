@@ -309,3 +309,14 @@ html[data-theme=light] .as-btn { background: var(--card2); color: var(--text2); 
 /* v1.6.1: カメラタブの撮影プレビュー */
 .cam-preview { display: block; width: 100%; max-height: 60vh; object-fit: contain; background: #000; }
 .cam-preview.hidden { display: none; }
+
+/* ---- v1.7.2: 画面のタイトル（どの画面も、左上に「丸いアイコン＋太字の名前」。右端は「履歴を消去」の場所） ---- */
+.page-title { display: flex; align-items: center; gap: .6rem; min-height: 2.25rem; margin: 0 0 .9rem; }
+.pt-ico { flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+    font-size: .85rem; background: var(--accent-soft, rgba(124, 131, 240, .16)); color: var(--accent-text, #A9AEF8); }
+.pt-text { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 1.05rem; line-height: 1.25; font-weight: 700; color: var(--text, #D7DCEA);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-act { flex: 0 0 auto; }
+.pt-act.hidden { display: none; }
+/* 押す場所は、文字より広く（高さ44px）。見た目の高さは増やさない */
+.page-title .hist-clear { align-self: auto; display: inline-flex; align-items: center; gap: .3rem; min-height: 2.75rem; padding: 0 .35rem; margin: -.25rem 0; white-space: nowrap; }

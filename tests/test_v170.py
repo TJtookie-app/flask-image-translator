@@ -65,10 +65,11 @@ def test_motion_is_subtle_and_respects_reduced_motion():
     assert "is-busy" in _read("static", "js", "app.js")                     # 翻訳中のボタンで光が流れる
 
 
-def test_gradients_only_on_the_main_button_and_progress_bar():
+def test_main_button_and_progress_bar_are_single_color():
     css = _read("static", "theme.css")
-    for needle in (".pbar-fill", "--grad-btn", "--grad-ring", "from-indigo-600"):
+    for needle in (".pbar-fill", "from-indigo-600", "--btn-hover"):
         assert needle in css, needle
+    assert "--grad-btn" not in css and "--grad-ring" not in css            # v1.7.2: アプリ全体でグラデーションなし
     assert ".hdr-brand img" not in css and ".nav-btn.text-indigo-400::after" not in css      # v1.7.1: ロゴの縁とタブの上の線は取った
 
 

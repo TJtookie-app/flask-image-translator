@@ -158,6 +158,17 @@ JSは、`templates/components/scripts.html`（と `offline.html`）に書いた�
   4. 翻訳を待つあいだ、結果の場所に、薄い「読み込み中」の枠（3本の線を光が流れる）。送信が止められたときは出さず、画面に戻ったときは消す
 - テスト: `tests/test_v170.py`、`python tests/e2e_v170.py` を更新（配色・動き・グラデーションの有無）
 
+## v1.7.2 の変更（単色・各画面のタイトル）
+- **「翻訳する」ボタンと PDF の進捗バーも単色に**（アプリ全体で、色のグラデーションはなくなった）。ボタンは `--btn`（ライトは `--btn-hover` で押した色）、進捗バーは `--accent`。完了（緑）・失敗（赤）・停止（灰）の色は、そのまま。
+- **どの画面も、左上に同じ形のタイトル**を出す（`templates/components/page_title.html`、`static/js/page_title.js`）。ロゴの下、言語の選択バーの上。
+  - 丸いアイコン（アクセント色の薄い背景）＋太字の名前。アイコンは下のナビ・設定の上のボタンと同じもの。名前も既存のラベルを使うので、**新しい言葉は増えていない**（nav_text / nav_image / nav_voice / nav_camera / nav_conversation / money_title / filter_settings / nav_history / filter_fav / filter_glossary / filter_phrases / filter_study / filter_trash）。
+  - 設定のなかの画面（設定・履歴・お気に入り・用語集・フレーズ集・学習・ゴミ箱）は、上のボタンを押すと名前も変わる。
+  - 「履歴を消去」は、タイトル行の右端へ移動（履歴・お気に入りの一覧のときだけ出る。押せる高さは 44px 以上）。通貨の見出しと、設定の見出しは、タイトルと重なるので取った。
+  - 画面が短いときも、タイトルと中身が離れないよう、中身は上に詰める（以前は上下の真ん中に寄せていた）。
+  - 右から左の言語ではアイコンが右、「履歴を消去」が左。文字サイズ「特大」・320px でも、はみ出さず重ならない。
+  - オフライン画面（履歴と通貨が並ぶ）にも、同じタイトルを出す。
+- テスト: `tests/test_v172.py`、`python tests/e2e_v172.py`（場所と形がそろう・単色・320px 特大・コントラスト・右から左）
+
 ## 画面の多言語化
 - 日本語・英語は `labels_ja.py` / `labels_en.py` に手書き（`languages.UI_LABELS` で取り出せます）。それ以外は `ui_labels/<言語コード>.json` を読みます。
 - 足りない文言がある言語は、スタート画面で選んだ時に Gemini が足りない分だけ自動翻訳して保存します（失敗したら、その分は英語で表示）。
@@ -238,6 +249,7 @@ python tests/e2e_pwa.py         # PWA・オフライン・フレーズ集のブ�
 python tests/e2e_v11.py         # 結果カードの「…」メニュー・ゴミ箱・元に戻す（スマホ幅）
 python tests/e2e_v12.py         # 待ち時間の案内・今日の残り回数
 python tests/e2e_v170.py        # 配色（ダーク・ライト・自動）・高コントラスト・ガラス・動き・320px
+python tests/e2e_v172.py        # 単色のボタン・各画面のタイトル（320px 特大・右から左）
 python tests/e2e_v160.py        # 返信の提案・辞書と文法（メニュー表示・コピー・読み上げ・単語帳保存）
 python tests/e2e_v125.py        # 画像・カメラの拡大/保存/一覧・PDFの進捗バーと履歴・単語帳の逆引き
 python tests/e2e_v126.py        # 言語バッジ（Español（スペイン語））

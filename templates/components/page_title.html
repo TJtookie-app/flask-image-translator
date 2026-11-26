@@ -1,0 +1,12 @@
+<!-- 画面のタイトル（v1.7.2）: どの画面でも同じ場所（左上、ロゴの下）に、丸いアイコン＋太字の名前を出す。中身は static/js/page_title.js が、いまの画面に合わせて入れ替える。
+     右端は「履歴を消去」の場所（履歴の一覧のときだけ出る）。名前は、下のナビ・上のボタンと同じ言葉（新しい言葉は増やさない） -->
+{% set active_mode = active_mode if active_mode is defined else 'history' %}   {# オフライン画面には、履歴と通貨が並ぶ。ここでは先頭の履歴の名前から始める #}
+{% set pt_icons = {'text':'fa-pen-to-square','image':'fa-image','voice':'fa-microphone','camera':'fa-camera','conversation':'fa-comments','money':'fa-coins','history':'fa-gear'} %}
+{% set pt_label = ui.filter_settings if active_mode == 'history' else (ui.money_title if active_mode == 'money' else ui['nav_' ~ active_mode]) %}
+<div id="page-title" class="page-title">
+    <span class="pt-ico" aria-hidden="true"><i id="page-title-icon" class="fa-solid {{ pt_icons.get(active_mode, 'fa-pen-to-square') }}"></i></span>
+    <h2 id="page-title-text" class="pt-text" dir="auto">{{ pt_label }}</h2>
+    <div id="page-title-act" class="pt-act">
+        <button type="button" id="history-clear-btn" onclick="clearHistory()" class="hist-clear text-xs text-slate-400 hover:text-red-300 transition"><i class="fa-solid fa-trash"></i> {{ ui.clear_history }}</button>
+    </div>
+</div>
