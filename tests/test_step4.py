@@ -18,9 +18,9 @@ def test_formality_and_pron_in_prompt(env):
     translator.translate_text("hi", "English", "Japanese", formality="formal", pronunciation=True)
     p = _prompt(calls)
     assert "polite, formal" in p and "romanized reading" in p
-    translator.translate_text("hi", "English", "Japanese", formality="casual")
+    translator.translate_text("hi", "English", "Japanese", formality="business")
     p = _prompt(calls)
-    assert "casual" in p.lower() and "romanized" not in p
+    assert "business" in p.lower() and "romanized" not in p
     translator.translate_text("hi", "English", "Japanese", formality="auto")
     assert "register" not in _prompt(calls)
 
@@ -60,9 +60,9 @@ def test_api_translate_text_options(env):
         '{"detected_language":"English","source_text":"hi","translation":"やあ","pronunciation":"yaa"}'))
     c = app.test_client()
     start(c)
-    r = c.post("/api/translate-text", json={"text": "hi", "source": "English", "target": "Japanese", "formality": "casual", "pron": True})
+    r = c.post("/api/translate-text", json={"text": "hi", "source": "English", "target": "Japanese", "formality": "business", "pron": True})
     assert r.status_code == 200 and r.get_json()["pronunciation"] == "yaa"
-    assert "casual" in _prompt(calls).lower()
+    assert "business" in _prompt(calls).lower()
 
 
 def test_alternatives_api(env):

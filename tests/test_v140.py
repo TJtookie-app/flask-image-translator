@@ -6,7 +6,7 @@ import pytest
 
 from conftest import ROOT, start
 
-STYLES = ["auto", "natural", "literal", "formal", "business", "casual", "slang"]
+STYLES = ["auto", "natural", "literal", "formal", "business"]
 
 
 def _read(*p):
@@ -15,19 +15,19 @@ def _read(*p):
 
 def test_styles_reach_the_prompt(env):
     app, translator, calls, _ = env
-    expect = {"natural": "natural everyday spoken", "literal": "as literally and faithfully", "business": "business register", "slang": "slang"}
+    expect = {"natural": "natural everyday spoken", "literal": "as literally and faithfully", "business": "business register"}
     for k, needle in expect.items():
         translator.translate_text("hi", "English", "Japanese", formality=k)
         assert needle in calls[-1][0][0], k
     translator.translate_text("hi", "English", "Japanese", formality="auto")
-    assert "register" not in calls[-1][0][0] and "slang" not in calls[-1][0][0]
+    assert "register" not in calls[-1][0][0]
 
 
 def test_styles_also_reach_alternatives_images_and_pdf(env):
     _, translator, _, _ = env
     for fn in ("alternative_translations", "translate_image_blocks", "translate_pdf_pages"):
         assert "FORMALITY_HINTS" in _read("translator.py")
-    assert set(translator.FORMALITY_HINTS) == {"formal", "casual", "natural", "literal", "business", "slang"}
+    assert set(translator.FORMALITY_HINTS) == {"formal", "natural", "literal", "business"}
 
 
 def test_clean_formality_accepts_only_known_styles(env):
@@ -41,20 +41,22 @@ def test_clean_formality_accepts_only_known_styles(env):
 def test_style_is_sent_from_the_form_to_the_prompt(env):
     app, translator, calls, _ = env
     c = app.test_client(); start(c, "Japanese")
-    c.post("/", data={"mode": "text", "direct_text": "hello", "formality": "slang", "pron": "0"})
-    assert "slang" in calls[-1][0][0]
+    c.post("/", data={"mode": "text", "direct_text": "hello", "formality": "literal", "pron": "0"})
+    assert "as literally and faithfully" in calls[-1][0][0]
+    c.post("/", data={"mode": "text", "direct_text": "hello", "formality": "slang", "pron": "0"})   # 削った設定が来ても、自動として扱う
+    assert "register" not in calls[-1][0][0] and "slang" not in calls[-1][0][0]
     r = c.post("/api/translate-text", json={"text": "hi", "source": "English", "target": "Japanese", "formality": "business"})
     assert r.status_code == 200 and "business register" in calls[-1][0][0]
 
 
-def test_settings_page_offers_seven_styles_and_js_accepts_them(env):
+def test_settings_page_offers_five_styles_and_js_accepts_them(env):
     app, *_ = env
     c = app.test_client(); start(c, "Japanese")
     html = c.get("/").get_data(as_text=True)
     box = html[html.index('data-setting="formality"'):]
     box = box[:box.index("</div>")]
-    assert re.findall(r'data-v="(\w+)"', box) == ["auto", "natural", "literal", "formal", "business", "casual", "slang"]
-    for lab in ("自然な会話", "直訳", "ビジネス", "スラング", "翻訳スタイル"):
+    assert re.findall(r'data-v="(\w+)"', box) == ["auto", "natural", "literal", "formal", "business"]
+    for lab in ("自然な会話", "直訳", "ビジネス", "翻訳スタイル"):
         assert lab in html
     js = _read("static", "js", "settings.js")
     assert all(f"'{k}'" in js.split("SETTING_CHOICES")[1].split("\n")[0] for k in STYLES)
@@ -67,7 +69,7 @@ def test_old_saved_settings_still_valid():
 
 def test_new_labels_in_ja_and_en():
     import labels_en, labels_ja
-    new = ["set_style", "formality_natural", "formality_literal", "formality_business", "formality_slang", "explain_usage"]
+    new = ["set_style", "formality_natural", "formality_literal", "formality_business", "explain_usage"]
     for k in new:
         assert labels_ja.LABELS[k].strip() and labels_en.LABELS[k].strip(), k
 

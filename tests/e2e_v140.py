@@ -43,22 +43,22 @@ with sync_playwright() as p:
         btns = pg.evaluate("""[...document.querySelectorAll('[data-setting=formality] .set-opt')].map(b => {
             const r = b.getBoundingClientRect(); return [b.dataset.v, Math.round(r.left), Math.round(r.right), b.scrollWidth > b.clientWidth + 1, b.textContent.trim()]; })""")
         tag = f"{width}px {ui[:2]}"
-        check(f"{tag}: 7 style buttons {[b[0] for b in btns]}", [b[0] for b in btns] == ["auto", "natural", "literal", "formal", "business", "casual", "slang"])
+        check(f"{tag}: 5 style buttons {[b[0] for b in btns]}", [b[0] for b in btns] == ["auto", "natural", "literal", "formal", "business"])
         check(f"{tag}: buttons inside the screen and text not cut", all(b[1] >= 0 and b[2] <= width and not b[3] for b in btns) and all(b[4] for b in btns))
-        rows = len({round(pg.evaluate("(i)=>document.querySelectorAll('[data-setting=formality] .set-opt')[i].getBoundingClientRect().top", i)) for i in range(7)})
+        rows = len({round(pg.evaluate("(i)=>document.querySelectorAll('[data-setting=formality] .set-opt')[i].getBoundingClientRect().top", i)) for i in range(5)})
         check(f"{tag}: laid out in 2 rows ({rows})", rows == 2)
         check(f"{tag}: no horizontal page scroll", pg.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"))
-        pg.click("[data-setting=formality] [data-v=slang]"); pg.wait_for_timeout(100)
+        pg.click("[data-setting=formality] [data-v=business]"); pg.wait_for_timeout(100)
         st = pg.evaluate("JSON.parse(localStorage.getItem('tl_settings_v1'))")
-        check(f"{tag}: slang saved {st.get('formality')}", st.get("formality") == "slang")
+        check(f"{tag}: business saved {st.get('formality')}", st.get("formality") == "business")
         pg.reload(wait_until="load"); pg.add_style_tag(content=CSS)
         pg.click("#nav-history"); pg.click("#hf-settings")
-        check(f"{tag}: slang still selected after reload", pg.get_attribute("[data-setting=formality] [data-v=slang]", "aria-pressed") == "true")
+        check(f"{tag}: business still selected after reload", pg.get_attribute("[data-setting=formality] [data-v=business]", "aria-pressed") == "true")
         if width == 390:
             # 選んだスタイルが、翻訳の依頼に載る
             pg.click("#nav-text"); pg.fill("textarea[name=direct_text]", "hello"); prompts.clear()
             pg.click("#tab-text button[type=submit]"); pg.wait_for_selector("#resultText-text")
-            check("slang style reached the translate prompt", any("slang" in q for _, q in prompts))
+            check("business style reached the translate prompt", any("business register" in q for _, q in prompts))
             # 外国語（英語）を読むとき: 原文を解説する
             reqs = []
             pg.on("request", lambda r: reqs.append(r.post_data) if r.url.endswith("/api/explain") else None)

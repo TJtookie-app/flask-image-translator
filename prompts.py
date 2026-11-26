@@ -17,11 +17,9 @@ SYSTEM_INSTRUCTION = (
 # 丁寧さの指定（None / "auto" は指定なし）
 FORMALITY_HINTS = {
     "formal": "Use a polite, formal register (honorific / courteous forms where the language has them).",
-    "casual": "Use a casual, friendly register (plain forms, as between friends).",
     "natural": "Make it sound like natural everyday spoken conversation of a native speaker, not a word-for-word rendering.",
     "literal": "Translate as literally and faithfully as possible, keeping the source wording and sentence structure where the target language allows. Do not paraphrase, smooth over or omit anything.",
     "business": "Use a professional business register suited to workplace emails and meetings: courteous, precise and clear, with no slang.",
-    "slang": "Use informal slang and youth speech that young native speakers of the target language really use. Keep the meaning, and avoid offensive or vulgar words.",
 }
 VALID_FORMALITY = ("auto",) + tuple(FORMALITY_HINTS)
 

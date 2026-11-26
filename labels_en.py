@@ -238,7 +238,6 @@ LABELS = {
     'formality_natural': 'Natural',
     'formality_literal': 'Literal',
     'formality_business': 'Business',
-    'formality_slang': 'Slang',
     'explain_usage': 'Explain nuance & usage',
     'reply_btn': 'Suggest replies',
     'reply_label': 'Reply ideas (copy or listen)',

@@ -1,7 +1,7 @@
 // 表示・翻訳の設定（丁寧さ・読み方・文字サイズ・配色）。この端末の localStorage に保存する
 const SKEY = 'tl_settings_v1';
 const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark' };
-const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business', 'casual', 'slang'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light'] };
+const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light'] };
 
 function loadSettings() {
     const st = Object.assign({}, SETTING_DEFAULTS);

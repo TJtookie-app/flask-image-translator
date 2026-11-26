@@ -238,7 +238,6 @@ LABELS = {
     'formality_natural': '自然な会話',
     'formality_literal': '直訳',
     'formality_business': 'ビジネス',
-    'formality_slang': 'スラング',
     'explain_usage': 'ニュアンス・使い方を解説',
     'reply_btn': '返信を提案',
     'reply_label': '返信の案（コピーや読み上げができます）',
