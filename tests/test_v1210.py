@@ -21,7 +21,7 @@ def test_route_table_unchanged(env):
 
 def test_routes_is_a_package_with_four_groups():
     names = sorted(os.path.basename(p) for p in glob.glob(os.path.join(ROOT, "routes", "*.py")))
-    assert names == ["__init__.py", "api_translate.py", "pages.py", "pwa.py", "system.py"]
+    assert names == ["__init__.py", "api_assist.py", "api_translate.py", "pages.py", "pwa.py", "system.py"]
     assert not os.path.exists(os.path.join(ROOT, "routes.py"))
     for p in glob.glob(os.path.join(ROOT, "routes", "*.py")):
         assert len(open(p, encoding="utf-8").read().splitlines()) <= 200, p   # 1ファイルが長くなりすぎない

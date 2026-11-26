@@ -39,6 +39,12 @@
                     <button type="button" role="menuitem" class="rc-item" onclick="closeResultMenus(); explainResult('{{ mode }}', this)">
                         <i class="fa-solid fa-lightbulb"></i><span class="rc-label">{{ ui.explain_usage }}</span>
                     </button>
+                    <button type="button" role="menuitem" class="rc-item rc-reply" onclick="closeResultMenus(); suggestReplies('{{ mode }}', this)">
+                        <i class="fa-solid fa-reply"></i><span class="rc-label">{{ ui.reply_btn }}</span>
+                    </button>
+                    <button type="button" role="menuitem" class="rc-item rc-dict" onclick="closeResultMenus(); showDictionary('{{ mode }}', this)">
+                        <i class="fa-solid fa-book-open"></i><span class="rc-label">{{ ui.dict_btn }}</span>
+                    </button>
                     <button type="button" role="menuitem" class="rc-item" onclick="saveVocabCurrent('{{ mode }}', this)">
                         <i class="fa-regular fa-bookmark"></i><span class="rc-label">{{ ui.vocab_save }}</span>
                     </button>
@@ -60,6 +66,8 @@
     {% endif %}
     <div id="alts-{{ mode }}" class="hidden space-y-1.5"></div>
     <div id="tones-{{ mode }}" class="hidden space-y-1.5"></div>
+    <div id="replies-{{ mode }}" class="hidden space-y-1.5"></div>
+    <div id="dict-{{ mode }}" class="hidden space-y-1.5"></div>
     <div id="explain-{{ mode }}" dir="auto" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed"></div>
     {% if show_original and original_text %}
     <details class="text-xs text-slate-400">

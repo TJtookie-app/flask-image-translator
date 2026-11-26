@@ -21,10 +21,10 @@ def test_result_card_has_speak_copy_and_more_menu(env):
     c = app.test_client(); start(c, "Japanese")
     html = post_text(c).get_data(as_text=True)
     assert html.count('class="rc-actions"') == 1
-    # 読み上げ・コピーは外に出ていて、残りの7つ（v1.2 で「口調を変える」を追加）が「…」メニューの中にある
+    # 読み上げ・コピーは外に出ていて、残りの9つ（v1.2 で「口調を変える」、v1.6 で「返信を提案」「辞書・文法」を追加）が「…」メニューの中にある
     menu = re.search(r'<div class="rc-menu hidden" role="menu">(.*?)\n                </div>\n            </div>', html, re.S).group(1)
-    assert menu.count('role="menuitem"') == 7
-    for fn in ("editResult", "showBigResult", "showAlternatives", "showTones", "explainResult", "saveVocabCurrent", "toggleFavCurrent"):
+    assert menu.count('role="menuitem"') == 9
+    for fn in ("editResult", "showBigResult", "showAlternatives", "showTones", "explainResult", "suggestReplies", "showDictionary", "saveVocabCurrent", "toggleFavCurrent"):
         assert fn in menu, fn
     assert "speakResult" not in menu and "copyResult" not in menu
     outer = html.split('<div class="rc-menu hidden"')[0]

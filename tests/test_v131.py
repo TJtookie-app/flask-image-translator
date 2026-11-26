@@ -32,4 +32,4 @@ def test_hint_logic_and_css():
 
 def test_version_is_1_3_1():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.3.1", "1.4", "1.5"))
+    assert appmod.APP_VERSION.startswith(("1.3.1", "1.4", "1.5", "1.6"))

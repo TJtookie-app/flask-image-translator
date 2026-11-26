@@ -63,6 +63,7 @@ function showBigResult(mode) {
 
 // ---- 別の言い方 ----
 async function showAlternatives(mode, btn) {
+    if (typeof hideAssistBoxes === 'function') hideAssistBoxes(mode);
     const box = $('alts-' + mode), el = $('resultText-' + mode);
     if (!box || !el || !RESULT) return;
     const icon = btn && btn.querySelector('i');
@@ -125,6 +126,7 @@ function useAlternative(mode, alt) {
 
 // ---- 口調を変える: 1回の呼び出しで、丁寧・標準・くだけたの3つを受け取り、選んだものに置き換える ----
 async function showTones(mode, btn) {
+    if (typeof hideAssistBoxes === 'function') hideAssistBoxes(mode);
     const box = $('tones-' + mode), el = $('resultText-' + mode);
     if (!box || !el || !RESULT) return;
     const alts = $('alts-' + mode);

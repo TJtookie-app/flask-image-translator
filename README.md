@@ -113,6 +113,13 @@ JSは、`templates/components/scripts.html`（と `offline.html`）に書いた�
 - 新しい画面の文言は13個（ja/en のみ。他の言語は `python tools/generate_ui_labels.py` で作ります）。
 - ブラウザでの確認は `python tests/e2e_v150.py` です。
 
+## v1.6 の変更（返信の提案・辞書と文法）
+- 結果カードの「…」に2つ追加。**返信を提案**: 外国語のメッセージを読んだときだけ表示。相手の言語で短い返信を3案（了解・断る・聞き返す など）、意味は画面の言語で付く。コピー・読み上げができる。**辞書・文法**: 原文（自分の言語で入力したときは訳文）から大事な単語を最大6つ（読み・品詞・意味・例文・語源）と文法のポイントを最大3つ。単語は単語帳に保存できる
+- 呼び出しはボタンを押したときの1回だけ（`/api/replies`、`/api/dictionary`）。入力が空・長すぎるときは Gemini を呼ばずに 400。結果が空なら 502。回数制限と統計（`reply` / `dict`）の対象
+- 構成: `assist.py`（解説・口調・要約・返信・辞書。`translator.py` から再エクスポート）、`routes/api_assist.py`、`static/js/assist.js`。プロンプトは `prompts.py`
+- 新しい画面文言は5つ（`reply_btn` `reply_label` `dict_btn` `dict_grammar` `dict_origin`）。日本語・英語のみ。他の言語は英語で表示され、文言ツールで生成できる
+- テスト: `tests/test_v160.py`、`python tests/e2e_v160.py`
+
 ## 画面の多言語化
 - 日本語・英語は `labels_ja.py` / `labels_en.py` に手書き（`languages.UI_LABELS` で取り出せます）。それ以外は `ui_labels/<言語コード>.json` を読みます。
 - 足りない文言がある言語は、スタート画面で選んだ時に Gemini が足りない分だけ自動翻訳して保存します（失敗したら、その分は英語で表示）。
@@ -192,6 +199,7 @@ python tests/e2e_backup.py      # バックアップ機能のブラウザ動作
 python tests/e2e_pwa.py         # PWA・オフライン・フレーズ集のブラウザ動作
 python tests/e2e_v11.py         # 結果カードの「…」メニュー・ゴミ箱・元に戻す（スマホ幅）
 python tests/e2e_v12.py         # 待ち時間の案内・今日の残り回数
+python tests/e2e_v160.py        # 返信の提案・辞書と文法（メニュー表示・コピー・読み上げ・単語帳保存）
 python tests/e2e_v125.py        # 画像・カメラの拡大/保存/一覧・PDFの進捗バーと履歴・単語帳の逆引き
 python tests/e2e_v126.py        # 言語バッジ（Español（スペイン語））
 python tests/e2e_v127.py        # 通貨タブ（国の判定・換算・一覧・オフライン）

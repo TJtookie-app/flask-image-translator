@@ -79,7 +79,7 @@ def test_explain_prompt_covers_usage_and_manners(env):
     for needle in ("situations", "rude", "friends, colleagues or superiors", "regional", "Japanese"):
         assert needle in p, needle
     assert "<text>\nwhat's up\n</text>" in p
-    assert "explain_prompt(" in _read("translator.py")
+    assert "explain_prompt(" in _read("assist.py")
 
 
 def test_explain_menu_label_and_side(env):
