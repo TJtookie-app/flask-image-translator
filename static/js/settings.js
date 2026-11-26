@@ -1,8 +1,7 @@
 // 表示・翻訳の設定（丁寧さ・読み方・文字サイズ・配色）。この端末の localStorage に保存する
 const SKEY = 'tl_settings_v1';
-const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark', contrast: false, bg: 'ink', accent: 'auto' };
-const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light', 'auto'],
-    bg: ['ink', 'deep', 'moon'], accent: ['auto', 'indigo', 'teal', 'orange', 'rose'] };
+const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark', contrast: false };
+const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light', 'auto'] };
 
 function loadSettings() {
     const st = Object.assign({}, SETTING_DEFAULTS);
@@ -32,9 +31,7 @@ function applySettings(st) {
     const theme = effectiveTheme(st);
     if (theme === 'light') d.setAttribute('data-theme', 'light'); else d.removeAttribute('data-theme');
     if (st.contrast) d.setAttribute('data-contrast', 'high'); else d.removeAttribute('data-contrast');
-    // 背景（グラデーション）とアクセント色。「標準」のときは属性を付けない（これまでの見た目のまま）
-    if (st.bg && st.bg !== 'ink') d.setAttribute('data-bg', st.bg); else d.removeAttribute('data-bg');
-    if (st.accent && st.accent !== 'auto') d.setAttribute('data-accent', st.accent); else d.removeAttribute('data-accent');
+    d.removeAttribute('data-bg'); d.removeAttribute('data-accent');   // v1.7.4: 背景・アクセント色の選択は取りやめた（v1.7.3 で付いた属性が残らないように消す）
     if (st.fs === 'l' || st.fs === 'xl') {
         d.setAttribute('data-fs', st.fs);
         d.style.fontSize = st.fs === 'xl' ? '128%' : '114%';
@@ -43,7 +40,7 @@ function applySettings(st) {
         d.style.fontSize = '';
     }
     const meta = document.querySelector('meta[name=theme-color]');
-    if (meta) meta.setAttribute('content', theme === 'light' ? '#F4F0E8' : ({ deep: '#04061A', moon: '#0F2027' }[st.bg] || '#0B1020'));
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#F4F0E8' : '#0B1020');
 }
 
 function renderSettings() {

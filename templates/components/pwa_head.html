@@ -15,8 +15,6 @@
             var light = st.theme === 'light' || (st.theme === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
             if (light) d.setAttribute('data-theme', 'light');
             if (st.contrast === true) d.setAttribute('data-contrast', 'high');
-            if (st.bg === 'deep' || st.bg === 'moon') d.setAttribute('data-bg', st.bg);
-            if (['indigo', 'teal', 'orange', 'rose'].indexOf(st.accent) >= 0) d.setAttribute('data-accent', st.accent);
             if (st.fs === 'l' || st.fs === 'xl') { d.setAttribute('data-fs', st.fs); d.style.fontSize = st.fs === 'xl' ? '128%' : '114%'; }
         } catch (e) {}
     })();

@@ -1,4 +1,4 @@
-"""v1.7.3のブラウザ確認: 背景3種（カードを少し透かす）・アクセント色・結果カード・手ごたえ（コピー/星/マイク/カメラ枠/振動）・320px特大・右から左。使い方: python tests/e2e_v173.py"""
+"""v1.7.3/1.7.4のブラウザ確認: 背景・アクセント色が無いこと・結果カード・手ごたえ（コピー/星/マイク/カメラ枠/振動）・320px特大・右から左。使い方: python tests/e2e_v173.py"""
 import json, os, sys, threading
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT); sys.path.insert(0, os.path.join(ROOT, "tests"))
@@ -43,63 +43,18 @@ with sync_playwright() as p:
     CARD = lambda pg: css(pg, ".max-w-xl", "backgroundColor")
     BTN = lambda pg: css(pg, "#tab-text button[type=submit]", "backgroundColor")
 
-    # ---- 標準: 何も変わらない ----
-    c, pg = page()
-    check("standard: no data-bg / data-accent", attr(pg, "data-bg") is None and attr(pg, "data-accent") is None)
-    check("standard: body has no gradient, card is the solid night-ink card", GRAD(pg) == "none" and CARD(pg) == "rgb(18, 26, 46)")
-    check("standard: button is the indigo button", BTN(pg) == "rgb(93, 100, 224)")
-    c.close()
-
-    # ---- 背景3種（ダーク）: 設定画面から選ぶ・再読み込みしても残る・カードが少し透ける ----
-    c, pg = page()
-    pg.click("#nav-history"); pg.click("#hf-settings")
-    pg.click("[data-setting=bg] [data-v=deep]"); pg.wait_for_timeout(100)
-    check("deep blue: attribute + gradient body + translucent card", attr(pg, "data-bg") == "deep" and "linear-gradient" in GRAD(pg) and CARD(pg) == "rgba(18, 26, 46, 0.86)")
-    check("deep blue: button color unchanged (still single color)", BTN(pg) == "rgb(93, 100, 224)" and css(pg, "#tab-text button[type=submit]", "backgroundImage") == "none")
-    check("deep blue: theme-color meta follows", pg.evaluate("document.querySelector('meta[name=theme-color]').content") == "#04061A")
-    pg.reload(wait_until="load"); pg.wait_for_timeout(200)
-    check("deep blue survives reload", attr(pg, "data-bg") == "deep" and "linear-gradient" in GRAD(pg))
-    pg.click("#nav-history"); pg.click("#hf-settings")
-    check("settings UI shows the saved background", pg.get_attribute("[data-setting=bg] [data-v=deep]", "aria-pressed") == "true")
-    pg.click("[data-setting=bg] [data-v=moon]"); pg.wait_for_timeout(100)
-    check("moonlight: gradient + accent turns teal by itself", attr(pg, "data-bg") == "moon" and "rgb(15, 32, 39)" in GRAD(pg) and BTN(pg) == "rgb(20, 128, 142)")
-    pg.click("[data-setting=accent] [data-v=rose]"); pg.wait_for_timeout(100)
-    check("moonlight + rose accent: the chosen accent wins", BTN(pg) == "rgb(194, 58, 98)")
-    pg.click("[data-setting=bg] [data-v=ink]"); pg.click("[data-setting=accent] [data-v=auto]"); pg.wait_for_timeout(100)
-    check("back to standard: attributes removed", attr(pg, "data-bg") is None and attr(pg, "data-accent") is None and GRAD(pg) == "none")
-    c.close()
-
-    # ---- アクセント色（ダーク・ライト）: ボタンの色 ----
-    want = {"dark": {"indigo": "rgb(93, 100, 224)", "teal": "rgb(20, 128, 142)", "orange": "rgb(191, 84, 16)", "rose": "rgb(194, 58, 98)"},
-            "light": {"indigo": "rgb(75, 84, 201)", "teal": "rgb(45, 106, 114)", "orange": "rgb(184, 83, 14)", "rose": "rgb(184, 58, 94)"}}
-    for theme in ("dark", "light"):
-        got = {}
-        for acc in ("indigo", "teal", "orange", "rose"):
-            c, pg = page(settings={"theme": theme, "accent": acc}); got[acc] = BTN(pg); c.close()
-        check(f"{theme}: accent colors on the translate button {got}", got == want[theme])
-    c, pg = page(settings={"theme": "light", "bg": "deep"})
-    check("light + deep blue: soft sand-blue gradient, card rgba(251,249,244,.88)", "linear-gradient" in GRAD(pg) and CARD(pg) == "rgba(251, 249, 244, 0.88)")
-    c.close()
-
-    # ---- 文字の読みやすさ: 実際に表示された色で、いちばん明るい背景の端まで ----
-    lum = lambda v: (lambda a: 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2])([((x / 255) / 12.92 if x / 255 <= .03928 else (((x / 255) + .055) / 1.055) ** 2.4) for x in v])
-    nums = lambda s: [float(x) for x in __import__("re").findall(r"[\d.]+", s)]
-    def ratio(a, b):
-        la, lb = lum(a), lum(b); return (max(la, lb) + .05) / (min(la, lb) + .05)
-    for theme, bg, edge in (("dark", "deep", [21, 48, 138]), ("dark", "moon", [44, 83, 100]), ("light", "deep", [220, 226, 236]), ("light", "moon", [217, 228, 226])):
-        c, pg = page(settings={"theme": theme, "bg": bg})
-        cd = nums(CARD(pg)); a = cd[3]; comp = [cd[i] * a + edge[i] * (1 - a) for i in range(3)]
-        tx = nums(css(pg, "#page-title-text", "color"))
-        check(f"{theme} {bg}: title text on the card over the brightest edge {ratio(tx, comp):.1f}:1 (>=7)", ratio(tx, comp) >= 7)
+    # ---- v1.7.4: 背景・アクセント色の選択は取りやめ。v1.7.3 で保存された設定が残っていても、見た目は元（v1.7.2）のまま ----
+    for theme, card, btn in (("dark", "rgb(18, 26, 46)", "rgb(93, 100, 224)"), ("light", "rgb(251, 249, 244)", "rgb(45, 106, 114)")):
+        c, pg = page(settings={"theme": theme, "bg": "deep", "accent": "rose"})
+        check(f"{theme}: old saved bg/accent are ignored (no attributes, solid card, original button)",
+              attr(pg, "data-bg") is None and attr(pg, "data-accent") is None and GRAD(pg) == "none" and CARD(pg) == card and BTN(pg) == btn)
+        pg.click("#nav-history"); pg.click("#hf-settings")
+        check(f"{theme}: settings screen has no background/accent choices", pg.locator("[data-setting=bg]").count() == 0 and pg.locator("[data-setting=accent]").count() == 0)
         c.close()
-
-    # ---- 設定の選択欄: 320px・特大・ダーク/ライトではみ出さない／押す場所は44px以上 ----
-    for name, st in (("dark xl", {"theme": "dark", "fs": "xl"}), ("light xl", {"theme": "light", "fs": "xl", "bg": "moon", "accent": "orange"})):
+    for name, st in (("dark xl", {"theme": "dark", "fs": "xl"}), ("light xl", {"theme": "light", "fs": "xl"})):
         c, pg = page(320, settings=st)
         pg.click("#nav-history"); pg.click("#hf-settings"); pg.wait_for_timeout(150)
-        ov = pg.evaluate("document.documentElement.scrollWidth > innerWidth + 1")
-        sizes = pg.evaluate("[...document.querySelectorAll('[data-setting=bg] button, [data-setting=accent] button')].map(b => { const r = b.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height), r.right]; })")
-        check(f"320px {name}: background/accent choices fit, >=44px tall, no overflow {sizes}", not ov and all(s[1] >= 44 and s[2] <= 320 for s in sizes) and len(sizes) == 8)
+        check(f"320px {name}: settings screen has no overflow", not pg.evaluate("document.documentElement.scrollWidth > innerWidth + 1"))
         c.close()
 
     # ---- 結果カード・手ごたえ ----

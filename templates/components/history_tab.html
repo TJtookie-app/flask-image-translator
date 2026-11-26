@@ -112,22 +112,6 @@
                 </div>
                 <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-200"><input type="checkbox" id="set-contrast" class="accent-indigo-500"> {{ ui.set_contrast }}</label>
             </div>
-            <div class="space-y-1.5">
-                <p class="text-xs font-semibold text-slate-300">{{ ui.set_bg }}</p>
-                <div class="grid grid-cols-3 gap-1.5" data-setting="bg">
-                    <button type="button" data-v="ink" class="set-opt">{{ ui.bg_ink }}</button>
-                    <button type="button" data-v="deep" class="set-opt">{{ ui.bg_deep }}</button>
-                    <button type="button" data-v="moon" class="set-opt">{{ ui.bg_moon }}</button>
-                </div>
-            </div>
-            <div class="space-y-1.5">
-                <p class="text-xs font-semibold text-slate-300">{{ ui.set_accent }}</p>
-                <div class="acc-grid" data-setting="accent">
-                    {% for v in ['auto', 'indigo', 'teal', 'orange', 'rose'] %}
-                    <button type="button" data-v="{{ v }}" class="set-opt acc-opt" title="{{ ui['acc_' ~ v] }}" aria-label="{{ ui['acc_' ~ v] }}"><span class="acc-dot a-{{ v }}" aria-hidden="true"></span></button>
-                    {% endfor %}
-                </div>
-            </div>
             <p class="text-xs text-slate-400">{{ ui.set_note }}</p>
         </div>
 
