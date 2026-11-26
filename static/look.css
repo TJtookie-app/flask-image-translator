@@ -1,0 +1,63 @@
+/* v1.7.3 見た目の追加（theme.css のあとに読み込む）: 背景のグラデーション3種・アクセント色・結果カード・操作の手ごたえ。
+   背景は「標準」のとき何も変わらない（html に data-bg が付かない）。アクセント色も、「標準」のときは data-accent が付かない。 */
+
+/* ---- 1) 背景（ページの下地だけ。文字の乗るカードは、ほぼ不透明のまま少しだけ透かす） ---- */
+html[data-bg=deep] body { background-image: linear-gradient(135deg, #04061A 0%, #0A1240 55%, #15308A 100%); background-attachment: fixed; background-size: cover; }
+html[data-bg=moon] body { background-image: linear-gradient(135deg, #0F2027 0%, #203A43 55%, #2C5364 100%); background-attachment: fixed; background-size: cover; }
+/* ライトの下地は style.css が「background: … !important」で決めているので、こちらも !important（同じ強さで、あとから読み込むので勝つ） */
+html[data-theme=light][data-bg=deep] body.bg-slate-950, html[data-theme=light][data-bg=deep] body { background-image: linear-gradient(135deg, #F6F2EA 0%, #E9E6E4 55%, #DCE2EC 100%) !important; background-attachment: fixed !important; background-size: cover !important; }
+html[data-theme=light][data-bg=moon] body.bg-slate-950, html[data-theme=light][data-bg=moon] body { background-image: linear-gradient(135deg, #F6F2EA 0%, #E8E9E2 55%, #D9E4E2 100%) !important; background-attachment: fixed !important; background-size: cover !important; }
+html[data-bg] .max-w-xl[class~="bg-slate-900"], html[data-bg] .max-w-md[class~="bg-slate-900"] { background-color: rgba(var(--card-rgb), .86); }
+html[data-theme=light][data-bg] .max-w-xl[class*="bg-slate-900"], html[data-theme=light][data-bg] .max-w-md[class*="bg-slate-900"] { background-color: rgba(var(--card-rgb), .88) !important; }
+
+/* ---- 2) アクセント色（ダーク・ライトそれぞれ、文字の読みやすさを確かめた濃さ）。「ムーンライト」の背景で標準のときは、ティール寄り ---- */
+html[data-accent=indigo]:not([data-theme=light]) { --accent: #7C83F0; --accent-text: #9AA0F5; --accent-soft: rgba(124, 131, 240, .15); --accent-line: rgba(124, 131, 240, .3);
+    --btn: #5D64E0; --btn-hover: #6E75EA; --accent-rgb: 124, 131, 240; --accent-hi: #C9CDFB; }
+html[data-accent=teal]:not([data-theme=light]), html[data-bg=moon]:not([data-accent]):not([data-theme=light]) { --accent: #3FBFCB; --accent-text: #6FD3DC;
+    --accent-soft: rgba(63, 191, 203, .15); --accent-line: rgba(63, 191, 203, .3); --btn: #14808E; --btn-hover: #1A92A2; --accent-rgb: 63, 191, 203; --accent-hi: #BDEFF3; }
+html[data-accent=orange]:not([data-theme=light]) { --accent: #F59A4B; --accent-text: #FFB878; --accent-soft: rgba(245, 154, 75, .15); --accent-line: rgba(245, 154, 75, .3);
+    --btn: #BF5410; --btn-hover: #D0621A; --accent-rgb: 245, 154, 75; --accent-hi: #FFE0C2; }
+html[data-accent=rose]:not([data-theme=light]) { --accent: #F2708F; --accent-text: #FF9DB4; --accent-soft: rgba(242, 112, 143, .15); --accent-line: rgba(242, 112, 143, .3);
+    --btn: #C23A62; --btn-hover: #D24A72; --accent-rgb: 242, 112, 143; --accent-hi: #FFD3DE; }
+html[data-theme=light][data-accent=indigo] { --accent: #4B54C9; --accent-text: #343CA8; --accent-soft: #E6E7F8; --accent-line: #C4C7EE; --btn: #4B54C9; --btn-hover: #3F47B0; --accent-rgb: 75, 84, 201; --accent-hi: #343CA8; }
+html[data-theme=light][data-accent=teal] { --accent: #2D6A72; --accent-text: #1F5961; --accent-soft: #E2EDEC; --accent-line: #B5CFCF; --btn: #2D6A72; --btn-hover: #245A61; --accent-rgb: 45, 106, 114; --accent-hi: #1F5961; }
+html[data-theme=light][data-accent=orange] { --accent: #B8530E; --accent-text: #8A3B05; --accent-soft: #F6E8DA; --accent-line: #E3C5A8; --btn: #B8530E; --btn-hover: #9E470A; --accent-rgb: 184, 83, 14; --accent-hi: #8A3B05; }
+html[data-theme=light][data-accent=rose] { --accent: #B83A5E; --accent-text: #8F2646; --accent-soft: #F5E3E6; --accent-line: #E3BFC8; --btn: #B83A5E; --btn-hover: #9E2F4F; --accent-rgb: 184, 58, 94; --accent-hi: #8F2646; }
+/* 高コントラスト（ライト）: 文字は、さらに濃く */
+html[data-theme=light][data-contrast=high][data-accent=indigo] { --accent-text: #262D8F; --btn: #343CA8; --btn-hover: #2A3190; }
+html[data-theme=light][data-contrast=high][data-accent=orange] { --accent-text: #6E2D02; --btn: #8A3B05; --btn-hover: #702E03; }
+html[data-theme=light][data-contrast=high][data-accent=rose] { --accent-text: #721B35; --btn: #8F2646; --btn-hover: #741D38; }
+/* 設定の選択欄 */
+.acc-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .375rem; }
+.acc-opt { min-height: 2.75rem; display: inline-flex; align-items: center; justify-content: center; }
+.acc-dot { display: inline-block; width: 1.25rem; height: 1.25rem; border-radius: 999px; border: 2px solid rgba(255, 255, 255, .4); box-sizing: border-box; }
+.acc-dot.a-auto { background: transparent; border: 2px dashed currentColor; }
+.acc-dot.a-indigo { background: #6C72E8; } .acc-dot.a-teal { background: #2FA4B3; } .acc-dot.a-orange { background: #E8803A; } .acc-dot.a-rose { background: #E0587F; }
+html[data-theme=light] .acc-dot:not(.a-auto) { border-color: rgba(52, 48, 42, .25); }
+html[data-theme=light] .set-opt[aria-pressed=true] .acc-dot { border-color: rgba(255, 255, 255, .7); }
+
+/* ---- 3) 結果カード: 訳文を大きく読みやすく。左（右から左の言語では右）にアクセント色の細い線。言語名は小さなチップ ---- */
+.rc-box { position: relative; padding: 1.35rem 1.25rem 1.1rem; box-shadow: var(--shadow-card, 0 6px 18px rgba(0, 0, 0, .16)); }
+.rc-box::before { content: ""; position: absolute; top: 1rem; bottom: 1rem; inset-inline-start: 0; width: 3px; border-radius: 3px; background: var(--accent); pointer-events: none; }
+html .rc-box .rc-out { color: var(--text) !important; font-size: 1.42rem; line-height: 1.5; font-weight: 600; letter-spacing: .01em; }
+.rc-box .rc-pron { padding-top: .55rem; border-top: 1px dashed var(--line2); font-size: .95rem; }
+.rc-tag { display: inline-flex; align-items: center; padding: .12rem .65rem; border-radius: 999px; background: var(--accent-soft); letter-spacing: .02em; text-transform: none; }
+html[data-theme=light] .rc-box { --shadow-card: 0 6px 18px rgba(52, 48, 42, .1); }
+
+/* ---- 4) 操作の手ごたえ（動きを減らす設定のときは、すべて止まる） ---- */
+@keyframes lk-pop { 0% { transform: scale(.4); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+@keyframes lk-star { 0% { transform: scale(.5) rotate(-25deg); } 60% { transform: scale(1.4) rotate(12deg); } 100% { transform: none; } }
+@keyframes lk-ring { 0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, .55); } 100% { box-shadow: 0 0 0 22px rgba(248, 113, 113, 0); } }
+.rc-btn .fa-check { display: inline-block; animation: lk-pop .32s ease-out; }
+.fav-btn .fa-solid.fa-star { display: inline-block; animation: lk-star .4s ease-out; }
+#start-record-btn:has(#mic-icon.animate-pulse) { animation: lk-ring 1.4s ease-out infinite; }
+/* カメラ: 撮る範囲の目安（四隅の枠。画面の操作は邪魔しない） */
+.cam-frame { position: absolute; top: 5.2rem; bottom: 11rem; left: 1.4rem; right: 1.4rem; pointer-events: none; }
+.cam-frame i { position: absolute; width: 1.8rem; height: 1.8rem; border: 0 solid rgba(255, 255, 255, .85); filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .5)); }
+.cam-frame i:nth-child(1) { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: .9rem; }
+.cam-frame i:nth-child(2) { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: .9rem; }
+.cam-frame i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: .9rem; }
+.cam-frame i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: .9rem; }
+@media (prefers-reduced-motion: reduce) {
+    .rc-btn .fa-check, .fav-btn .fa-solid.fa-star, #start-record-btn:has(#mic-icon.animate-pulse) { animation: none !important; }
+}

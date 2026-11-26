@@ -1,9 +1,9 @@
 {% macro result_box(mode, show_original=false, left=false) %}
 {% if translated_text and active_mode == mode %}
-<div class="mt-4 p-5 bg-indigo-950/40 rounded-2xl border border-indigo-800/60 space-y-3 {{ 'text-left' if left }}">
+<div class="rc-box mt-4 p-5 bg-indigo-950/40 rounded-2xl border border-indigo-800/60 space-y-3 {{ 'text-left' if left }}">
     <div class="flex justify-between items-center flex-wrap border-b border-indigo-900/50 pb-2 gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-wrap">
-            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">{{ ui.result_label }} ({{ target_display }})</span>
+            <span class="rc-tag text-xs font-bold text-indigo-400 uppercase tracking-wider">{{ ui.result_label }} ({{ target_display }})</span>
             {% if detected_lang %}
             <span class="lang-badge bg-emerald-950/80 text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-800" data-lang-tag="{{ detected_tag or '' }}" data-lang-native="{{ detected_native or '' }}">🌐 <span class="lang-badge-text">{{ detected_lang }}</span></span>
             {% endif %}
