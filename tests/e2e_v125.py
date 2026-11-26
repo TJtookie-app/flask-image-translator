@@ -110,9 +110,10 @@ with sync_playwright() as p:
     # ================= カメラタブ =================
     pg.goto(B + "/", wait_until="domcontentloaded"); pg.click("#nav-camera")
     check("camera tab overlay hidden before translating", hidden(pg, "#ovc-box"))
-    pg.evaluate("startCamera()")
+    pg.click("#camera-open-btn")
     pg.wait_for_function("document.getElementById('camera-video').videoWidth > 0", timeout=15000)
     pg.click("#camera-capture-btn")
+    pg.click("#camera-submit-btn")
     pg.wait_for_selector("#ovc-box:not(.hidden)", timeout=20000)
     pg.wait_for_function("document.getElementById('ovc-img').complete && document.getElementById('ovc-img').naturalWidth>0")
     check("camera result is shown on the camera tab", pg.is_visible("#tab-camera") and "Ramen" in pg.inner_text("#resultText-camera"))

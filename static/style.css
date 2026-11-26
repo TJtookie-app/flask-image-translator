@@ -308,3 +308,7 @@ html[data-theme=light] .as-sub { color: #334155; }
 html[data-theme=light] .as-ex, html[data-theme=light] .as-origin { color: #475569; }
 html[data-theme=light] .as-tag { color: #3730a3; background: #e0e7ff; }
 html[data-theme=light] .as-btn { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+
+/* v1.6.1: カメラタブの撮影プレビュー */
+.cam-preview { display: block; width: 100%; max-height: 60vh; object-fit: contain; background: #000; }
+.cam-preview.hidden { display: none; }

@@ -1,13 +1,6 @@
-// 全画面のカメラ。「カメラ」タブを開くと画面が切り替わり、左上の矢印でもとの画面へ戻る。撮影するとそのまま翻訳（camera-form を送る）
+// 全画面のカメラ。カメラタブの「カメラで撮る」で開く。撮影するとカメラタブに戻ってプレビューが出て、「翻訳する」を押すと翻訳（camera-form を送る）。左上の矢印は、撮らずに戻る
 let videoStream = null;
-let camPrevTab = 'text';
 let camTorchOn = false;
-
-// 直前に開いていたタブを覚える（矢印で戻る先）
-(function () {
-    const orig = switchTab;
-    switchTab = function (t) { if (t !== 'camera') camPrevTab = t; return orig.apply(this, arguments); };
-})();
 
 function camStop() {
     if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
@@ -28,13 +21,12 @@ function openCameraFull() {
     document.addEventListener('keydown', camKey);
 }
 
-function closeCameraFull(back) {
+function closeCameraFull() {
     camStop();
     const box = $('cam-full');
     if (box) box.classList.add('hidden');
     document.documentElement.classList.remove('cam-open');
     document.removeEventListener('keydown', camKey);
-    if (back !== false && !$('tab-camera').classList.contains('hidden') && camPrevTab) switchTab(camPrevTab);   // もとの画面へ
 }
 function camKey(ev) { if (ev.key === 'Escape') closeCameraFull(); }
 
@@ -51,7 +43,7 @@ async function startCamera() {
             if (caps && caps.torch) $('cam-torch').classList.remove('hidden');
         } catch (e) {}
     } catch (err) {
-        closeCameraFull(false);
+        closeCameraFull();
         alert(UI.err_camera + ': ' + err.message);
     }
 }
@@ -66,11 +58,17 @@ async function toggleTorch() {
     } catch (e) {}
 }
 
-function camSubmit(dataUrl) {
+// 撮った（選んだ）写真をカメラタブに出す。翻訳は「翻訳する」を押したときだけ（無料枠を使わない）
+function camTake(dataUrl) {
     $('camera_data').value = dataUrl;
     if (typeof storeLastImage === 'function') storeLastImage(dataUrl, 'camera');   // 結果に写真を重ねて見せるため、端末に一時保持
-    closeCameraFull(false);
-    $('camera-form').requestSubmit();
+    closeCameraFull();
+    const pv = $('camera-preview');
+    pv.src = dataUrl;
+    pv.classList.remove('hidden');
+    $('camera-placeholder').classList.add('hidden');
+    $('camera-submit-btn').disabled = false;
+    $('camera-open-btn').querySelector('.btn-label').textContent = UI.cam_retake;   // 「カメラで撮る」→「撮り直す」
 }
 
 function captureCamera() {
@@ -81,7 +79,7 @@ function captureCamera() {
     canvas.width = Math.round(video.videoWidth * scale);
     canvas.height = Math.round(video.videoHeight * scale);
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    camSubmit(canvas.toDataURL('image/jpeg', 0.85));
+    camTake(canvas.toDataURL('image/jpeg', 0.85));
 }
 
 // アルバムの写真を選んで、そのまま翻訳する
@@ -91,12 +89,7 @@ async function cameraFromFile(input) {
     if (!file) return;
     try {
         const blob = await downscaleImage(file);
-        camSubmit(await blobToDataURL(blob || file));
+        camTake(await blobToDataURL(blob || file));
     } catch (e) { alert(UI.err_camera_first); }
 }
 
-// 「カメラ」タブを押した瞬間に、全画面のカメラへ切り替える（ページを開き直したときの表示では、開かない）
-document.addEventListener('DOMContentLoaded', () => {
-    const nav = $('nav-camera');
-    if (nav) nav.addEventListener('click', () => startCamera());
-});

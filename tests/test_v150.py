@@ -46,17 +46,18 @@ def test_full_screen_camera_markup(env):
     for needle in ('id="camera-video"', 'id="camera-canvas"', 'class="cam-btn cam-back"', 'id="camera-capture-btn"', 'id="cam-torch"', 'type="file"', 'cameraFromFile'):
         assert needle in box, needle
     assert 'onclick="closeCameraFull()"' in box and 'onclick="captureCamera()"' in box
-    # 小さなプレビュー枠は無くなり、タブには「カメラ起動」だけが残る
+    # タブには「カメラで撮る」と「翻訳する」（撮るまで押せない）、撮った写真のプレビュー
     tab = html[html.index('id="tab-camera"'):html.index('id="tab-conversation"')]
     assert "aspect-video" not in tab and 'id="camera-open-btn"' in tab and 'id="camera-form"' in tab
     assert 'id="camera-video"' not in tab
+    assert re.search(r'id="camera-submit-btn"[^>]*disabled', tab) and 'type="submit"' in tab and 'id="camera-preview"' in tab
 
 
 def test_full_screen_camera_js_and_css():
     js = _read("static", "js", "camera_full.js")
-    for needle in ("function openCameraFull", "function closeCameraFull", "function toggleTorch", "function cameraFromFile", "camPrevTab", "getCapabilities", "torch", "srcObject = null", "Escape"):
+    for needle in ("function openCameraFull", "function closeCameraFull", "function toggleTorch", "function cameraFromFile", "function camTake", "getCapabilities", "torch", "srcObject = null", "Escape"):
         assert needle in js, needle
-    assert "nav-camera" in js and "DOMContentLoaded" in js                       # タブを押した瞬間に開く
+    assert "nav-camera" not in js and "camPrevTab" not in js and "requestSubmit" not in js   # v1.6.1: タブを開いても自動では開かない。撮っただけでは翻訳しない
     assert "function startCamera" not in _read("static", "js", "media.js")      # 古いカメラ処理は media.js から移した
     css = _read("static", "style.css")
     assert ".cam-full" in css and "100dvh" in css and "safe-area-inset-bottom" in css and "object-fit: cover" in css

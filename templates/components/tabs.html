@@ -72,6 +72,7 @@
             <i class="fa-solid fa-camera text-3xl text-slate-500 block mb-2"></i>
             {{ ui.camera_instruction }}
         </div>
+        <img id="camera-preview" class="cam-preview hidden" alt="">
     </div>
 
     <form id="camera-form" action="/" method="POST" class="tx-form space-y-3">
@@ -79,9 +80,14 @@
         <input type="hidden" name="overlay" value="1">
         <input type="hidden" name="formality" value="auto"><input type="hidden" name="pron" value="0">
         <input type="hidden" id="camera_data" name="camera_data" value="">
-        <button type="button" id="camera-open-btn" onclick="startCamera()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2">
-            <i class="fa-solid fa-camera"></i> <span class="btn-label">{{ ui.btn_camera_start }}</span>
-        </button>
+        <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="camera-open-btn" onclick="startCamera()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-camera"></i> <span class="btn-label">{{ ui.btn_camera_start }}</span>
+            </button>
+            <button type="submit" id="camera-submit-btn" disabled class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-language"></i> <span class="btn-label">{{ ui.btn_text_translate }}</span>
+            </button>
+        </div>
     </form>
     <!-- 撮った写真の上に訳文を重ねて表示（画像タブと同じ部品） -->
     {{ overlay_box('ovc') }}
