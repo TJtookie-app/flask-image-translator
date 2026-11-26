@@ -39,7 +39,7 @@ function applySettings(st) {
         d.style.fontSize = '';
     }
     const meta = document.querySelector('meta[name=theme-color]');
-    if (meta) meta.setAttribute('content', theme === 'light' ? '#F4F8FB' : '#0B1020');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#F4F0E8' : '#0B1020');
 }
 
 function renderSettings() {

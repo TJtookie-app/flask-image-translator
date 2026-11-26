@@ -177,7 +177,7 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelector('.rc-actions').scrollIntoView({block:'center'})")
     pg.click(".rc-more"); shot(pg, "5_light_menu")
     bg = pg.evaluate("getComputedStyle(document.querySelector('.rc-menu')).backgroundColor")
-    check(f"light theme menu is light {bg}", bg in ("rgb(255, 255, 255)", "rgba(255, 255, 255, 0.9)"))   # v1.7: ライトのメニューは、ほぼ不透明な白いガラス
+    check(f"light theme menu is light {bg}", bg in ("rgb(255, 255, 255)", "rgba(255, 255, 255, 0.9)", "rgba(251, 249, 244, 0.9)"))   # v1.7: ライトのメニューは、ほぼ不透明な白いガラス
     pg.keyboard.press("Escape")
 
     # ---- すべて削除はゴミ箱も消す ----

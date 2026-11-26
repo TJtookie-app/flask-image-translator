@@ -17,22 +17,22 @@
     --shadow: 0 10px 30px rgba(0, 0, 0, .45);
 }
 html[data-theme=light] {
-    --bg: #F4F8FB; --bg-rgb: 244, 248, 251;
-    --card: #FFFFFF; --card-rgb: 255, 255, 255;
-    --card2: #E6EEF6; --card2-hover: #D5E1EE;
-    --line: #C9D6E3; --line2: #AFC0D2;
-    --text: #0F172A; --text2: #1E293B; --text3: #475569; --text4: #56637A;
-    --accent: #2F5BFF; --accent-text: #2447D6; --accent-soft: #E3EBFF; --accent-line: #B8C8FF;
-    --btn: #2F5BFF; --btn-hover: #2449D6;
+    --bg: #F4F0E8; --bg-rgb: 244, 240, 232;
+    --card: #FBF9F4; --card-rgb: 251, 249, 244;
+    --card2: #EFE9DD; --card2-hover: #E3DBCB;
+    --line: #DAD1C2; --line2: #C5B9A5;
+    --text: #34302A; --text2: #463F36; --text3: #5B5348; --text4: #6B6256;
+    --accent: #2D6A72; --accent-text: #1F5961; --accent-soft: #E2EDEC; --accent-line: #B5CFCF;
+    --btn: #2D6A72; --btn-hover: #245A61;
     --grad-btn: linear-gradient(135deg, #2F5BFF 0%, #8B3FE0 56%, #D6407F 100%);
     --grad-ring: linear-gradient(135deg, #FFA43A 0%, #F2545B 34%, #C13DD0 66%, #3F63FF 100%);
-    --glass: rgba(255, 255, 255, .9); --glass-line: rgba(100, 116, 139, .28); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9);
+    --glass: rgba(251, 249, 244, .9); --glass-line: rgba(110, 95, 75, .26); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9);
     --glass-blur: blur(12px) saturate(1.2);
-    --shadow: 0 10px 28px rgba(15, 23, 42, .18);
+    --shadow: 0 10px 28px rgba(52, 48, 42, .14);
 }
 /* 高コントラスト（屋外・まぶしい場所向け）。文字と境界線を濃くする */
 html[data-contrast=high] { --line: rgba(203, 213, 225, .42); --line2: rgba(203, 213, 225, .6); --text: #F4F6FC; --text2: #E1E6F3; --text3: #C2CADF; --text4: #A4AFCB; }
-html[data-theme=light][data-contrast=high] { --bg: #FFFFFF; --bg-rgb: 255, 255, 255; --card2: #DCE6F1; --line: #7F93AB; --line2: #64788F; --text: #020617; --text2: #0F172A; --text3: #1E293B; --text4: #334155; --accent-text: #1A36A8; --accent-soft: #EAF0FF; --glass: rgba(255, 255, 255, .97); --btn: #2447D6; --btn-hover: #1E3BB0; }
+html[data-theme=light][data-contrast=high] { --bg: #FFFEFB; --bg-rgb: 255, 254, 251; --card2: #E8E0D0; --line: #8A7D6A; --line2: #6E6252; --text: #1A1612; --text2: #2A241D; --text3: #3A342B; --text4: #4A4237; --accent-text: #174A52; --accent-soft: #E8F1F0; --glass: rgba(255, 254, 251, .97); --btn: #1F5058; --btn-hover: #18424A; }
 
 /* ---- 画面の下地 ---- */
 html:not([data-theme=light]) body, html:not([data-theme=light]) body[class*="bg-slate-950"] { background-color: var(--bg); color: var(--text); }
@@ -107,16 +107,30 @@ html[data-theme=light] [class*="border-indigo-"] { border-color: var(--accent-li
 html[data-theme=light] .rc-item { color: var(--text); }
 html[data-theme=light] .rc-item i { color: var(--text3); }
 
-/* ---- グラデーション（部分使い: ロゴの縁・いま開いているタブの印・進捗バー） ---- */
-.hdr-brand img { background: var(--grad-ring); padding: 2px; border: 0; }
-.nav-btn.text-indigo-400 { position: relative; }
-.nav-btn.text-indigo-400::after {
-    content: ""; position: absolute; top: 3px; left: 50%; width: 1.2rem; height: 3px; margin-left: -.6rem;
-    border-radius: 2px; background: var(--grad-ring);
-}
+/* ---- グラデーション（部分使い: 主役のボタン・進捗バーだけ） ---- */
 .pbar-fill { background: var(--grad-ring) !important; }
 
 /* ---- 控えめな動き ---- */
+/* 1) ページの切り替え（スタート画面→翻訳画面、翻訳の結果）: 画面が、軽く浮き上がって、ふわっと出る（ブラウザの View Transitions は、エラーが出る場合があるので使わない） */
+.max-w-xl, .max-w-md { animation: tl-fade .26s ease-out; }
+/* 2) 下のナビ: 選択中の「丸い面」が、押したタブへすっと動く（位置は JS が --pill-x / --pill-w に入れる） */
+.bottom-nav-in { position: relative; }
+.bottom-nav-in::before {
+    content: ""; position: absolute; top: .3rem; bottom: .3rem; left: 0; width: var(--pill-w, 0); border-radius: 1.3rem;
+    background: var(--accent-soft); transform: translateX(var(--pill-x, 0)); opacity: var(--pill-o, 0); pointer-events: none;
+}
+.bottom-nav-in.pill-ready::before { transition: transform .28s cubic-bezier(.3, .8, .3, 1), width .28s cubic-bezier(.3, .8, .3, 1), opacity .2s; }
+.nav-btn { position: relative; z-index: 1; }
+.bottom-nav-in .nav-btn[class*="bg-indigo-950"] { background-color: transparent !important; }
+/* 3) 言語の入れ替えボタン: 押すと、半回転する */
+#swap-lang-container button i { transition: transform .32s cubic-bezier(.3, .8, .3, 1); }
+#swap-lang-container.swapping button i { transform: rotate(180deg); }
+/* 4) 翻訳を待つあいだ、結果が出る場所に、薄い「読み込み中」の枠を出す */
+.sk-box { margin-top: .75rem; padding: 1rem; border-radius: 1rem; border: 1px solid var(--line); background: var(--card2); display: grid; gap: .6rem; }
+.sk-line { height: .85rem; border-radius: .45rem; background: var(--line2); opacity: .5; position: relative; overflow: hidden; }
+.sk-line:nth-child(1) { width: 62%; } .sk-line:nth-child(2) { width: 88%; } .sk-line:nth-child(3) { width: 45%; }
+.sk-line::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; transform: translateX(-100%);
+    background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .45) 50%, transparent 80%); animation: tl-sheen 1.3s ease-in-out infinite; }
 @keyframes tl-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes tl-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes tl-sheen { to { transform: translateX(100%); } }

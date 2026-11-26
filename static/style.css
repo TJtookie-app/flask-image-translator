@@ -23,35 +23,35 @@ html[data-fs=xl] .text-\[11px\] { font-size: .8rem !important; }
     position: absolute; top: max(.75rem, env(safe-area-inset-top)); right: .75rem; width: 2.75rem; height: 2.75rem;
     border-radius: 9999px; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: inherit; font-size: 1.1rem;
 }
-html[data-theme=light] .big-overlay { background: #fff; color: #0f172a; }
+html[data-theme=light] .big-overlay { background: var(--card); color: var(--text); }
 html[data-theme=light] .big-close { border-color: rgba(15,23,42,.3); background: rgba(15,23,42,.08); }
 
 /* ---- ライト配色（既定はダーク。Tailwind の色クラスを上書きする） ---- */
-html[data-theme=light] body.bg-slate-950, html[data-theme=light] body { background: #F4F8FB !important; color: #0f172a !important; }
-html[data-theme=light] [class*="bg-slate-950"] { background-color: #F4F8FB !important; }
-html[data-theme=light] [class*="bg-slate-900"] { background-color: #ffffff !important; }
-html[data-theme=light] [class*="bg-slate-800"] { background-color: #E6EEF6 !important; }
-html[data-theme=light] [class*="hover:bg-slate-700"]:hover { background-color: #C9D6E3 !important; }
-html[data-theme=light] [class*="border-slate-"] { border-color: #C9D6E3 !important; }
-html[data-theme=light] .text-white:not([class*="bg-indigo-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not([class*="from-indigo-"]) { color: #0f172a !important; }
-html[data-theme=light] .text-slate-100, html[data-theme=light] .text-slate-200 { color: #0f172a !important; }
-html[data-theme=light] .text-slate-300 { color: #334155 !important; }
-html[data-theme=light] .text-slate-400 { color: #475569 !important; }
-html[data-theme=light] .text-slate-500, html[data-theme=light] .text-slate-600 { color: #56637A !important; }
-html[data-theme=light] .text-indigo-100, html[data-theme=light] .text-indigo-200 { color: #1E3A8A !important; }
-html[data-theme=light] .text-indigo-300, html[data-theme=light] .text-indigo-400 { color: #2447D6 !important; }
+html[data-theme=light] body.bg-slate-950, html[data-theme=light] body { background: var(--bg) !important; color: var(--text) !important; }
+html[data-theme=light] [class*="bg-slate-950"] { background-color: var(--bg) !important; }
+html[data-theme=light] [class*="bg-slate-900"] { background-color: var(--card) !important; }
+html[data-theme=light] [class*="bg-slate-800"] { background-color: var(--card2) !important; }
+html[data-theme=light] [class*="hover:bg-slate-700"]:hover { background-color: var(--line) !important; }
+html[data-theme=light] [class*="border-slate-"] { border-color: var(--line) !important; }
+html[data-theme=light] .text-white:not([class*="bg-indigo-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not([class*="from-indigo-"]) { color: var(--text) !important; }
+html[data-theme=light] .text-slate-100, html[data-theme=light] .text-slate-200 { color: var(--text) !important; }
+html[data-theme=light] .text-slate-300 { color: var(--text2) !important; }
+html[data-theme=light] .text-slate-400 { color: var(--text3) !important; }
+html[data-theme=light] .text-slate-500, html[data-theme=light] .text-slate-600 { color: var(--text4) !important; }
+html[data-theme=light] .text-indigo-100, html[data-theme=light] .text-indigo-200 { color: var(--accent-text) !important; }
+html[data-theme=light] .text-indigo-300, html[data-theme=light] .text-indigo-400 { color: var(--accent-text) !important; }
 html[data-theme=light] .text-emerald-200, html[data-theme=light] .text-emerald-400 { color: #047857 !important; }
 html[data-theme=light] .text-amber-100, html[data-theme=light] .text-amber-200 { color: #92400e !important; }
 html[data-theme=light] .text-red-200, html[data-theme=light] .text-red-300 { color: #b91c1c !important; }
-html[data-theme=light] [class*="bg-indigo-950"] { background-color: #E3EBFF !important; }
+html[data-theme=light] [class*="bg-indigo-950"] { background-color: var(--accent-soft) !important; }
 html[data-theme=light] [class*="bg-emerald-950"] { background-color: #d1fae5 !important; }
 html[data-theme=light] [class*="bg-amber-950"] { background-color: #fef3c7 !important; }
 html[data-theme=light] [class*="bg-red-950"] { background-color: #fee2e2 !important; }
 html[data-theme=light] [class*="border-indigo-"], html[data-theme=light] [class*="border-emerald-"],
-html[data-theme=light] [class*="border-amber-"], html[data-theme=light] [class*="border-red-"] { border-color: #B8C8FF !important; }
+html[data-theme=light] [class*="border-amber-"], html[data-theme=light] [class*="border-red-"] { border-color: var(--accent-line) !important; }
 html[data-theme=light] [class*="placeholder-slate-"]::placeholder { color: #94a3b8 !important; }
 html[data-theme=light] .set-opt[aria-pressed=true] { color: #fff !important; }
-html[data-theme=light] .set-opt[aria-pressed=true] { background-color: #2F5BFF !important; }
+html[data-theme=light] .set-opt[aria-pressed=true] { background-color: var(--btn) !important; }
 
 /* ---- 画像の重ね翻訳 ---- */
 .ov-block {
@@ -89,11 +89,11 @@ html[data-theme=light] .set-opt[aria-pressed=true] { background-color: #2F5BFF !
 .rc-item:hover, .rc-item:active { background: #1A2440; }
 .rc-item i { width: 1.1rem; text-align: center; color: #8D98B4; flex: 0 0 auto; }
 .rc-label { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
-html[data-theme=light] .rc-btn { background: #E6EEF6; color: #334155; }
-html[data-theme=light] .rc-btn:hover, html[data-theme=light] .rc-btn:active { background: #C9D6E3; }
-html[data-theme=light] .rc-item { color: #0f172a; }
-html[data-theme=light] .rc-item:hover, html[data-theme=light] .rc-item:active { background: #EAF1F8; }
-html[data-theme=light] .rc-item i { color: #56637A; }
+html[data-theme=light] .rc-btn { background: var(--card2); color: var(--text2); }
+html[data-theme=light] .rc-btn:hover, html[data-theme=light] .rc-btn:active { background: var(--line); }
+html[data-theme=light] .rc-item { color: var(--text); }
+html[data-theme=light] .rc-item:hover, html[data-theme=light] .rc-item:active { background: var(--card2); }
+html[data-theme=light] .rc-item i { color: var(--text4); }
 
 /* ---- 「ゴミ箱に移しました［元に戻す］」の通知 ---- */
 .undo-toast {
@@ -108,8 +108,8 @@ html[data-theme=light] .rc-item i { color: #56637A; }
 }
 .undo-toast button:hover { background: #1A2440; }
 body.has-bottom-nav .undo-toast { bottom: calc(var(--nav-h) + var(--nav-gap) + env(safe-area-inset-bottom, 0px) + .75rem); }
-html[data-theme=light] .undo-toast button { color: #2447D6; }
-html[data-theme=light] .undo-toast button:hover { background: #eef2ff; }
+html[data-theme=light] .undo-toast button { color: var(--accent-text); }
+html[data-theme=light] .undo-toast button:hover { background: var(--accent-soft); }
 
 /* ---- 翻訳が遅いときの案内・今日の残り回数 ---- */
 .wait-note { margin-top: .6rem; padding: .6rem .8rem; border-radius: .9rem; font-size: .88rem; line-height: 1.5; text-align: center;
@@ -118,11 +118,11 @@ html[data-theme=light] .undo-toast button:hover { background: #eef2ff; }
 .quota-note.low { color: #fcd34d; }
 .quota-note.none { color: #fca5a5; }
 html[data-theme=light] .wait-note { color: #92400e; background: #fef3c7; border-color: #f59e0b; }
-html[data-theme=light] .quota-note { color: #334155; }
+html[data-theme=light] .quota-note { color: var(--text2); }
 html[data-theme=light] .quota-note.low { color: #92400e; }
 html[data-theme=light] .quota-note.none { color: #b91c1c; }
 /* 入力欄の薄い案内文字（暗い画面で読みやすい色にしたので、明るい画面では濃い色に戻す） */
-html[data-theme=light] [class*="placeholder-slate-400"]::placeholder { color: #56637A !important; }
+html[data-theme=light] [class*="placeholder-slate-400"]::placeholder { color: var(--text4) !important; }
 /* ボタンを素早く2回タップしたときの拡大を防ぐ */
 button, a, select, label { touch-action: manipulation; }
 
@@ -146,8 +146,8 @@ button, a, select, label { touch-action: manipulation; }
     background: #1A2440; color: #f1f5f9; border: 1px solid #475569;
 }
 .ov-zoom-btn:hover, .ov-zoom-btn:active { background: #26324F; }
-html[data-theme=light] .ov-tool { background: #E6EEF6; color: #1e293b; border-color: #C9D6E3; }
-html[data-theme=light] .ov-tool:hover, html[data-theme=light] .ov-tool:active { background: #C9D6E3; }
+html[data-theme=light] .ov-tool { background: var(--card2); color: var(--text2); border-color: var(--line); }
+html[data-theme=light] .ov-tool:hover, html[data-theme=light] .ov-tool:active { background: var(--line); }
 
 .pbar { height: .5rem; border-radius: 999px; background: #1A2440; overflow: hidden; }
 .pbar-fill { height: 100%; width: 0; border-radius: 999px; background: #6C72E8; transition: width .4s ease; }
@@ -157,7 +157,7 @@ html[data-theme=light] .ov-tool:hover, html[data-theme=light] .ov-tool:active { 
 .pbar-stopped .pbar-fill { background: #6F7A96; }
 @keyframes pbar-slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
 @media (prefers-reduced-motion: reduce) { .pbar.ind .pbar-fill { animation: none; width: 100%; opacity: .5; } .pbar-fill { transition: none; } }
-html[data-theme=light] .pbar { background: #C9D6E3; }
+html[data-theme=light] .pbar { background: var(--line); }
 
 /* ---- V12.7: 通貨タブ ---- */
 .money-card { padding: .85rem; border-radius: 1rem; background: rgba(18, 26, 46, .6); border: 1px solid #1A2440; }
@@ -181,7 +181,7 @@ html[data-theme=light] .pbar { background: #C9D6E3; }
 .money-swap { grid-area: swap; align-self: center; width: 2.75rem; height: 2.75rem; border-radius: .75rem; background: #1A2440; color: #D7DCEA; border: 0; cursor: pointer; }
 .money-swap:hover { background: #26324F; }
 .money-swap i { display: inline-block; transform: rotate(90deg); }   /* 上下に入れ替える向き */
-html[data-theme=light] .money-swap { background: #E6EEF6; color: #1e293b; }
+html[data-theme=light] .money-swap { background: var(--card2); color: var(--text2); }
 .money-row { display: flex; align-items: stretch; gap: .35rem; }
 .money-row-main {
     flex: 1 1 auto; min-width: 0; min-height: 2.9rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
@@ -190,11 +190,11 @@ html[data-theme=light] .money-swap { background: #E6EEF6; color: #1e293b; }
 .money-row-main:hover, .money-row-main:active { background: #1A2440; }
 .money-pin { flex: 0 0 auto; width: 2.75rem; border-radius: .75rem; background: #1A2440; color: #B4BDD3; border: 1px solid #26324F; font-size: .9rem; }
 .money-pin:hover, .money-pin:active { background: #26324F; }
-html[data-theme=light] .money-card { background: #F4F8FB; border-color: #C9D6E3; }
-html[data-theme=light] .money-btn, html[data-theme=light] .money-pin { background: #E6EEF6; color: #1e293b; border-color: #C9D6E3; }
-html[data-theme=light] .money-select, html[data-theme=light] .money-row-main { background: #fff; color: #0f172a; border-color: #C9D6E3; }
+html[data-theme=light] .money-card { background: var(--bg); border-color: var(--line); }
+html[data-theme=light] .money-btn, html[data-theme=light] .money-pin { background: var(--card2); color: var(--text2); border-color: var(--line); }
+html[data-theme=light] .money-select, html[data-theme=light] .money-row-main { background: var(--card); color: var(--text); border-color: var(--line); }
 html[data-theme=light] .money-select, html[data-theme=light] .money-popup { color-scheme: light; }
-html[data-theme=light] .money-select option, html[data-theme=light] .money-select optgroup, html[data-theme=light] .money-popup option { background: #fff; color: #0f172a; }
+html[data-theme=light] .money-select option, html[data-theme=light] .money-select optgroup, html[data-theme=light] .money-popup option { background: var(--card); color: var(--text); }
 html[data-theme=light] .money-select option:disabled { color: #94a3b8; }
 
 /* ---- 下に固定するタブバー（V12.9.1: Instagram のような、浮いたカプセル型） ---- */
@@ -255,9 +255,9 @@ html[data-fs=xl] .bottom-nav .nav-btn span { font-size: clamp(9px, 2.7vw, 11px) 
 .ov-block.ov-picked { cursor: pointer; box-shadow: 0 0 0 2px #8D93F2; }
 .ov-tool-main { background: #4f46e5; border-color: #6C72E8; color: #fff; }
 .ov-tool-main:hover, .ov-tool-main:active { background: #6C72E8; }
-html[data-theme=light] .ov-tool-main { background: #2F5BFF; border-color: #2447D6; color: #fff; }
-html[data-theme=light] .ov-tool-main:hover, html[data-theme=light] .ov-tool-main:active { background: #2447D6; }
-html[data-theme=light] .ov-pick { border-color: #2F5BFF; }
+html[data-theme=light] .ov-tool-main { background: var(--btn); border-color: var(--accent-text); color: #fff; }
+html[data-theme=light] .ov-tool-main:hover, html[data-theme=light] .ov-tool-main:active { background: var(--btn-hover); }
+html[data-theme=light] .ov-pick { border-color: var(--btn); }
 
 /* ---- v1.5: 全画面のカメラ ---- */
 .cam-full { position: fixed; top: 0; right: 0; bottom: 0; left: 0; height: 100vh; height: 100dvh; z-index: 80; background: #000; color: #fff; }
@@ -283,7 +283,7 @@ html.cam-open, html.cam-open body { overflow: hidden; }
 .unit-cats { display: flex; flex-wrap: wrap; gap: .35rem; }
 .unit-cat { flex: 1 1 auto; min-height: 2.5rem; padding: .35rem .75rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; background: #1A2440; color: #D7DCEA; border: 1px solid #26324F; }
 .unit-cat.on { background: #0369a1; border-color: #38bdf8; color: #fff; }
-html[data-theme=light] .unit-cat { background: #E6EEF6; color: #1e293b; border-color: #C9D6E3; }
+html[data-theme=light] .unit-cat { background: var(--card2); color: var(--text2); border-color: var(--line); }
 html[data-theme=light] .unit-cat.on { background: #0284c7; color: #fff; border-color: #0369a1; }
 
 /* ---- v1.6: 返信の提案・辞書と文法 ---- */
@@ -299,12 +299,12 @@ html[data-theme=light] .unit-cat.on { background: #0284c7; color: #fff; border-c
 .as-btn { min-height: 2.5rem; padding: .3rem .8rem; border-radius: .6rem; font-size: .75rem; font-weight: 600; background: #1A2440; color: #D7DCEA; border: 1px solid #26324F; }
 .as-btn:hover:not(:disabled) { background: #26324F; }
 .as-btn:disabled { opacity: .7; }
-html[data-theme=light] .as-card { background: #F4F8FB; border-color: #C9D6E3; }
-html[data-theme=light] .as-main { color: #0f172a; }
-html[data-theme=light] .as-sub { color: #334155; }
-html[data-theme=light] .as-ex, html[data-theme=light] .as-origin { color: #475569; }
-html[data-theme=light] .as-tag { color: #3730a3; background: #E3EBFF; }
-html[data-theme=light] .as-btn { background: #E6EEF6; color: #1e293b; border-color: #C9D6E3; }
+html[data-theme=light] .as-card { background: var(--bg); border-color: var(--line); }
+html[data-theme=light] .as-main { color: var(--text); }
+html[data-theme=light] .as-sub { color: var(--text2); }
+html[data-theme=light] .as-ex, html[data-theme=light] .as-origin { color: var(--text3); }
+html[data-theme=light] .as-tag { color: #3730a3; background: var(--accent-soft); }
+html[data-theme=light] .as-btn { background: var(--card2); color: var(--text2); border-color: var(--line); }
 
 /* v1.6.1: カメラタブの撮影プレビュー */
 .cam-preview { display: block; width: 100%; max-height: 60vh; object-fit: contain; background: #000; }

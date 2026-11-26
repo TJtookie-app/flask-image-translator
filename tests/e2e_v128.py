@@ -110,7 +110,7 @@ with sync_playwright() as p:
     check("desktop: typing does not hide the bar", not pg.evaluate("document.body.classList.contains('kb-open')"))
     # ライトテーマ
     pg.evaluate("document.documentElement.setAttribute('data-theme', 'light')")
-    check("light theme: bar background is light", pg.evaluate("getComputedStyle(document.querySelector('.bottom-nav-in')).backgroundColor").startswith("rgba(255, 255, 255"))
+    check("light theme: bar background is light", pg.evaluate("getComputedStyle(document.querySelector('.bottom-nav-in')).backgroundColor").startswith(("rgba(255, 255, 255", "rgba(251, 249, 244")))
     ctx.close()
 
     # ---------- 他のページには影響しない ----------
