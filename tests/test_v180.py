@@ -25,7 +25,7 @@ def _scan(dirs, exts):
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.8.", "1.9.", "1.10.", "1.11."))
+    assert appmod.APP_VERSION.startswith(("1.8.", "1.9.", "1.10.", "1.11.", "1.12."))
 
 
 def test_no_cdn_left_anywhere_in_the_app():
@@ -35,7 +35,7 @@ def test_no_cdn_left_anywhere_in_the_app():
         for b in banned:
             assert b not in text, (path, b)
         if "cdn.jsdelivr.net" in text:   # v1.9.0: オフライン翻訳のエンジンだけは、ダウンロードのボタンを押したときに jsdelivr から取る（試作）
-            assert path.replace(os.sep, "/").endswith(("static/js/offline_mt_worker.js", "templates/sw.js")), path
+            assert path.replace(os.sep, "/").endswith(("static/js/offline_mt_worker.js", "static/js/offline_ocr.js", "templates/sw.js")), path
     assert "CDN_PRECACHE" not in _read("routes", "pwa.py") and "CDN_HOSTS" not in _read("templates", "sw.js")
 
 

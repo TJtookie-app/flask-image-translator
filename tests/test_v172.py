@@ -11,7 +11,7 @@ def _read(*p):
 
 def test_version_is_1_7_2():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.7.", "1.8.", "1.9.", "1.10.", "1.11."))
+    assert appmod.APP_VERSION.startswith(("1.7.", "1.8.", "1.9.", "1.10.", "1.11.", "1.12."))
 
 
 def test_no_color_gradients_left_in_theme_css():

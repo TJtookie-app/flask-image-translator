@@ -6,7 +6,7 @@ const MODE_URL = '/__net_mode';
 const OFFLINE_URL = '/offline';
 const OMT_CACHE = 'tookie-omt';          // オフライン翻訳（試作）の翻訳エンジン。版が変わっても消さない（モデルは 'transformers-cache'）
 const OMT_HOST = 'cdn.jsdelivr.net';
-const OMT_PATHS = ['/npm/@huggingface/transformers@', '/npm/onnxruntime-web@'];
+const OMT_PATHS = ['/npm/@huggingface/transformers@', '/npm/onnxruntime-web@', '/npm/tesseract.js@', '/npm/tesseract.js-core@', '/npm/@tesseract.js-data/'];   // 翻訳エンジンと、写真の文字認識（v1.12.0）のエンジン・認識データ
 const PRECACHE = {{ precache|tojson }};   // Tailwind・FontAwesome も static/vendor/ に同梱しているので、ここに入る（V13: 外部の読み込みはなくなった）
 
 self.addEventListener('install', (event) => {

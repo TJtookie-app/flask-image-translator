@@ -21,7 +21,7 @@ NEW_LABELS = ["omt_group", "omt_intro", "omt_ja_en", "omt_en_ja", "omt_state_non
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.9.", "1.10.", "1.11."))
+    assert appmod.APP_VERSION.startswith(("1.9.", "1.10.", "1.11.", "1.12."))
 
 
 def test_labels_in_ja_and_en_and_other_languages_fall_back_to_english():
@@ -90,7 +90,7 @@ def test_cdn_is_only_in_the_worker_service_worker_and_the_notice_text():
                 p = os.path.join(base, n)
                 if "cdn.jsdelivr.net" in open(p, encoding="utf-8", errors="ignore").read():
                     hits.append(os.path.relpath(p, ROOT).replace(os.sep, "/"))
-    assert sorted(hits) == ["labels_en.py", "labels_ja.py", "static/js/offline_mt_worker.js", "templates/sw.js"]   # 手書きの2つは、利用者に知らせる文章だけ
+    assert sorted(hits) == ["labels_en.py", "labels_ja.py", "static/js/offline_mt_worker.js", "static/js/offline_ocr.js", "templates/sw.js"]   # 手書きの2つは、利用者に知らせる文章だけ
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node がない")

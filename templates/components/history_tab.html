@@ -96,6 +96,7 @@
         <div id="omt-card" class="space-y-3">
             <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">{{ ui.omt_group }}</p>
             <p class="text-xs text-slate-400 leading-relaxed">{{ ui.omt_intro }}</p>
+            <p class="text-xs text-slate-400 leading-relaxed">{{ ui.ocr_intro }}</p>
             <p id="omt-unsupported" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-2">{{ ui.omt_unsupported }}</p>
             <div id="omt-rows" class="space-y-3">
             {% set packs = [('ja', ['ja-en', 'en-ja']), ('zh', ['zh-en', 'en-zh']), ('ko', ['ko-en']), ('es', ['es-en', 'en-es']), ('fr', ['fr-en', 'en-fr']), ('de', ['de-en', 'en-de']), ('it', ['it-en', 'en-it']), ('ru', ['ru-en', 'en-ru']), ('id', ['id-en', 'en-id'])] %}
@@ -115,8 +116,20 @@
                 </div>
             </div>
             {% endfor %}
+            <div class="ocr-row rounded-xl border border-slate-700/70 p-2.5 space-y-2" data-ocr-pack="{{ pk }}">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-sm font-semibold text-slate-200"><i class="fa-solid fa-camera"></i> {{ ui.ocr_row }}</p>
+                    <span class="ocr-state text-xs text-slate-400 text-right"></span>
+                </div>
+                <div class="ocr-bar pbar hidden"><div class="pbar-fill"></div></div>
+                <div class="grid grid-cols-1 gap-2">
+                    <button type="button" class="ocr-get min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-download"></i> {{ ui.omt_btn_get }}</button>
+                    <button type="button" class="ocr-del hidden min-h-[2.75rem] text-sm text-red-300 hover:text-red-200 border border-red-900/60 rounded-xl py-2 transition"><i class="fa-solid fa-trash"></i> {{ ui.omt_btn_del }}</button>
+                </div>
+            </div>
             </div>
             {% endfor %}
+            <p id="ocr-err" class="hidden text-xs text-red-300 break-words" role="alert"></p>
             <div id="omt-add" class="hidden space-y-2 rounded-xl border border-dashed border-slate-600 p-2.5">
                 <p class="text-sm font-semibold text-slate-200"><i class="fa-solid fa-plus"></i> {{ ui.omt_add_title }}</p>
                 <select id="omt-add-sel" class="w-full rounded-xl border border-slate-700 bg-transparent text-sm text-slate-100 p-2.5 min-h-[2.75rem]">

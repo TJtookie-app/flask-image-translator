@@ -15,6 +15,12 @@
         </div>
     </div>
     <textarea id="omt-tab-in" rows="4" maxlength="2000" placeholder="{{ ui.ot_ph }}" class="w-full rounded-xl border border-slate-700 bg-transparent text-sm text-slate-100 p-2.5"></textarea>
+    <!-- 写真から読み取る（v1.12.0 試作）: 設定で文字認識のデータを入れた言語だけ。読み取った文字は上の欄に入り、そのまま翻訳する。動きは static/js/offline_photo.js -->
+    <div class="space-y-1.5">
+        <label for="omt-photo" class="flex items-center justify-center gap-2 min-h-[2.75rem] cursor-pointer border border-slate-600 hover:bg-slate-800 text-slate-100 text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-camera"></i> {{ ui.ocr_photo_btn }}</label>
+        <input type="file" id="omt-photo" accept="image/*" class="hidden">
+        <p id="omt-photo-msg" class="hidden text-xs text-slate-300 leading-relaxed break-words" role="status"></p>
+    </div>
     <div id="omt-tab-need" class="hidden rounded-xl bg-amber-950/30 border border-amber-900/60 p-2.5 space-y-2">
         <p class="text-xs text-amber-200 leading-relaxed">{{ ui.ot_need }} <span id="omt-tab-missing" class="font-semibold"></span></p>
         <button type="button" id="omt-tab-open" class="w-full min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-gear"></i> {{ ui.ot_open }}</button>

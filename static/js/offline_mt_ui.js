@@ -85,6 +85,7 @@
             await get(pair);
             if (!ready[pair]) break;
         }
+        if (pairsOf(pk).every((x) => ready[x])) document.dispatchEvent(new CustomEvent('omt-pack-added', { detail: pk }));   // 続けて、写真の文字認識のデータも入れる（offline_ocr_ui.js）
     }
 
     async function run(pair) {
