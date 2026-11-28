@@ -46,11 +46,17 @@ async function offlinePage() {
   return cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }
 
-// 画面の読み込み。オンラインモードでは何も差し替えない（通信できなければブラウザ本来のエラー）。
-// オフラインモードのときだけ、「/」でオフライン画面を出し、通信に失敗した画面もオフライン画面にする
+// 画面の読み込み。オンラインモードでは、通信できているかぎり何も差し替えない。
+// ただし「/」を新しく開こうとして通信エラー（電波なし・機内モード）になったときだけは、ブラウザのエラーではなく、保存済みのオフライン画面を出す（v1.10.2）。
+// オフラインモードのときは、「/」でオフライン画面を出し、通信に失敗した画面もオフライン画面にする
 async function navigate(req) {
-  if ((await netMode()) !== 'offline') return fetch(req);
   const u = new URL(req.url);
+  if ((await netMode()) !== 'offline') {
+    if (req.method === 'GET' && u.origin === location.origin && u.pathname === '/') {
+      try { return await fetch(req); } catch (e) { return offlinePage(); }
+    }
+    return fetch(req);
+  }
   if (req.method === 'GET' && u.origin === location.origin && u.pathname === '/') return offlinePage();
   try {
     return await fetch(req);

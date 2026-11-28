@@ -363,4 +363,5 @@ def test_service_worker_follows_selected_mode(env):
     js = app.test_client().get("/sw.js").get_data(as_text=True)
     assert "tookie-mode" in js and "async function netMode" in js
     nav = js.split("async function navigate")[1].split("async function cacheFirst")[0]
-    assert "!== 'offline') return fetch(req)" in nav      # オンラインモードでは差し替えない
+    assert "!== 'offline') {" in nav and "return fetch(req);" in nav      # オンラインモードでは、通信できているかぎり差し替えない
+    assert "try { return await fetch(req); } catch (e) { return offlinePage(); }" in nav   # v1.10.2: 「/」が通信エラーのときだけ、保存済みのオフライン画面

@@ -50,13 +50,15 @@ with sync_playwright() as p:
         check(f"precached {must}", must in cached)
     check("API is not cached", not any(u.startswith("/api") for u in cached))
 
-    # --- オンラインモードでは、通信が切れても勝手にオフライン画面へ切り替えない ---
+    # --- オンラインモードでも、「/」を新しく開こうとして通信できないとき（機内モード）は、ブラウザのエラーではなく、保存済みのオフライン画面を出す（v1.10.2）。モードは変えない ---
     ctx.set_offline(True)
     try:
         pg.goto(B + "/"); swapped = pg.locator("#offline-status").count() > 0
     except Exception:
         swapped = False
-    check("online mode: no automatic swap to the offline page", not swapped)
+    check("online mode + no connection: opening '/' shows the saved offline page (not a browser error)", swapped)
+    check("...and it has the offline text translation", swapped and pg.locator("#omt-tab").count() == 1)
+    check("...and the mode is still 'online' (not switched behind the user's back)", swapped and pg.evaluate("getNetMode()") == "online")
     ctx.set_offline(False)
 
     # --- 完全オフライン（オフラインモードを選んだ状態） ---

@@ -51,6 +51,7 @@
   var started = 0, timer = 0, gone = false;
 
   function go() { if (gone) return; gone = true; location.replace(TARGET); }
+  function goOffline() { if (gone) return; gone = true; location.replace(TARGET + "offline"); }   // 電波がないとき: 本体のサイトが端末に保存してあるオフライン画面（前に一度、通信できるときに開いておく）
   function say(t) { msg.textContent = t; }
   function giveUp() {
     clearTimeout(timer); say(tx.fail); acts.hidden = false; bar.hidden = true; bar.setAttribute("aria-busy", "false");
@@ -65,12 +66,12 @@
   }
   function loop() {
     if (gone) return;
-    if (navigator.onLine === false) { go(); return; }   // 電波がないときは、保存済みの画面（オフライン）へ
+    if (navigator.onLine === false) { goOffline(); return; }   // 電波がないときは、保存済みの画面（オフライン）へ
     var spent = Date.now() - started;
     if (spent > SLOW_MS) say(tx.slow);
     ping().then(function (ok) {
       if (ok) { go(); return; }
-      if (navigator.onLine === false) { go(); return; }
+      if (navigator.onLine === false) { goOffline(); return; }
       if (Date.now() - started > GIVEUP_MS) { giveUp(); return; }
       timer = setTimeout(loop, GAP_MS);
     });
