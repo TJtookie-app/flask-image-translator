@@ -5,10 +5,13 @@ const OfflineText = (function () {
     const LANG = {
         'Japanese': { code: 'ja' }, 'English': { code: 'en' }, 'Korean': { code: 'ko' },
         'Chinese (Simplified)': { code: 'zh', tok: '>>cmn_Hans<<' }, 'Chinese (Traditional)': { code: 'zh', tok: '>>cmn_Hant<<' },
+        'Spanish': { code: 'es' }, 'French': { code: 'fr' }, 'German': { code: 'de' }, 'Italian': { code: 'it' }, 'Russian': { code: 'ru' }, 'Indonesian': { code: 'id' },   // v1.11.2
     };
+    const LATIN_LANGS = ['English', 'Spanish', 'French', 'German', 'Italian', 'Indonesian'];   // アルファベットで書く言語（文字だけでは見分けられない）
     const NAMES = Object.keys(LANG);
     const HAVE = ['ja-en', 'en-ja', 'zh-en', 'en-zh', 'ko-en'];          // 使えるモデル（英語 → 韓国語は、使えるモデルが見つかっていない）
-    const KANA = /[\u3040-\u30ff]/, HANGUL = /[\u1100-\u11ff\uac00-\ud7af]/, HAN = /[\u3400-\u9fff]/, LATIN = /[A-Za-z]/;
+    ['es', 'fr', 'de', 'it', 'ru', 'id'].forEach((c) => HAVE.push(c + '-en', 'en-' + c));
+    const KANA = /[\u3040-\u30ff]/, HANGUL = /[\u1100-\u11ff\uac00-\ud7af]/, HAN = /[\u3400-\u9fff]/, LATIN = /[A-Za-z]/, CYRILLIC = /[\u0400-\u04ff]/;
     const PIECES = /.+?(?:[。！？!?]+|\.(?=\s|$)|$)\s*/g;     // offline_mt_worker.js の文の区切りと同じ
 
     // 訳す手順（モデルの並び）。使えない組み合わせは null。例: ja→zh = [ja-en, en-zh（>>cmn_Hans<<）]
@@ -22,12 +25,13 @@ const OfflineText = (function () {
         return a && b ? [a, b] : null;
     }
 
-    // 文の文字から、言語を決める（かな→日本語、ハングル→韓国語、漢字だけ→preferHan、アルファベット→英語）。決められなければ null
-    function detect(text, preferHan) {
+    // 文の文字から、言語を決める（かな→日本語、ハングル→韓国語、キリル文字→ロシア語、漢字だけ→preferHan、アルファベット→preferLatin か英語）。決められなければ null
+    function detect(text, preferHan, preferLatin) {
         if (HANGUL.test(text)) return 'Korean';
         if (KANA.test(text)) return 'Japanese';
         if (HAN.test(text)) return preferHan || 'Chinese (Simplified)';
-        return LATIN.test(text) ? 'English' : null;
+        if (CYRILLIC.test(text)) return 'Russian';
+        return LATIN.test(text) ? (LATIN_LANGS.indexOf(preferLatin) >= 0 ? preferLatin : 'English') : null;
     }
 
     const joiner = (to) => (LANG[to] && (LANG[to].code === 'ja' || LANG[to].code === 'zh') ? '' : ' ');
@@ -81,7 +85,7 @@ const OfflineText = (function () {
     // 「足りないモデル: 中国語 → 英語、…」（設定のラベルと同じ名前）
     const missingText = (list) => (list && list.length ? ' ' + UI.ot_missing.replace('{m}', list.map((p) => UI['omt_' + p.replace('-', '_')] || p).join('、')) : '');
 
-    return { translate, route, detect, viaText, missingText, NAMES, LANG, HAVE };
+    return { translate, route, detect, viaText, missingText, NAMES, LANG, HAVE, LATIN_LANGS };
 })();
 
 // ---- 通常の画面の「テキスト」: 圏外のときだけ、サーバーに送らずここで訳す ----
@@ -100,7 +104,7 @@ const OfflineText = (function () {
         // 入れた文の言語: 文字から決める。漢字だけのときは、翻訳元に選んである言語（日本語・中国語）、なければ、翻訳先と別のほう
         const chosen = (typeof SOURCE_CODE === 'string' && SOURCE_CODE) ? LANGS.find((l) => l.code === SOURCE_CODE) : null;
         const han = chosen && /^(Japanese|Chinese)/.test(chosen.name) ? chosen.name : (TARGET_LANG === 'Japanese' ? 'Chinese (Simplified)' : 'Japanese');
-        const from = OfflineText.detect(text, han) || '';
+        const from = OfflineText.detect(text, han, chosen && chosen.name) || '';
         let r;
         try { r = await OfflineText.translate(text, TARGET_LANG, from); } catch (e) { r = { error: 'failed' }; }
         if (btn) btn.disabled = false;

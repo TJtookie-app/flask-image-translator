@@ -17,7 +17,7 @@
     const preferHan = () => (HAN.indexOf(from) >= 0 ? from : (to === 'Japanese' ? 'Chinese (Simplified)' : 'Japanese'));
     // 入れた文の言語が、いまの翻訳元と違えば、バーを合わせる（取り違えを防ぐ）
     function follow(text) {
-        const d = text ? T.detect(text, preferHan()) : null;
+        const d = text ? T.detect(text, preferHan(), from) : null;
         if (!d || d === from) return;
         from = d;
         if (to === from || !valid(from, to)) fixTo();

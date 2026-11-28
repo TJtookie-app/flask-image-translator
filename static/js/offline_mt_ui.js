@@ -33,7 +33,7 @@
         q('#omt-test').classList.toggle('hidden', !any);
         addSel.addEventListener('change', paintPacks);
     addBtn.addEventListener('click', addPack);
-    card.querySelectorAll('.omt-run').forEach((b) => { b.disabled = busy || !ready[b.dataset.omtRun]; });
+    card.querySelectorAll('.omt-run').forEach((b) => { b.disabled = busy || !ready[b.dataset.omtRun]; b.classList.toggle('hidden', !ready[b.dataset.omtRun]); });   // 入れた方向のボタンだけ並べる
     }
 
     // ダウンロード済み（または追加した）言語だけを並べる。残りは「言語を追加」の選択欄に入れる
@@ -41,7 +41,6 @@
         packs.forEach((el) => el.classList.toggle('hidden', !shown(el.dataset.pack)));
         addSel.addEventListener('change', paintPacks);
     addBtn.addEventListener('click', addPack);
-    card.querySelectorAll('.omt-run').forEach((b) => b.classList.toggle('hidden', !shown(b.dataset.pack)));
         Array.from(addSel.options).forEach((o) => { if (o.value) { o.hidden = o.disabled = shown(o.value); } });
         if (addSel.value && shown(addSel.value)) addSel.value = '';
         addBox.classList.toggle('hidden', Array.from(addSel.options).every((o) => !o.value || o.hidden));

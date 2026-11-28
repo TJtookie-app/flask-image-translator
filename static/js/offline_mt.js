@@ -5,6 +5,7 @@ const OfflineMT = (function () {
         'ja-en': 'Xenova/opus-mt-ja-en', 'en-ja': 'Xenova/opus-mt-en-jap',
         'zh-en': 'Xenova/opus-mt-zh-en', 'en-zh': 'Xenova/opus-mt-en-zh', 'ko-en': 'Xenova/opus-mt-ko-en',
     };
+    for (const c of ['es', 'fr', 'de', 'it', 'ru', 'id']) { MODELS[c + '-en'] = 'Xenova/opus-mt-' + c + '-en'; MODELS['en-' + c] = 'Xenova/opus-mt-en-' + c; }   // v1.11.2: 英語との両方向
     const NEED = ['encoder_model_quantized.onnx', 'decoder_model_merged_quantized.onnx'];   // 保存されていれば「ダウンロード済み」
     let worker = null, seq = 0, onLog = null, lastErr = '';
     const waits = new Map();

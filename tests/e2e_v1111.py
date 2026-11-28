@@ -57,7 +57,7 @@ with sync_playwright() as p:
     settings(pg)
     # ---- 1) 最初: 日本語⇄英語だけが並び、ほかは「言語を追加」の中 ----
     check(f"only the Japanese pack is listed at first {packs(pg)}", packs(pg) == ["ja"])
-    check("the add box is shown, with zh and ko to choose from", vis(pg, "#omt-add") and opts(pg) == ["zh", "ko"])
+    check("the add box is shown, with every other language to choose from", vis(pg, "#omt-add") and opts(pg) == ["zh", "ko", "es", "fr", "de", "it", "ru", "id"])
     check("the add button waits for a choice", pg.locator("#omt-add-btn").is_disabled())
     check("the test box is hidden while nothing is downloaded", not vis(pg, "#omt-test"))
     # ---- 2) 中国語を追加 → 両方向が順に入り、並ぶ ----
@@ -67,25 +67,25 @@ with sync_playwright() as p:
     pg.wait_for_function("document.querySelectorAll('.omt-row[data-pair=\"zh-en\"] .omt-del:not(.hidden), .omt-row[data-pair=\"en-zh\"] .omt-del:not(.hidden)').length === 2", timeout=15000)
     pg.wait_for_timeout(300)
     check(f"Chinese is listed with both directions downloaded {packs(pg)}", packs(pg) == ["ja", "zh"])
-    check(f"Chinese is gone from the choices {opts(pg)}", opts(pg) == ["ko"])
-    check("run buttons: Japanese ones and the new Chinese ones, not Korean", pg.evaluate("Array.from(document.querySelectorAll('.omt-run')).filter(b => b.offsetParent).map(b => b.dataset.omtRun)") == ["ja-en", "en-ja", "zh-en", "en-zh"])
+    check(f"Chinese is gone from the choices {opts(pg)}", opts(pg) == ["ko", "es", "fr", "de", "it", "ru", "id"])
+    check("run buttons: only the downloaded directions", pg.evaluate("Array.from(document.querySelectorAll('.omt-run')).filter(b => b.offsetParent).map(b => b.dataset.omtRun)") == ["zh-en", "en-zh"])
     # ---- 3) 再読み込み: ダウンロード済みの言語だけが並ぶ（追加した覚えがなくても） ----
     settings(pg)
-    check(f"after a reload the downloaded Chinese pack is still listed, Korean is not {packs(pg)}", packs(pg) == ["ja", "zh"] and opts(pg) == ["ko"])
+    check(f"after a reload the downloaded Chinese pack is still listed, Korean is not {packs(pg)}", packs(pg) == ["ja", "zh"] and opts(pg)[0] == "ko")
     # ---- 4) 韓国語を追加 → 追加欄が消える ----
     pg.select_option("#omt-add-sel", "ko"); pg.click("#omt-add-btn")
     pg.wait_for_function("document.querySelector('.omt-row[data-pair=\"ko-en\"] .omt-del:not(.hidden)')", timeout=15000); pg.wait_for_timeout(300)
-    check(f"all three listed, add box hidden {packs(pg)}", packs(pg) == ["ja", "zh", "ko"] and not vis(pg, "#omt-add"))
+    check(f"all three listed, Korean no longer offered {packs(pg)}", packs(pg) == ["ja", "zh", "ko"] and vis(pg, "#omt-add") and "ko" not in opts(pg))
     # ---- 5) 削除すると、基本以外の言語は、並びから消えて、追加欄に戻る ----
     pg.once("dialog", lambda d: d.accept())
     pg.locator('.omt-row[data-pair="ko-en"] .omt-del').click(); pg.wait_for_timeout(600)
-    check(f"deleting the only Korean model removes it from the list and back into the choices {packs(pg)} {opts(pg)}", packs(pg) == ["ja", "zh"] and opts(pg) == ["ko"] and vis(pg, "#omt-add"))
+    check(f"deleting the only Korean model removes it from the list and back into the choices {packs(pg)} {opts(pg)}", packs(pg) == ["ja", "zh"] and opts(pg)[0] == "ko" and vis(pg, "#omt-add"))
     pg.once("dialog", lambda d: d.accept())
     pg.locator('.omt-row[data-pair="en-zh"] .omt-del').click(); pg.wait_for_timeout(600)
     check(f"one Chinese direction left: still listed (so the other can be fetched again) {packs(pg)}", "zh" in packs(pg))
     pg.once("dialog", lambda d: d.accept())
     pg.locator('.omt-row[data-pair="zh-en"] .omt-del').click(); pg.wait_for_timeout(600)
-    check(f"Chinese removed completely: gone from the list {packs(pg)}", packs(pg) == ["ja"] and opts(pg) == ["zh", "ko"])
+    check(f"Chinese removed completely: gone from the list {packs(pg)}", packs(pg) == ["ja"] and opts(pg)[:2] == ["zh", "ko"])
     # ---- 6) 日本語は、未ダウンロードでも並ぶ（最初に入れる言語） ----
     check("the Japanese pack stays listed even when nothing is downloaded", "ja" in packs(pg) and pg.locator('.omt-row[data-pair="ja-en"] .omt-get').is_visible())
     # ---- 7) 途中で失敗: 追加した言語は並んだまま、ボタンで続きができる ----

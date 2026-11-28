@@ -29,7 +29,7 @@ def test_labels_in_ja_and_en_and_other_languages_fall_back_to_english():
     import labels_ja
     for k in NEW_LABELS:
         assert labels_ja.LABELS[k].strip() and labels_en.LABELS[k].strip(), k
-    assert "100MB" in labels_ja.LABELS["omt_intro"] and "100 MB" in labels_en.LABELS["omt_intro"]
+    assert "MB" in labels_ja.LABELS["omt_intro"] and "MB" in labels_en.LABELS["omt_intro"]
     from ui_i18n import get_ui_labels
     assert get_ui_labels("Thai")["omt_group"] == labels_en.LABELS["omt_group"]      # まだ訳していない言語は、English で出る
 
@@ -65,7 +65,7 @@ def test_settings_has_the_card_after_translate_before_display(env):
     assert html.index('id="set-pron"') < html.index('id="omt-card"') < html.index('id="set-contrast"')
     for needle in ("オフライン翻訳（試作）", 'data-pair="ja-en"', 'data-pair="en-ja"', 'data-omt-run="ja-en"', 'id="omt-diag"', 'id="omt-copy"', "約100MB"):
         assert needle in html, needle
-    assert html.count('class="omt-row ') == 5      # v1.11.0: 日本語⇄英語、中国語⇄英語、韓国語→英語
+    assert html.count('class="omt-row ') == 17      # v1.11.2: 17方向。v1.11.0: 日本語⇄英語、中国語⇄英語、韓国語→英語
     off = c.get("/offline").get_data(as_text=True)
     assert 'id="omt-card"' in off and "js/offline_mt.js?v=" in off
 

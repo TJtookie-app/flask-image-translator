@@ -68,7 +68,7 @@ with sync_playwright() as p:
     pg.goto(B + "/offline", wait_until="load"); pg.wait_for_timeout(500)
 
     # ---- 1) 言語バーは選べる形。使えない組み合わせは選べない ----
-    check("both bars list the five languages", pg.locator("#omt-tab-from option").count() == 5 and pg.locator("#omt-tab-to option").count() == 5)
+    check("both bars list the eleven languages", pg.locator("#omt-tab-from option").count() == 11 and pg.locator("#omt-tab-to option").count() == 11)
     check("starts as Japanese → English; the swap button is still in the middle", bar(pg) == ("Japanese", "English") and pg.locator("#omt-tab-swap").is_visible())
     check("To: Korean (no model exists) is not selectable; Chinese is (via English)", dis(pg, "#omt-tab-to", "Korean") and not dis(pg, "#omt-tab-to", "Chinese (Simplified)") and not dis(pg, "#omt-tab-to", "English") and not dis(pg, "#omt-tab-to", "Japanese"))
     pg.select_option("#omt-tab-from", "Korean")
@@ -140,14 +140,14 @@ with sync_playwright() as p:
 
     # ---- 7) 設定: 5つの行。自動ダウンロードは日本語⇄英語だけ ----
     pg.evaluate("setHistFilter('settings')")
-    check("settings have five rows, each with a state and a delete button after download", pg.locator(".omt-row").count() == 5 and pg.locator(".omt-run").count() == 5)
+    check("settings have five rows, each with a state and a delete button after download", pg.locator(".omt-row").count() == 17 and pg.locator(".omt-run").count() == 17)
     c2 = new_ctx(br); a = c2.new_page(); a.on("pageerror", lambda e: errs.append(str(e)))
     a.goto(B + "/", wait_until="load"); a.wait_for_timeout(300)
     a.evaluate("switchTab('history'); setHistFilter('settings')"); a.wait_for_timeout(200)
     a.locator("#set-auto-model").check()
     a.wait_for_function("document.querySelectorAll('.omt-del:not(.hidden)').length === 2", timeout=15000); a.wait_for_timeout(1500)
     done = a.evaluate("Promise.all(OfflineMT.PAIRS.map(p => OfflineMT.isDownloaded(p)))")
-    check(f"auto-download fetches only ja-en and en-ja {done}", done == [True, True, False, False, False])
+    check(f"auto-download fetches only ja-en and en-ja {done}", done == [True, True] + [False] * 15)
     c2.close()
 
     # ---- 8) 通常の画面（圏外）: 韓国語を英語に ----

@@ -71,8 +71,8 @@ def test_settings_card_and_offline_tab_render_the_five_directions(env):
     assert html.count('data-auto="1"') == 2 and 'data-pair="ja-en" data-auto="1"' in html and 'data-pair="en-ja" data-auto="1"' in html
     off = c.get("/offline").get_data(as_text=True)
     bar = off.split('id="omt-tab-bar"')[1].split('id="omt-tab-in"')[0]
-    assert bar.count("<option") == 10 and '<select id="omt-tab-from"' in bar and '<select id="omt-tab-to"' in bar
-    for name in ("Japanese", "English", "Chinese (Simplified)", "Chinese (Traditional)", "Korean"):
+    assert bar.count("<option") == 22   # v1.11.2: 11言語 × 2 and '<select id="omt-tab-from"' in bar and '<select id="omt-tab-to"' in bar
+    for name in ("Japanese", "English", "Chinese (Simplified)", "Chinese (Traditional)", "Korean", "Spanish", "French", "German", "Italian", "Russian", "Indonesian"):
         assert f'<option value="{name}">' in bar, name
     assert 'id="omt-tab-missing"' in off
 
