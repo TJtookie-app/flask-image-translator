@@ -17,6 +17,8 @@ function saveHistory(list) {
 }
 
 function addHistory(entry) {
+    // オンラインで訳した文は、翻訳メモリーにも覚える（端末内で訳した文は覚えない。質の低い訳で、メモリーを汚さないため）
+    if (!entry.offline && ['text', 'voice', 'conversation'].indexOf(entry.mode) >= 0 && typeof tmAdd === 'function') tmAdd(entry.src, entry.out, entry.tgt, false);
     const list = loadHistory();
     const last = list[0];
     if (last && last.mode === entry.mode && last.src === entry.src && last.out === entry.out && last.tgt === entry.tgt && Date.now() - last.ts < 10 * 60 * 1000) {
@@ -74,6 +76,7 @@ function upsertGlossary(kind, term, meaning, to) {
 
 function learnCorrection(src, out, toLang) {
     if (src && src.length <= 300) upsertGlossary('example', src, out, toLang);
+    if (typeof tmAdd === 'function') tmAdd(src, out, toLang, true);   // 手直しした訳は、翻訳メモリーでいつも優先する
 }
 
 // チャット（キーはバックアップ機能でも使う）

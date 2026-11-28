@@ -135,6 +135,16 @@
                 <pre id="omt-diag" class="mt-2 whitespace-pre-wrap break-words text-xs text-slate-300 max-h-60 overflow-y-auto"></pre>
                 <button type="button" id="omt-copy" class="mt-2 min-h-[2.75rem] border border-slate-600 rounded-xl px-3 py-1.5 text-slate-200">{{ ui.omt_diag_copy }}</button>
             </details>
+            <div class="space-y-2 border-t border-slate-700/60 pt-3">
+                <label class="flex items-start gap-2 cursor-pointer text-sm text-slate-200"><input type="checkbox" id="set-auto-model" class="accent-indigo-500 mt-1"> <span>{{ ui.omt_auto }}</span></label>
+                <p class="text-xs text-slate-400 leading-relaxed">{{ ui.omt_auto_note }}</p>
+                <label class="flex items-start gap-2 cursor-pointer text-sm text-slate-200"><input type="checkbox" id="set-tm" class="accent-indigo-500 mt-1"> <span>{{ ui.tm_use }}</span></label>
+                <p class="text-xs text-slate-400 leading-relaxed">{{ ui.tm_note }}</p>
+                <div class="flex items-center justify-between gap-2">
+                    <span id="tm-count" class="text-xs text-slate-400"></span>
+                    <button type="button" id="tm-clear" class="min-h-[2.75rem] text-sm text-red-300 hover:text-red-200 border border-red-900/60 rounded-xl px-3 transition"><i class="fa-solid fa-trash"></i> {{ ui.tm_clear }}</button>
+                </div>
+            </div>
             <p class="text-xs text-slate-400 leading-relaxed">{{ ui.omt_net }}</p>
         </div>
 

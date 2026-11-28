@@ -60,7 +60,9 @@ with sync_playwright() as p:
     check("the text translation tab is on the /offline page, above the history/settings", pg.locator("#omt-tab").is_visible() and pg.evaluate("document.getElementById('omt-tab').compareDocumentPosition(document.getElementById('page-title')) & 4") > 0)
     check("title says 'テキスト'", "テキスト" in pg.inner_text("#omt-tab") or pg.locator(".pt-text", has_text="テキスト").first.is_visible())
     pg.fill("#omt-tab-in", "こんにちは")
-    check("no model yet: guidance + open-settings button, run disabled", pg.locator("#omt-tab-need").is_visible() and pg.locator("#omt-tab-run").is_disabled())
+    check("no model yet: guidance + open-settings button; run is usable (the memory can still answer)", pg.locator("#omt-tab-need").is_visible() and pg.locator("#omt-tab-run").is_enabled())
+    pg.click("#omt-tab-run"); pg.wait_for_function("!document.getElementById('omt-tab-err').classList.contains('hidden')", timeout=5000)
+    check("no model and nothing in the memory: says the model is missing", "モデル" in pg.inner_text("#omt-tab-err") and not pg.locator("#omt-tab-result").is_visible())
 
     # ---- 2) 案内のボタンで設定を開き、ダウンロードする → 戻ると使える ----
     pg.click("#omt-tab-open"); pg.wait_for_timeout(300)
@@ -82,7 +84,7 @@ with sync_playwright() as p:
 
     # ---- 4) 自動: 英語 → 日本語は、モデルが無いので案内に戻る。手動で方向を選べる ----
     pg.fill("#omt-tab-in", "Where is the station?")
-    check("English text with auto: the en→ja model is missing → guidance, run disabled", pg.locator("#omt-tab-need").is_visible() and pg.locator("#omt-tab-run").is_disabled())
+    check("English text with auto: the en→ja model is missing → guidance shown", pg.locator("#omt-tab-need").is_visible())
     pg.click('#omt-tab-dirs [data-dir="ja-en"]')
     check("manual direction ja→en overrides auto: runnable, pressed state follows", pg.locator("#omt-tab-run").is_enabled() and pg.get_attribute('#omt-tab-dirs [data-dir="ja-en"]', "aria-pressed") == "true" and pg.get_attribute('#omt-tab-dirs [data-dir="auto"]', "aria-pressed") == "false")
     pg.click("#omt-tab-run"); pg.wait_for_function("document.getElementById('omt-tab-out').textContent.includes('Where')", timeout=10000)
@@ -113,7 +115,7 @@ with sync_playwright() as p:
     pg.locator('.omt-row[data-pair="ja-en"] .omt-del').click()
     pg.wait_for_function("document.querySelector('.omt-row[data-pair=\"ja-en\"] .omt-get:not(.hidden)')", timeout=5000)
     pg.wait_for_timeout(200)
-    check("after deleting the model the tab asks for the download again", pg.locator("#omt-tab-need").is_visible() and pg.locator("#omt-tab-run").is_disabled())
+    check("after deleting the model the tab asks for the download again", pg.locator("#omt-tab-need").is_visible())
 
     # ---- 9) 見た目 ----
     for theme, w in (("dark", 390), ("light", 390), ("dark", 320), ("light", 320)):
@@ -137,7 +139,7 @@ with sync_playwright() as p:
     c4 = new_ctx(br); c4.add_init_script("delete window.Worker")
     q = c4.new_page(); q.on("pageerror", lambda e: errs.append(str(e))); q.goto(B + "/offline", wait_until="load"); q.wait_for_timeout(300)
     q.fill("#omt-tab-in", "こんにちは")
-    check("no Worker: guidance shown and run disabled (no crash)", q.locator("#omt-tab-need").is_visible() and q.locator("#omt-tab-run").is_disabled())
+    check("no Worker: guidance shown (no crash)", q.locator("#omt-tab-need").is_visible())
     c4.close()
     br.close()
 check(f"no page errors {errs}", not errs)

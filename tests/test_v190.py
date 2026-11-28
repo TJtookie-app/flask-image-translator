@@ -21,7 +21,7 @@ NEW_LABELS = ["omt_group", "omt_intro", "omt_ja_en", "omt_en_ja", "omt_state_non
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith("1.9.")
+    assert appmod.APP_VERSION.startswith(("1.9.", "1.10."))
 
 
 def test_labels_in_ja_and_en_and_other_languages_fall_back_to_english():

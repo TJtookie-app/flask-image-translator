@@ -75,6 +75,21 @@
         setTimeout(() => { q('#omt-copy').textContent = UI.omt_diag_copy; }, 1500);
     }
 
+    // 設定で「自動ダウンロード」が ON のとき、オンラインなら、足りない方向を順に入れる（1回の起動で1回だけ。失敗したら、次の起動でやり直す）。
+    // 携帯回線かどうかが分かる端末（Android など）では、携帯回線とデータ節約のときは始めない。iPhone の Safari は分からない
+    const cellular = () => { const c = navigator.connection; return !!c && (c.type === 'cellular' || c.saveData === true); };
+    async function autoGet() {
+        if (!loadSettings().autoModel || navigator.onLine === false || cellular() || busy) return;
+        try { if (sessionStorage.getItem('omt_auto')) return; sessionStorage.setItem('omt_auto', '1'); } catch (e) {}
+        for (const r of rows) {
+            const pair = r.dataset.pair;
+            if (ready[pair]) continue;
+            await get(pair);
+            if (!ready[pair]) break;
+        }
+    }
+    document.addEventListener('omt-auto-on', () => { try { sessionStorage.removeItem('omt_auto'); } catch (e) {} autoGet(); });
+
     rows.forEach((r) => {
         q('.omt-get', r).addEventListener('click', () => get(r.dataset.pair));
         q('.omt-del', r).addEventListener('click', () => del(r.dataset.pair));
@@ -92,5 +107,5 @@
     }
     paintAll();
     OfflineMT.envText().then((t) => { q('#omt-diag').textContent = t + '\n---\n' + q('#omt-diag').textContent; });
-    refresh();
+    refresh().then(() => setTimeout(autoGet, 3000));   // ページを開いた直後の通信を邪魔しないよう、少し待つ
 })();

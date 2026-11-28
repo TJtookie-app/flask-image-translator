@@ -13,6 +13,17 @@
         </button>
     </form>
     {{ result_box('text') }}
+    <!-- 圏外のときの翻訳（v1.10.0）: 翻訳メモリー、なければ端末内の AI。static/js/offline_text.js が出す -->
+    <p id="local-msg" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-2xl p-3 leading-relaxed" role="status"></p>
+    <div id="local-result" class="hidden rc-box p-5 bg-indigo-950/40 rounded-2xl space-y-3 border border-indigo-800/60">
+        <span class="rc-tag text-xs font-bold text-indigo-400 uppercase tracking-wider">{{ ui.result_label }} ({{ target_display }})</span>
+        <div id="local-out" dir="auto" class="rc-out text-indigo-100 font-medium whitespace-pre-wrap break-words"></div>
+        <p id="local-via" class="text-xs text-slate-400 break-words"></p>
+        <div class="rc-actions local-actions">
+            <button type="button" class="rc-btn" data-local="speak" title="{{ ui.speak }}" aria-label="{{ ui.speak }}"><i class="fa-solid fa-volume-high"></i></button>
+            <div class="rc-right"><span class="contents"><button type="button" class="rc-btn" data-local="copy" title="{{ ui.copy_btn }}" aria-label="{{ ui.copy_btn }}"><i class="fa-solid fa-copy"></i></button></span></div>
+        </div>
+    </div>
 </div>
 
 <!-- 2. 画像 -->

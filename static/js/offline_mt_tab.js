@@ -20,7 +20,7 @@
         const text = $t('omt-tab-in').value.trim();
         const pair = pick(text);
         show('omt-tab-need', !OfflineMT.supported() || !ready[pair]);
-        $t('omt-tab-run').disabled = busy || !text || !ready[pair];
+        $t('omt-tab-run').disabled = busy || !text;      // モデルが無くても、翻訳メモリーにある文は訳せるので、押せる
     }
 
     function setDir(v) {
@@ -36,17 +36,24 @@
     async function run() {
         const text = $t('omt-tab-in').value.trim();
         const pair = pick(text);
-        if (busy || !text || !ready[pair]) return;
+        if (busy || !text) return;
         busy = true; show('omt-tab-err', false); paint();
         $t('omt-tab-out').textContent = UI.omt_running;
         $t('omt-tab-label').textContent = UI['omt_' + pair.replace('-', '_')];
         show('omt-tab-result', true);
-        try {
-            const out = await OfflineMT.translate(pair, text);
-            $t('omt-tab-out').textContent = out;
-            const n = NAMES[pair];
-            if (typeof addHistory === 'function') addHistory({ mode: 'text', src: text, out, srcLang: n[0], tgt: n[1], tcode: n[2], pron: '' });
-        } catch (e) { show('omt-tab-result', false); show('omt-tab-err', true); }
+        const n = NAMES[pair];
+        let r;
+        try { r = await OfflineText.translate(text, n[1], pair); } catch (e) { r = { error: 'failed' }; }
+        if (r.error) {
+            show('omt-tab-result', false);
+            $t('omt-tab-err').textContent = r.error === 'failed' ? UI.ot_err : (UI['lo_msg_' + r.error] || UI.ot_err);
+            show('omt-tab-err', true);
+        } else {
+            $t('omt-tab-out').textContent = r.out;
+            const via = OfflineText.viaText(r);
+            $t('omt-tab-label').textContent = UI['omt_' + pair.replace('-', '_')] + (via ? '  ·  ' + via : '');
+            addHistory({ mode: 'text', src: text, out: r.out, srcLang: n[0], tgt: n[1], tcode: n[2], pron: '', offline: true });
+        }
         busy = false; paint();
     }
 
@@ -59,7 +66,7 @@
 
     root.querySelectorAll('#omt-tab-dirs button').forEach((b) => b.addEventListener('click', () => setDir(b.dataset.dir)));
     $t('omt-tab-in').addEventListener('input', paint);
-    $t('omt-tab-run').addEventListener('click', () => { refresh().then(run); });
+    $t('omt-tab-run').addEventListener('click', () => { refresh().then(run); });   // 押すたびに、ダウンロードの状態を確かめ直す
     $t('omt-tab-copy').addEventListener('click', copy);
     $t('omt-tab-open').addEventListener('click', () => {
         if (typeof setHistFilter === 'function') setHistFilter('settings');

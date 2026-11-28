@@ -1,6 +1,6 @@
 // 表示・翻訳の設定（丁寧さ・読み方・文字サイズ・配色）。この端末の localStorage に保存する
 const SKEY = 'tl_settings_v1';
-const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark', contrast: false };
+const SETTING_DEFAULTS = { formality: 'auto', pron: true, fs: 'm', theme: 'dark', contrast: false, tm: true, autoModel: false };
 const SETTING_CHOICES = { formality: ['auto', 'natural', 'literal', 'formal', 'business'], fs: ['m', 'l', 'xl'], theme: ['dark', 'light', 'auto'] };
 
 function loadSettings() {
@@ -10,6 +10,8 @@ function loadSettings() {
         Object.keys(SETTING_CHOICES).forEach(k => { if (SETTING_CHOICES[k].indexOf(saved[k]) >= 0) st[k] = saved[k]; });
         if (typeof saved.pron === 'boolean') st.pron = saved.pron;
         if (typeof saved.contrast === 'boolean') st.contrast = saved.contrast;
+        if (typeof saved.tm === 'boolean') st.tm = saved.tm;                      // 翻訳メモリーを使う（既定: 使う）
+        if (typeof saved.autoModel === 'boolean') st.autoModel = saved.autoModel;   // オフライン翻訳のモデルを、自動でダウンロード（既定: しない）
     } catch (e) {}
     return st;
 }
