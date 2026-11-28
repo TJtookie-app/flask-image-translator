@@ -1,14 +1,17 @@
-// オフライン画面のテキスト翻訳（v1.9.1）: 設定でダウンロード済みのモデルで、通信なしで訳す（日本語⇄英語）
+// オフライン画面のテキスト翻訳（v1.9.1）: 翻訳メモリーと、設定でダウンロード済みのモデルで、通信なしで訳す（日本語⇄英語）。言語のバーは、オンラインの画面と同じ形（v1.10.1）
 (function () {
     const root = document.getElementById('omt-tab');
     if (!root || typeof OfflineMT === 'undefined') return;
     const $t = (id) => document.getElementById(id);
     const NAMES = { 'ja-en': ['Japanese', 'English', 'en-US'], 'en-ja': ['English', 'Japanese', 'ja-JP'] };
     const JA = /[぀-ヿ㐀-鿿]/;
-    let dir = 'auto', busy = false;
+    let dir = (typeof TARGET_LANG !== 'undefined' && TARGET_LANG === 'Japanese') ? 'en-ja' : 'ja-en', busy = false;
     const ready = {};
 
-    const pick = (text) => (dir !== 'auto' ? dir : (JA.test(text) ? 'ja-en' : 'en-ja'));
+    const pick = () => dir;
+    const nativeOf = (name) => ((typeof langByName === 'function' && langByName(name)) || {}).native || name;
+    // 入れた文が日本語なら日本語→英語、そうでなければ英語→日本語に、バーを合わせる（取り違えを防ぐ）
+    const follow = (text) => { if (text) { const want = JA.test(text) ? 'ja-en' : 'en-ja'; if (want !== dir) setDir(want); } };
     const show = (id, on) => $t(id).classList.toggle('hidden', !on);
 
     async function refresh() {
@@ -18,25 +21,23 @@
 
     function paint() {
         const text = $t('omt-tab-in').value.trim();
-        const pair = pick(text);
+        const pair = pick();
         show('omt-tab-need', !OfflineMT.supported() || !ready[pair]);
         $t('omt-tab-run').disabled = busy || !text;      // モデルが無くても、翻訳メモリーにある文は訳せるので、押せる
     }
 
     function setDir(v) {
         dir = v;
-        root.querySelectorAll('#omt-tab-dirs button').forEach((b) => {
-            const on = b.dataset.dir === v;
-            b.setAttribute('aria-pressed', on ? 'true' : 'false');
-            b.className = b.className.replace(/bg-indigo-600 text-white|bg-slate-800 text-slate-300/, on ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300');
-        });
+        $t('omt-tab-from').textContent = nativeOf(NAMES[v][0]);
+        $t('omt-tab-to').textContent = nativeOf(NAMES[v][1]);
         paint();
     }
 
     async function run() {
         const text = $t('omt-tab-in').value.trim();
-        const pair = pick(text);
         if (busy || !text) return;
+        follow(text);
+        const pair = pick();
         busy = true; show('omt-tab-err', false); paint();
         $t('omt-tab-out').textContent = UI.omt_running;
         $t('omt-tab-label').textContent = UI['omt_' + pair.replace('-', '_')];
@@ -64,8 +65,8 @@
         setTimeout(() => { label.textContent = UI.copy_btn; }, 1500);
     }
 
-    root.querySelectorAll('#omt-tab-dirs button').forEach((b) => b.addEventListener('click', () => setDir(b.dataset.dir)));
-    $t('omt-tab-in').addEventListener('input', paint);
+    $t('omt-tab-swap').addEventListener('click', () => setDir(dir === 'ja-en' ? 'en-ja' : 'ja-en'));
+    $t('omt-tab-in').addEventListener('input', () => { follow($t('omt-tab-in').value.trim()); paint(); });
     $t('omt-tab-run').addEventListener('click', () => { refresh().then(run); });   // 押すたびに、ダウンロードの状態を確かめ直す
     $t('omt-tab-copy').addEventListener('click', copy);
     $t('omt-tab-open').addEventListener('click', () => {
@@ -74,6 +75,6 @@
         if (card && card.scrollIntoView) card.scrollIntoView({ block: 'start' });
     });
     document.addEventListener('omt-changed', refresh);
-    paint();
+    setDir(dir);
     refresh();
 })();

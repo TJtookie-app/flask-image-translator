@@ -82,14 +82,18 @@ with sync_playwright() as p:
     pg.evaluate("setHistFilter('all')"); pg.wait_for_timeout(200)
     check("the history list shows it", "元気ですか" in pg.inner_text("#history-section") if pg.locator("#history-section").count() else "元気ですか" in pg.inner_text("body"))
 
-    # ---- 4) 自動: 英語 → 日本語は、モデルが無いので案内に戻る。手動で方向を選べる ----
+    # ---- 4) 言語のバー（翻訳元 ⇄ 翻訳先）: 入れた文に合わせて入れ替わり、真ん中のボタンでも入れ替えられる ----
+    bar = lambda: (pg.inner_text("#omt-tab-from"), pg.inner_text("#omt-tab-to"))
+    check(f"the bar is the same shape as the online screen: From / swap / To {bar()}", bar() == ("日本語", "English") and pg.locator("#omt-tab-swap").is_visible())
     pg.fill("#omt-tab-in", "Where is the station?")
-    check("English text with auto: the en→ja model is missing → guidance shown", pg.locator("#omt-tab-need").is_visible())
-    pg.click('#omt-tab-dirs [data-dir="ja-en"]')
-    check("manual direction ja→en overrides auto: runnable, pressed state follows", pg.locator("#omt-tab-run").is_enabled() and pg.get_attribute('#omt-tab-dirs [data-dir="ja-en"]', "aria-pressed") == "true" and pg.get_attribute('#omt-tab-dirs [data-dir="auto"]', "aria-pressed") == "false")
-    pg.click("#omt-tab-run"); pg.wait_for_function("document.getElementById('omt-tab-out').textContent.includes('Where')", timeout=10000)
-    check("translated with the chosen direction", pg.inner_text("#omt-tab-out").startswith("[opus-mt-ja-en]"))
-    pg.click('#omt-tab-dirs [data-dir="auto"]')
+    check(f"typing English flips the bar to English → Japanese {bar()}", bar() == ("English", "日本語"))
+    check("English text: the en→ja model is missing → guidance shown", pg.locator("#omt-tab-need").is_visible())
+    pg.click("#omt-tab-swap")
+    check(f"the swap button flips the bar {bar()}", bar() == ("日本語", "English"))
+    pg.fill("#omt-tab-in", "何時ですか？")
+    check("Japanese text: the bar is Japanese → English and the model is ready, so no guidance", bar() == ("日本語", "English") and not pg.locator("#omt-tab-need").is_visible())
+    pg.click("#omt-tab-swap"); pg.click("#omt-tab-run"); pg.wait_for_function("(() => { const t = document.getElementById('omt-tab-out').textContent; return t.includes('opus-mt-ja-en') && t.includes('何時') && !t.includes('翻訳しています'); })()", timeout=10000)
+    check("running with a mismatched bar still uses the direction of the text (no garbage)", pg.inner_text("#omt-tab-out").startswith("[opus-mt-ja-en]") and bar() == ("日本語", "English"))
 
     # ---- 5) コピー ----
     pg.click("#omt-tab-copy"); pg.wait_for_timeout(200)

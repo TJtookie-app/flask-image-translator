@@ -31,7 +31,7 @@ def test_offline_page_has_the_tab_above_the_history_and_normal_page_does_not(env
     c = app.test_client(); start(c, "Japanese")
     off = c.get("/offline").get_data(as_text=True)
     assert off.index('id="omt-tab"') < off.index('id="page-title"')
-    for needle in ('id="omt-tab-in"', 'id="omt-tab-run"', 'data-dir="auto"', 'data-dir="ja-en"', 'data-dir="en-ja"', 'id="omt-tab-need"', 'id="omt-tab-open"', 'id="omt-tab-copy"'):
+    for needle in ('id="omt-tab-in"', 'id="omt-tab-run"', 'id="omt-tab-swap"', 'id="omt-tab-from"', 'id="omt-tab-to"', 'id="omt-tab-need"', 'id="omt-tab-open"', 'id="omt-tab-copy"'):
         assert needle in off, needle
     assert 'id="omt-tab"' not in c.get("/").get_data(as_text=True)
 
