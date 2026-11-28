@@ -280,7 +280,7 @@ def test_service_worker(env):
                    "/static/vendor/fontawesome/webfonts/fa-solid-900.woff2\"", "/static/vendor/fontawesome/webfonts/fa-regular-400.woff2\""]:
         assert needle in js, needle
     assert "/static/icon-512.png" not in js            # 大きいアイコンは事前保存しない
-    assert "cdn" not in js.lower() and "RUNTIME" not in js                  # V13: 外部の読み込みはない
+    assert js.lower().count("cdn") == 1 and "OMT_HOST = 'cdn.jsdelivr.net'" in js and "RUNTIME" not in js   # V13: 外部の読み込みはない（v1.9.0: オフライン翻訳のエンジンだけ例外）
     assert "/api/" not in js.split("const PRECACHE")[1].split("self.addEventListener")[0]
 
 

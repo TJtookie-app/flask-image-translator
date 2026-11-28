@@ -25,15 +25,17 @@ def _scan(dirs, exts):
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith("1.8.")
+    assert appmod.APP_VERSION.startswith(("1.8.", "1.9."))
 
 
 def test_no_cdn_left_anywhere_in_the_app():
-    banned = ("cdn.tailwindcss.com", "cdnjs.cloudflare.com", "unpkg.com", "cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com", "code.jquery.com")
+    banned = ("cdn.tailwindcss.com", "cdnjs.cloudflare.com", "unpkg.com", "fonts.googleapis.com", "fonts.gstatic.com", "code.jquery.com")
     for path in _scan(["templates", "static", "routes"], (".html", ".js", ".css", ".py")):
         text = open(path, encoding="utf-8").read()
         for b in banned:
             assert b not in text, (path, b)
+        if "cdn.jsdelivr.net" in text:   # v1.9.0: オフライン翻訳のエンジンだけは、ダウンロードのボタンを押したときに jsdelivr から取る（試作）
+            assert path.replace(os.sep, "/").endswith(("static/js/offline_mt_worker.js", "templates/sw.js")), path
     assert "CDN_PRECACHE" not in _read("routes", "pwa.py") and "CDN_HOSTS" not in _read("templates", "sw.js")
 
 
@@ -97,7 +99,7 @@ def test_service_worker_precaches_the_bundled_files_and_drops_the_old_runtime_ca
     pre = js.split("const PRECACHE")[1].split("self.addEventListener")[0]
     assert f"/static/vendor/tailwind.css?v={ASSET_V}" in pre and f"/static/vendor/fontawesome/css/all.min.css?v={ASSET_V}" in pre
     assert '"/static/vendor/fontawesome/webfonts/fa-solid-900.woff2"' in pre      # CSS の中から（?v= なしで）呼ばれるので、付けずに保存する
-    assert "const keep = [CACHE, MODE_CACHE]" in js and "tookie-runtime-v1" not in js.replace("tookie-runtime-v1）は", "")
+    assert "const keep = [CACHE, MODE_CACHE, OMT_CACHE, 'transformers-cache']" in js and "tookie-runtime-v1" not in js.replace("tookie-runtime-v1）は", "")
 
 
 def test_build_css_check_command_works():

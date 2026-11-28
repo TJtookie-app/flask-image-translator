@@ -18,7 +18,7 @@ def _read(*p):
 
 def test_version_is_181_or_later_in_family():
     from app import APP_VERSION
-    assert APP_VERSION.startswith(("1.8.",))
+    assert APP_VERSION.startswith(("1.8.", "1.9."))
 
 
 def test_capacitor_config_is_the_agreed_one():

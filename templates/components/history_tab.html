@@ -92,6 +92,52 @@
             <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-200"><input type="checkbox" id="set-pron" class="accent-indigo-500"> {{ ui.set_pron }}</label>
         </div>
 
+        <!-- オフライン翻訳（試作）: 端末の中で日本語⇄英語を翻訳する -->
+        <div id="omt-card" class="space-y-3">
+            <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">{{ ui.omt_group }}</p>
+            <p class="text-xs text-slate-400 leading-relaxed">{{ ui.omt_intro }}</p>
+            <p id="omt-unsupported" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-2">{{ ui.omt_unsupported }}</p>
+            <div id="omt-rows" class="space-y-2">
+            <div class="omt-row rounded-xl border border-slate-700/70 p-2.5 space-y-2" data-pair="ja-en">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-sm font-semibold text-slate-200">{{ ui.omt_ja_en }}</p>
+                    <span class="omt-state text-xs text-slate-400 text-right"></span>
+                </div>
+                <div class="omt-bar pbar hidden"><div class="pbar-fill"></div></div>
+                <div class="grid grid-cols-1 gap-2">
+                    <button type="button" class="omt-get min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-download"></i> {{ ui.omt_btn_get }}</button>
+                    <button type="button" class="omt-del hidden min-h-[2.75rem] text-sm text-red-300 hover:text-red-200 border border-red-900/60 rounded-xl py-2 transition"><i class="fa-solid fa-trash"></i> {{ ui.omt_btn_del }}</button>
+                </div>
+            </div>
+            <div class="omt-row rounded-xl border border-slate-700/70 p-2.5 space-y-2" data-pair="en-ja">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-sm font-semibold text-slate-200">{{ ui.omt_en_ja }}</p>
+                    <span class="omt-state text-xs text-slate-400 text-right"></span>
+                </div>
+                <div class="omt-bar pbar hidden"><div class="pbar-fill"></div></div>
+                <div class="grid grid-cols-1 gap-2">
+                    <button type="button" class="omt-get min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-download"></i> {{ ui.omt_btn_get }}</button>
+                    <button type="button" class="omt-del hidden min-h-[2.75rem] text-sm text-red-300 hover:text-red-200 border border-red-900/60 rounded-xl py-2 transition"><i class="fa-solid fa-trash"></i> {{ ui.omt_btn_del }}</button>
+                </div>
+            </div>
+            </div>
+            <div id="omt-test" class="hidden space-y-2">
+                <textarea id="omt-in" rows="3" maxlength="2000" placeholder="{{ ui.omt_test_ph }}" class="w-full rounded-xl border border-slate-700 bg-transparent text-sm text-slate-100 p-2.5"></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" data-omt-run="ja-en" class="omt-run min-h-[2.75rem] bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold rounded-xl py-2.5 px-1 transition">{{ ui.omt_run_ja_en }}</button>
+                    <button type="button" data-omt-run="en-ja" class="omt-run min-h-[2.75rem] bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold rounded-xl py-2.5 px-1 transition">{{ ui.omt_run_en_ja }}</button>
+                </div>
+                <p id="omt-out" class="min-h-[1.5rem] whitespace-pre-wrap break-words text-sm text-slate-100" role="status"></p>
+            </div>
+            <p id="omt-err" class="hidden text-xs text-red-300 break-words" role="alert">{{ ui.omt_err }}</p>
+            <details class="text-xs text-slate-400">
+                <summary class="cursor-pointer">{{ ui.omt_diag }}</summary>
+                <pre id="omt-diag" class="mt-2 whitespace-pre-wrap break-words text-xs text-slate-300 max-h-60 overflow-y-auto"></pre>
+                <button type="button" id="omt-copy" class="mt-2 min-h-[2.75rem] border border-slate-600 rounded-xl px-3 py-1.5 text-slate-200">{{ ui.omt_diag_copy }}</button>
+            </details>
+            <p class="text-xs text-slate-400 leading-relaxed">{{ ui.omt_net }}</p>
+        </div>
+
         <!-- 表示 -->
         <div class="space-y-3">
             <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">{{ ui.set_group_display }}</p>

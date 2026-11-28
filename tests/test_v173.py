@@ -42,7 +42,7 @@ def _rules(css):
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.7.", "1.8."))
+    assert appmod.APP_VERSION.startswith(("1.7.", "1.8.", "1.9."))
 
 
 

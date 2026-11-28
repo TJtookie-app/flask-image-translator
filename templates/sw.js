@@ -4,6 +4,9 @@ const CACHE = 'tookie-' + VERSION;
 const MODE_CACHE = 'tookie-mode';        // スタート画面で選んだ接続モード（online / offline）。ページ側が書き込む
 const MODE_URL = '/__net_mode';
 const OFFLINE_URL = '/offline';
+const OMT_CACHE = 'tookie-omt';          // オフライン翻訳（試作）の翻訳エンジン。版が変わっても消さない（モデルは 'transformers-cache'）
+const OMT_HOST = 'cdn.jsdelivr.net';
+const OMT_PATHS = ['/npm/@huggingface/transformers@', '/npm/onnxruntime-web@'];
 const PRECACHE = {{ precache|tojson }};   // Tailwind・FontAwesome も static/vendor/ に同梱しているので、ここに入る（V13: 外部の読み込みはなくなった）
 
 self.addEventListener('install', (event) => {
@@ -17,7 +20,7 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const keep = [CACHE, MODE_CACHE];   // 以前の外部ファイル用のキャッシュ（tookie-runtime-v1）は、ここで消える
+    const keep = [CACHE, MODE_CACHE, OMT_CACHE, 'transformers-cache'];   // 以前の外部ファイル用のキャッシュ（tookie-runtime-v1）は、ここで消える。オフライン翻訳のエンジンとモデルは残す
     for (const k of await caches.keys()) if (!keep.includes(k)) await caches.delete(k);
     await self.clients.claim();
   })());
@@ -64,6 +67,16 @@ async function cacheFirst(req) {
   return res;
 }
 
+// 翻訳エンジン（ダウンロードのときに1回取得）: 保存があればそれを使い、なければ取りに行って保存する
+async function engineCache(req) {
+  const c = await caches.open(OMT_CACHE);
+  const hit = await c.match(req);
+  if (hit) return hit;
+  const res = await fetch(req);
+  if (res && res.ok) c.put(req, res.clone());
+  return res;
+}
+
 async function networkFirstUpdate(req) {
   try {
     const res = await fetch(req);
@@ -95,4 +108,5 @@ self.addEventListener('fetch', (event) => {
     else if (url.pathname === OFFLINE_URL) event.respondWith(networkFirstUpdate(req));
     return;   // API などはそのままネットワークへ
   }
+  if (url.hostname === OMT_HOST && OMT_PATHS.some((p) => url.pathname.startsWith(p))) event.respondWith(engineCache(req));
 });
