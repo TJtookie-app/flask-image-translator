@@ -21,7 +21,7 @@ NEW_LABELS = ["omt_group", "omt_intro", "omt_ja_en", "omt_en_ja", "omt_state_non
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.9.", "1.10."))
+    assert appmod.APP_VERSION.startswith(("1.9.", "1.10.", "1.11."))
 
 
 def test_labels_in_ja_and_en_and_other_languages_fall_back_to_english():
@@ -65,7 +65,7 @@ def test_settings_has_the_card_after_translate_before_display(env):
     assert html.index('id="set-pron"') < html.index('id="omt-card"') < html.index('id="set-contrast"')
     for needle in ("オフライン翻訳（試作）", 'data-pair="ja-en"', 'data-pair="en-ja"', 'data-omt-run="ja-en"', 'id="omt-diag"', 'id="omt-copy"', "約100MB"):
         assert needle in html, needle
-    assert html.count('class="omt-row ') == 2
+    assert html.count('class="omt-row ') == 5      # v1.11.0: 日本語⇄英語、中国語⇄英語、韓国語→英語
     off = c.get("/offline").get_data(as_text=True)
     assert 'id="omt-card"' in off and "js/offline_mt.js?v=" in off
 

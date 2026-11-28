@@ -1,8 +1,11 @@
 // オフライン翻訳（試作）のワーカー。画面とは別のスレッドで動かし、翻訳中も画面が固まらないようにする。
 // 翻訳エンジン（Transformers.js）は、最初の「ダウンロード」「翻訳」のときだけ読み込む。
-// 使うのは、日本語⇄英語のモデル Opus-MT（量子化版）。1方向あたり約100MB。
+// 使うのは、Opus-MT（量子化版）のモデル。1方向あたり約100〜120MB。日本語⇄英語、中国語⇄英語、韓国語→英語（v1.11.0）。
 const LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2';
-const MODELS = { 'ja-en': 'Xenova/opus-mt-ja-en', 'en-ja': 'Xenova/opus-mt-en-jap' };
+const MODELS = {
+    'ja-en': 'Xenova/opus-mt-ja-en', 'en-ja': 'Xenova/opus-mt-en-jap',
+    'zh-en': 'Xenova/opus-mt-zh-en', 'en-zh': 'Xenova/opus-mt-en-zh', 'ko-en': 'Xenova/opus-mt-ko-en',
+};
 let lib = null;
 const pipes = {};
 const post = (m) => self.postMessage(m);
@@ -22,9 +25,19 @@ async function getLib(id, offline) {
     return lib;
 }
 
+// 端末のメモリーを守るため、読み込んでおくモデルは1つだけ（別のモデルを使うときは、前のものを手放す）
+async function releaseOthers(pair) {
+    for (const k of Object.keys(pipes)) {
+        if (k === pair) continue;
+        try { if (pipes[k] && pipes[k].dispose) await pipes[k].dispose(); } catch (e) { /* 手放せなくても続ける */ }
+        delete pipes[k];
+    }
+}
+
 async function load(id, pair, offline) {
     if (pipes[pair]) return pipes[pair];
     if (!MODELS[pair]) throw new Error('未対応の組み合わせ: ' + pair);
+    await releaseOthers(pair);
     const L = await getLib(id, offline);
     const t = performance.now();
     post({ id, type: 'log', text: 'モデルを準備中: ' + MODELS[pair] });
@@ -44,9 +57,11 @@ function pieces(line) {
     return line.match(/.+?(?:[。！？!?]+|\.(?=\s|$)|$)\s*/g) || [line];
 }
 
-async function translate(id, pair, text, offline) {
+// prefix: 英語→中国語のモデルは、文の頭に、出力する文字の種類（>>cmn_Hans<< 簡体 / >>cmn_Hant<< 繁体）が必要
+async function translate(id, pair, text, offline, prefix) {
     const pipe = await load(id, pair, offline);
-    const join = pair === 'en-ja' ? '' : ' ';
+    const join = /-(ja|zh)$/.test(pair) ? '' : ' ';
+    const pre = prefix ? prefix + ' ' : '';
     const t = performance.now();
     const lines = [];
     for (const line of String(text).split('\n')) {
@@ -54,7 +69,7 @@ async function translate(id, pair, text, offline) {
         const out = [];
         for (const s of pieces(line)) {
             if (!s.trim()) continue;
-            const r = await pipe(s.trim(), { max_new_tokens: 256 });
+            const r = await pipe(pre + s.trim(), { max_new_tokens: 256 });
             out.push((r && r[0] && r[0].translation_text) || '');
         }
         lines.push(out.join(join).trim());
@@ -67,7 +82,7 @@ self.onmessage = async (e) => {
     const m = e.data || {};
     try {
         if (m.type === 'load') { await load(m.id, m.pair, m.offline); post({ id: m.id, type: 'done' }); }
-        else if (m.type === 'translate') { post({ id: m.id, type: 'done', text: await translate(m.id, m.pair, m.text, m.offline) }); }
+        else if (m.type === 'translate') { post({ id: m.id, type: 'done', text: await translate(m.id, m.pair, m.text, m.offline, m.prefix) }); }
         else if (m.type === 'drop') { delete pipes[m.pair]; post({ id: m.id, type: 'done' }); }
     } catch (err) {
         post({ id: m.id, type: 'error', message: String((err && err.message) || err) });

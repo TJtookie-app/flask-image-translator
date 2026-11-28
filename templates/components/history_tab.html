@@ -98,9 +98,10 @@
             <p class="text-xs text-slate-400 leading-relaxed">{{ ui.omt_intro }}</p>
             <p id="omt-unsupported" class="hidden text-xs text-amber-200 bg-amber-950/30 border border-amber-900/50 rounded-xl p-2">{{ ui.omt_unsupported }}</p>
             <div id="omt-rows" class="space-y-2">
-            <div class="omt-row rounded-xl border border-slate-700/70 p-2.5 space-y-2" data-pair="ja-en">
+            {% for pair in ['ja-en', 'en-ja', 'zh-en', 'en-zh', 'ko-en'] %}
+            <div class="omt-row rounded-xl border border-slate-700/70 p-2.5 space-y-2" data-pair="{{ pair }}"{% if pair in ['ja-en', 'en-ja'] %} data-auto="1"{% endif %}>
                 <div class="flex items-center justify-between gap-2">
-                    <p class="text-sm font-semibold text-slate-200">{{ ui.omt_ja_en }}</p>
+                    <p class="text-sm font-semibold text-slate-200">{{ ui['omt_' ~ pair|replace('-', '_')] }}</p>
                     <span class="omt-state text-xs text-slate-400 text-right"></span>
                 </div>
                 <div class="omt-bar pbar hidden"><div class="pbar-fill"></div></div>
@@ -109,23 +110,14 @@
                     <button type="button" class="omt-del hidden min-h-[2.75rem] text-sm text-red-300 hover:text-red-200 border border-red-900/60 rounded-xl py-2 transition"><i class="fa-solid fa-trash"></i> {{ ui.omt_btn_del }}</button>
                 </div>
             </div>
-            <div class="omt-row rounded-xl border border-slate-700/70 p-2.5 space-y-2" data-pair="en-ja">
-                <div class="flex items-center justify-between gap-2">
-                    <p class="text-sm font-semibold text-slate-200">{{ ui.omt_en_ja }}</p>
-                    <span class="omt-state text-xs text-slate-400 text-right"></span>
-                </div>
-                <div class="omt-bar pbar hidden"><div class="pbar-fill"></div></div>
-                <div class="grid grid-cols-1 gap-2">
-                    <button type="button" class="omt-get min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-download"></i> {{ ui.omt_btn_get }}</button>
-                    <button type="button" class="omt-del hidden min-h-[2.75rem] text-sm text-red-300 hover:text-red-200 border border-red-900/60 rounded-xl py-2 transition"><i class="fa-solid fa-trash"></i> {{ ui.omt_btn_del }}</button>
-                </div>
-            </div>
+            {% endfor %}
             </div>
             <div id="omt-test" class="hidden space-y-2">
                 <textarea id="omt-in" rows="3" maxlength="2000" placeholder="{{ ui.omt_test_ph }}" class="w-full rounded-xl border border-slate-700 bg-transparent text-sm text-slate-100 p-2.5"></textarea>
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" data-omt-run="ja-en" class="omt-run min-h-[2.75rem] bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold rounded-xl py-2.5 px-1 transition">{{ ui.omt_run_ja_en }}</button>
-                    <button type="button" data-omt-run="en-ja" class="omt-run min-h-[2.75rem] bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold rounded-xl py-2.5 px-1 transition">{{ ui.omt_run_en_ja }}</button>
+                    {% for pair in ['ja-en', 'en-ja', 'zh-en', 'en-zh', 'ko-en'] %}
+                    <button type="button" data-omt-run="{{ pair }}" class="omt-run min-h-[2.75rem] bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold rounded-xl py-2.5 px-1 transition">{{ ui['omt_run_' ~ pair|replace('-', '_')] }}</button>
+                    {% endfor %}
                 </div>
                 <p id="omt-out" class="min-h-[1.5rem] whitespace-pre-wrap break-words text-sm text-slate-100" role="status"></p>
             </div>

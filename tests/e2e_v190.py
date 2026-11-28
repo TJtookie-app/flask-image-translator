@@ -61,7 +61,7 @@ with sync_playwright() as p:
     row = lambda pair: pg.locator(f'.omt-row[data-pair="{pair}"]')
 
     # ---- 1) 最初の状態 ----
-    check("card is in the settings view with both directions", pg.locator("#omt-card").is_visible() and pg.locator(".omt-row").count() == 2)
+    check("card is in the settings view with all five directions", pg.locator("#omt-card").is_visible() and pg.locator(".omt-row").count() == 5)
     check("both directions start as 'not downloaded' with a download button", all("未ダウンロード" in row(x).locator(".omt-state").inner_text() and row(x).locator(".omt-get").is_visible() and not row(x).locator(".omt-del").is_visible() for x in ("ja-en", "en-ja")))
     check("test box is hidden until something is downloaded", not pg.locator("#omt-test").is_visible())
     check("diagnostics show the environment", "Worker/WASM/caches: true/true/true" in pg.locator("#omt-diag").text_content())

@@ -1,7 +1,10 @@
 // オフライン翻訳（試作）: 画面側の入り口。重い処理は offline_mt_worker.js（別スレッド）で行う
 const OfflineMT = (function () {
     const WORKER_URL = (document.currentScript && document.currentScript.src || '').replace('offline_mt.js', 'offline_mt_worker.js');
-    const MODELS = { 'ja-en': 'Xenova/opus-mt-ja-en', 'en-ja': 'Xenova/opus-mt-en-jap' };
+    const MODELS = {
+        'ja-en': 'Xenova/opus-mt-ja-en', 'en-ja': 'Xenova/opus-mt-en-jap',
+        'zh-en': 'Xenova/opus-mt-zh-en', 'en-zh': 'Xenova/opus-mt-en-zh', 'ko-en': 'Xenova/opus-mt-ko-en',
+    };
     const NEED = ['encoder_model_quantized.onnx', 'decoder_model_merged_quantized.onnx'];   // 保存されていれば「ダウンロード済み」
     let worker = null, seq = 0, onLog = null, lastErr = '';
     const waits = new Map();
@@ -92,7 +95,7 @@ const OfflineMT = (function () {
         log('ダウンロード完了: ' + pair + ' (' + Math.round((performance.now() - t) / 1000) + '秒)');
     }
 
-    async function translate(pair, text) { return (await call('translate', { pair, text })).text; }
+    async function translate(pair, text, prefix) { return (await call('translate', { pair, text, prefix: prefix || '' })).text; }
 
     async function remove(pair) {
         await call('drop', { pair }).catch(() => {});
@@ -113,5 +116,5 @@ const OfflineMT = (function () {
         return out.join('\n');
     }
 
-    return { supported, isDownloaded, download, translate, remove, envText, setLogger(fn) { onLog = fn; fn(logs.slice()); } };
+    return { supported, isDownloaded, PAIRS: Object.keys(MODELS), download, translate, remove, envText, setLogger(fn) { onLog = fn; fn(logs.slice()); } };
 })();

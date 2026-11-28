@@ -25,7 +25,7 @@ def _scan(dirs, exts):
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.8.", "1.9.", "1.10."))
+    assert appmod.APP_VERSION.startswith(("1.8.", "1.9.", "1.10.", "1.11."))
 
 
 def test_no_cdn_left_anywhere_in_the_app():

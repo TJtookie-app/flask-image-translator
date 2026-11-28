@@ -45,7 +45,7 @@ def test_tab_js_is_short_safe_and_uses_the_agreed_pieces():
     js = _read("static", "js", "offline_mt_tab.js")
     assert len(js.splitlines()) <= 200
     assert "innerHTML" not in js
-    for needle in ("OfflineMT.isDownloaded", "OfflineText.translate", "addHistory", "omt-changed", "setHistFilter('settings')"):
+    for needle in ("OfflineMT.isDownloaded", "OfflineText", "T.translate(", "addHistory", "omt-changed", "setHistFilter('settings')"):
         assert needle in js, needle
     assert "omt-changed" in _read("static", "js", "offline_mt_ui.js")
 

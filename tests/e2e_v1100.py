@@ -115,7 +115,7 @@ with sync_playwright() as p:
     check("the result card keeps speak and copy buttons", pg.locator("#local-result [data-local=speak]").is_visible() and pg.locator("#local-result [data-local=copy]").is_visible())
     check("only Japanese ⇄ English works on the device (other pairs report it)", ev("OfflineText.translate('こんにちは', 'Korean')") == {"error": "nopair"})
     ta.fill("Hello there"); run.click(); pg.wait_for_function("!document.getElementById('local-msg').classList.contains('hidden')", timeout=5000)
-    check("English text with an English target: nothing to do, explained (no crash)", "日本語と英語" in pg.inner_text("#local-msg"))
+    check("English text with an English target: nothing to do, explained (no crash)", "組み合わせ" in pg.inner_text("#local-msg"))
 
     # ---- 4) オンラインでは、今まで通りサーバーに送る ----
     ev("Object.defineProperty(navigator, 'onLine', {get: () => true, configurable: true})")

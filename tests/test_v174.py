@@ -10,7 +10,7 @@ def _read(*p):
 
 def test_version():
     import app as appmod
-    assert appmod.APP_VERSION.startswith(("1.7.", "1.8.", "1.9.", "1.10."))
+    assert appmod.APP_VERSION.startswith(("1.7.", "1.8.", "1.9.", "1.10.", "1.11."))
 
 
 def test_settings_screen_has_no_background_or_accent_choices(env):

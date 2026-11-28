@@ -83,7 +83,7 @@
         try { if (sessionStorage.getItem('omt_auto')) return; sessionStorage.setItem('omt_auto', '1'); } catch (e) {}
         for (const r of rows) {
             const pair = r.dataset.pair;
-            if (ready[pair]) continue;
+            if (ready[pair] || !r.dataset.auto) continue;      // 自動で入れるのは、日本語⇄英語の2つだけ（中国語・韓国語は、ボタンを押したときだけ）
             await get(pair);
             if (!ready[pair]) break;
         }
