@@ -1,0 +1,22 @@
+<!-- オフライン画面のテキスト翻訳（v1.9.1）: 設定でダウンロードしたモデルで、通信なしで訳す。動きは static/js/offline_mt_tab.js -->
+<div class="page-title"><span class="pt-ico" aria-hidden="true"><i class="fa-solid fa-pen-to-square"></i></span><h2 class="pt-text" dir="auto">{{ ui.nav_text }}</h2></div>
+<div id="omt-tab" class="space-y-3">
+    <p class="text-xs text-slate-400 leading-relaxed">{{ ui.ot_hint }}</p>
+    <div id="omt-tab-dirs" class="grid grid-cols-3 gap-1.5">
+        <button type="button" data-dir="auto" class="set-opt min-h-[2.75rem] px-2 py-2 rounded-xl text-xs font-semibold border border-slate-700 bg-indigo-600 text-white" aria-pressed="true">{{ ui.ot_dir_auto }}</button>
+        <button type="button" data-dir="ja-en" class="set-opt min-h-[2.75rem] px-2 py-2 rounded-xl text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300" aria-pressed="false">{{ ui.omt_ja_en }}</button>
+        <button type="button" data-dir="en-ja" class="set-opt min-h-[2.75rem] px-2 py-2 rounded-xl text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300" aria-pressed="false">{{ ui.omt_en_ja }}</button>
+    </div>
+    <textarea id="omt-tab-in" rows="4" maxlength="2000" placeholder="{{ ui.ot_ph }}" class="w-full rounded-xl border border-slate-700 bg-transparent text-sm text-slate-100 p-2.5"></textarea>
+    <div id="omt-tab-need" class="hidden rounded-xl bg-amber-950/30 border border-amber-900/60 p-2.5 space-y-2">
+        <p class="text-xs text-amber-200 leading-relaxed">{{ ui.ot_need }}</p>
+        <button type="button" id="omt-tab-open" class="w-full min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition"><i class="fa-solid fa-gear"></i> {{ ui.ot_open }}</button>
+    </div>
+    <button type="button" id="omt-tab-run" class="w-full min-h-[2.75rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl py-2 transition disabled:opacity-50"><i class="fa-solid fa-language"></i> {{ ui.ot_run }}</button>
+    <div id="omt-tab-result" class="hidden rounded-xl border border-slate-700/70 p-2.5 space-y-2">
+        <p id="omt-tab-label" class="text-xs text-slate-400"></p>
+        <p id="omt-tab-out" class="text-sm text-slate-100 whitespace-pre-wrap break-words" dir="auto"></p>
+        <button type="button" id="omt-tab-copy" class="min-h-[2.75rem] px-3 text-xs text-slate-300 border border-slate-700 rounded-xl"><i class="fa-solid fa-copy"></i> <span>{{ ui.copy_btn }}</span></button>
+    </div>
+    <p id="omt-tab-err" class="hidden text-xs text-red-300">{{ ui.ot_err }}</p>
+</div>

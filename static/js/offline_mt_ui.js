@@ -34,6 +34,7 @@
     async function refresh() {
         for (const r of rows) ready[r.dataset.pair] = await OfflineMT.isDownloaded(r.dataset.pair).catch(() => false);
         paintAll();
+        document.dispatchEvent(new Event('omt-changed'));   // 画面上のテキスト翻訳（offline_mt_tab.js）に知らせる
     }
 
     async function get(pair) {
