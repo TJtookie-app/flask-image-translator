@@ -49,7 +49,10 @@ def new_ctx(br, width=390, theme=None, target="English"):
     return ctx
 def get_model(pg, pair):
     pg.evaluate("if (document.getElementById('nav-history')) switchTab('history'); setHistFilter('settings')"); pg.wait_for_timeout(200)
-    pg.locator(f'.omt-row[data-pair="{pair}"] .omt-get').click()
+    if pg.locator(f'.omt-row[data-pair="{pair}"] .omt-del:not(.hidden)').count(): return
+    if not pg.locator(f'.omt-row[data-pair="{pair}"]').is_visible():       # v1.11.1: 言語パック。追加した言語の、すべての方向が入る
+        pk = pair.replace("en", "").replace("-", ""); pg.select_option("#omt-add-sel", pk); pg.click("#omt-add-btn")
+    else: pg.locator(f'.omt-row[data-pair="{pair}"] .omt-get').click()
     pg.wait_for_function(f"document.querySelector('.omt-row[data-pair=\"{pair}\"] .omt-del:not(.hidden)')", timeout=10000)
 def bar(pg): return (pg.input_value("#omt-tab-from"), pg.input_value("#omt-tab-to"))
 def dis(pg, sel, v): return pg.eval_on_selector(f"{sel} option[value='{v}']", "o => o.disabled")
@@ -88,7 +91,7 @@ with sync_playwright() as p:
     check("running without them: the error also names them", "英語 → 中国語" in pg.inner_text("#omt-tab-err"))
 
     # ---- 3) ダウンロード → 経由で訳す（中国語の文字の指定が付く） ----
-    get_model(pg, "ja-en")
+    get_model(pg, "ja-en"); pg.wait_for_timeout(500)
     check("one of the two is not enough: still guided", "英語 → 中国語" in pg.inner_text("#omt-tab-need") and "日本語 → 英語" not in pg.inner_text("#omt-tab-missing"))
     get_model(pg, "en-zh")
     pg.wait_for_function("!document.getElementById('omt-tab-need').offsetParent", timeout=5000)

@@ -4,8 +4,13 @@
     if (!card || typeof OfflineMT === 'undefined') return;
     const q = (sel, root) => (root || card).querySelector(sel);
     const rows = Array.from(card.querySelectorAll('.omt-row'));
-    const ready = {};
+    const packs = Array.from(card.querySelectorAll('.omt-pack'));
+    const addBox = q('#omt-add'), addSel = q('#omt-add-sel'), addBtn = q('#omt-add-btn');
+    const ready = {}, added = new Set();   // added: この画面で「言語を追加」した言語（ダウンロードが終わるまで、並べておく）
     let busy = false, loading = '';   // loading: ダウンロード中の方向
+    const packOf = (pair) => rowOf(pair).closest('.omt-pack').dataset.pack;
+    const pairsOf = (pk) => rows.filter((r) => packOf(r.dataset.pair) === pk).map((r) => r.dataset.pair);
+    const shown = (pk) => pk && (card.querySelector('.omt-pack[data-pack="' + pk + '"]').dataset.base || added.has(pk) || pairsOf(pk).some((x) => ready[x] || loading === x));
 
     const rowOf = (pair) => rows.find((r) => r.dataset.pair === pair);
     const setBar = (row, ratio) => {
@@ -26,10 +31,24 @@
         if (!now) setBar(row, null);
         const any = Object.values(ready).some(Boolean);
         q('#omt-test').classList.toggle('hidden', !any);
-        card.querySelectorAll('.omt-run').forEach((b) => { b.disabled = busy || !ready[b.dataset.omtRun]; });
+        addSel.addEventListener('change', paintPacks);
+    addBtn.addEventListener('click', addPack);
+    card.querySelectorAll('.omt-run').forEach((b) => { b.disabled = busy || !ready[b.dataset.omtRun]; });
     }
 
-    function paintAll() { rows.forEach((r) => paint(r.dataset.pair)); }
+    // ダウンロード済み（または追加した）言語だけを並べる。残りは「言語を追加」の選択欄に入れる
+    function paintPacks() {
+        packs.forEach((el) => el.classList.toggle('hidden', !shown(el.dataset.pack)));
+        addSel.addEventListener('change', paintPacks);
+    addBtn.addEventListener('click', addPack);
+    card.querySelectorAll('.omt-run').forEach((b) => b.classList.toggle('hidden', !shown(b.dataset.pack)));
+        Array.from(addSel.options).forEach((o) => { if (o.value) { o.hidden = o.disabled = shown(o.value); } });
+        if (addSel.value && shown(addSel.value)) addSel.value = '';
+        addBox.classList.toggle('hidden', Array.from(addSel.options).every((o) => !o.value || o.hidden));
+        addBtn.disabled = busy || !addSel.value;
+    }
+
+    function paintAll() { rows.forEach((r) => paint(r.dataset.pair)); paintPacks(); }
 
     async function refresh() {
         for (const r of rows) ready[r.dataset.pair] = await OfflineMT.isDownloaded(r.dataset.pair).catch(() => false);
@@ -54,6 +73,19 @@
         try { await OfflineMT.remove(pair); } catch (e) { showErr(true); }
         busy = false;
         await refresh();
+        if (!pairsOf(packOf(pair)).some((x) => ready[x])) { added.delete(packOf(pair)); paintPacks(); }
+    }
+
+    // 言語を追加: その言語の、足りない方向を順に入れる（途中で失敗したら止める。ボタンから続きをやり直せる）
+    async function addPack() {
+        const pk = addSel.value;
+        if (!pk || busy) return;
+        added.add(pk); addSel.value = ''; paintAll();
+        for (const pair of pairsOf(pk)) {
+            if (ready[pair]) continue;
+            await get(pair);
+            if (!ready[pair]) break;
+        }
     }
 
     async function run(pair) {
@@ -94,6 +126,8 @@
         q('.omt-get', r).addEventListener('click', () => get(r.dataset.pair));
         q('.omt-del', r).addEventListener('click', () => del(r.dataset.pair));
     });
+    addSel.addEventListener('change', paintPacks);
+    addBtn.addEventListener('click', addPack);
     card.querySelectorAll('.omt-run').forEach((b) => b.addEventListener('click', () => run(b.dataset.omtRun)));
     q('#omt-copy').addEventListener('click', copyDiag);
     OfflineMT.setLogger((lines) => {
